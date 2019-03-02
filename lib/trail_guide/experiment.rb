@@ -3,6 +3,7 @@ module TrailGuide
     class << self
       def inherited(child)
         # TODO allow inheriting algo, variants, goals, metrics, etc.
+        TrailGuide::Catalog.register(child)
       end
 
       def experiment_name(name=nil)
@@ -18,7 +19,9 @@ module TrailGuide
       def variant(name, metadata: {}, control: false)
         raise ArgumentError, "The variant #{name} already exists in experiment #{experiment_name}" if variants.any? { |var| var == name }
         control = true if variants.empty?
-        variants << Variant.new(self, name, metadata: metadata, control: control)
+        variant = Variant.new(self, name, metadata: metadata, control: control)
+        variants << variant
+        variant
       end
 
       def variants(include_control=true)
@@ -38,14 +41,13 @@ module TrailGuide
 
         if var_idx.nil?
           variant = Variant.new(self, name, control: true)
-          variants.unshift(variant)
-          return variant
         else
           variant = variants.slice!(var_idx, 1)[0]
           variant.control!
-          variants.unshift(variant)
-          return variant
         end
+
+        variants.unshift(variant)
+        return variant
       end
     end
   end

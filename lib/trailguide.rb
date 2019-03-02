@@ -3,6 +3,7 @@ require "redis"
 require "trail_guide/participant"
 require "trail_guide/variant"
 require "trail_guide/experiment"
+require "trail_guide/catalog"
 require "trail_guide/engine"
 
 module TrailGuide
