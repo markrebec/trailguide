@@ -6,7 +6,7 @@ require "trail_guide/version"
 # Describe your gem and declare its dependencies:
 Gem::Specification.new do |spec|
   spec.name        = "trailguide"
-  spec.version     = TrailGuide::VERSION
+  spec.version     = TrailGuide::Version::VERSION
   spec.authors     = ["Mark Rebec"]
   spec.email       = ["mark@markrebec.com"]
   spec.homepage    = "https://github.com/markrebec/trailguide"

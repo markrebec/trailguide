@@ -1,3 +1,14 @@
 module TrailGuide
-  VERSION = '0.1.0'
+  module Version
+    MAJOR = 0
+    MINOR = 1
+    PATCH = 0
+    VERSION = "#{MAJOR}.#{MINOR}.#{PATCH}"
+
+    class << self
+      def inspect
+        VERSION
+      end
+    end
+  end
 end
