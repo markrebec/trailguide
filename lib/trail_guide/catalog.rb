@@ -1,21 +1,26 @@
 module TrailGuide
   class Catalog
     include Enumerable
-    attr_reader :experiments
 
     class << self
-      def experiments
-        @experiments ||= new
+      def catalog
+        @catalog ||= new
       end
 
       def register(klass)
-        experiments.register(klass)
+        catalog.register(klass)
       end
 
       def find(name)
-        experiments.find(name)
+        catalog.find(name)
+      end
+
+      def select(name)
+        catalog.select(name)
       end
     end
+
+    attr_reader :experiments
 
     def initialize(experiments=[])
       @experiments = experiments
@@ -31,6 +36,19 @@ module TrailGuide
       else
         experiments.find do |exp|
           exp.experiment_name == name.to_s.underscore.to_sym ||
+            exp.metric == name.to_s.underscore.to_sym ||
+            exp.name == name.to_s.classify
+        end
+      end
+    end
+
+    def select(name)
+      if name.is_a?(Class)
+        experiments.select { |exp| exp == name }
+      else
+        experiments.select do |exp|
+          exp.experiment_name == name.to_s.underscore.to_sym ||
+            exp.metric == name.to_s.underscore.to_sym ||
             exp.name == name.to_s.classify
         end
       end

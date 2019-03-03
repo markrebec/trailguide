@@ -18,6 +18,9 @@ module TrailGuide
       end
     end
 
+    # TODO maybe track the control on the experiment itself, rather than as a
+    # flag on the variants like this?
+
     # mark this variant as the control
     def control!
       @control = true
@@ -31,6 +34,66 @@ module TrailGuide
     # unmark this variant as the control
     def variant!
       @control = false
+    end
+
+    def persisted?
+      TrailGuide.redis.exists(storage_key)
+    end
+
+    def save!
+      TrailGuide.redis.hsetnx(storage_key, 'name', name)
+    end
+
+    def delete!
+      TrailGuide.redis.del(storage_key)
+    end
+
+    def reset!
+      delete! && save!
+    end
+
+    def participants
+      (TrailGuide.redis.hget(storage_key, 'participants') || 0).to_i
+    end
+
+    def converted(checkpoint=nil)
+      if experiment.checkpoints.empty?
+        raise ArgumentError, "Invalid checkpoint: #{checkpoint}" unless checkpoint.nil?
+        (TrailGuide.redis.hget(storage_key, 'converted') || 0).to_i
+      elsif !checkpoint.nil?
+        raise ArgumentError, "Invalid checkpoint: #{checkpoint}" unless experiment.checkpoints.any? { |ckp| ckp == checkpoint.to_s.underscore.to_sym }
+        (TrailGuide.redis.hget(storage_key, checkpoint.to_s.underscore) || 0).to_i
+      else
+        experiment.checkpoints.sum do |checkpoint|
+          (TrailGuide.redis.hget(storage_key, checkpoint.to_s.underscore) || 0).to_i
+        end
+      end
+    end
+
+    def unconverted
+      participants - converted
+    end
+
+    def increment_participation!
+      TrailGuide.redis.hincrby(storage_key, 'participants', 1)
+    end
+
+    def increment_conversion!(checkpoint=nil)
+      checkpoint ||= :converted
+      TrailGuide.redis.hincrby(storage_key, checkpoint.to_s.underscore, 1)
+    end
+
+    def as_json(opts={})
+      {
+        name: name,
+        control: control?,
+        weight: weight,
+        metadata: metadata.as_json,
+      }
+    end
+
+    def storage_key
+      "#{experiment.experiment_name}:#{name}"
     end
   end
 end
