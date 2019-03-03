@@ -7,8 +7,57 @@ module TrailGuide
     end
 
     initializer "trailguide" do |app|
-      # TODO temporary until we have real configs
-      Dir[Rails.root.join("app/experiments/**/*.rb")].each { |f| require f }
+      TrailGuide::Engine.load_experiments
+    end
+
+    def self.load_experiments
+      # Load experiments from YAML configs if any exists
+      load_yaml_experiments(Rails.root.join("config/experiments.yml"))
+      Dir[Rails.root.join("config/experiments/**/*.yml")].each { |f| load_yaml_experiments(f) }
+
+      # Load experiments from ruby configs if any exist
+      DSL.instance_eval(File.read(Rails.root.join("config/experiments.rb"))) if File.exists?(Rails.root.join("config/experiments.rb"))
+      Dir[Rails.root.join("config/experiments/**/*.rb")].each { |f| DSL.instance_eval(File.read(f)) }
+
+      # Load any experiment classes defined in the app
+      Dir[Rails.root.join("app/experiments/**/*.rb")].each { |f| load f }
+    end
+
+    def self.load_yaml_experiments(file)
+      experiments = (YAML.load_file(file) || {} rescue {})
+        .symbolize_keys.map { |k,v| [k, v.symbolize_keys] }.to_h
+
+      experiments.each do |name, options|
+        expvars = options[:variants].map do |var|
+          if var.is_a?(Array)
+            [var[0], var[1].symbolize_keys]
+          else
+            [var]
+          end
+        end
+
+        DSL.experiment(name) do
+          expvars.each do |expvar|
+            variant *expvar
+          end
+          control                     options[:control] if options[:control]
+          algorithm                   options[:algorithm] if options[:algorithm]
+          goals                       options[:goals] if options[:goals]
+          metric                      options[:metric] if options[:metric]
+          resettable                  options[:resettable] if options.key?(:resettable)
+          allow_multiple_conversions  options[:allow_multiple_conversions] if options.key?(:allow_multiple_conversions)
+          allow_multiple_goals        options[:allow_multiple_goals] if options.key?(:allow_multiple_goals)
+        end
+      end
+    end
+
+    class DSL
+      def self.experiment(name, &block)
+        Class.new(TrailGuide::Experiment) do
+          experiment_name name
+          instance_eval &block
+        end
+      end
     end
   end
 end

@@ -69,7 +69,8 @@ module TrailGuide
       end
       alias_method :goal, :funnel
 
-      def funnels
+      def funnels(arr=nil)
+        @funnels = arr unless arr.nil?
         @funnels ||= []
       end
       alias_method :goals, :funnels
