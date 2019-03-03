@@ -23,7 +23,11 @@ module TrailGuide
       end
 
       def resettable?
-        !!@resettable
+        if @resettable.nil?
+          !TrailGuide.configuration.reset_manually
+        else
+          !!@resettable
+        end
       end
 
       def variant(name, metadata: {}, weight: 1, control: false)
@@ -73,6 +77,22 @@ module TrailGuide
       def metric(key=nil)
         @metric = key.to_s.underscore.to_sym unless key.nil?
         @metric ||= experiment_name
+      end
+
+      def allow_multiple_conversions(allow)
+        @allow_multiple_conversions = allow
+      end
+
+      def allow_multiple_conversions?
+        !!@allow_multiple_conversions
+      end
+
+      def allow_multiple_goals(allow)
+        @allow_multiple_goals = allow
+      end
+
+      def allow_multiple_goals?
+        !!@allow_multiple_goals
       end
 
       def start!
@@ -128,11 +148,8 @@ module TrailGuide
         delete! && save!
       end
 
-      def participating?(participant)
-        new(participant).participating?
-      end
-
       def as_json(opts={})
+        # TODO fill in the rest of the values i've added
         {
           experiment_name: experiment_name,
           algorithm: algorithm,
@@ -147,7 +164,8 @@ module TrailGuide
 
     attr_reader :participant
     delegate :experiment_name, :variants, :control, :funnels, :storage_key,
-      :started?, :started_at, :resettable?, :winner?, :winner, to: :class
+      :started?, :started_at, :start!, :resettable?, :winner?, :winner,
+      :allow_multiple_conversions?, :allow_multiple_goals?, to: :class
 
     def initialize(participant)
       @participant = participant
@@ -158,65 +176,54 @@ module TrailGuide
     end
 
     def excluded?
-      false # TODO
+      false # TODO maybe at the context helper/proxy level?
     end
 
     def choose!(override: nil)
-      # TODO return override if provided (should be passed through from context helpers)
-      # TODO handle multiple experiments NOT allowed when user is already participating in experiments
       return control if TrailGuide.configuration.disabled
-      return winner if winner?
-      return control if excluded?
-      return variants.find { |var| var == participant[storage_key] } if participating?
-      return control if !started?
+      if override.present?
+        variant = variants.find { |var| var == override }
+        return variant unless TrailGuide.configuration.store_override
+      else
+        return winner if winner?
+        return control if excluded?
+        return control if !started? && TrailGuide.configuration.start_manually
+        start! unless started?
+        return variants.find { |var| var == participant[storage_key] } if participating?
+        return control unless TrailGuide.configuration.allow_multiple_experiments == true || !participant.participating_in_active_experiments?(TrailGuide.configuration.allow_multiple_experiments == false) 
 
-      chosen = algorithm.choose!
+        variant = algorithm.choose!
+      end
 
-      participant[storage_key] = chosen.name
-      participant[timestamp_key] = Time.now.to_i
-
-      chosen.increment_participation!
-      chosen
+      participant.participating!(variant)
+      variant.increment_participation!
+      variant
     end
 
     def convert!(checkpoint=nil)
       return false unless participating?
-      raise ArgumentError, "You must provide a valid funnel checkpoint for #{experiment_name}" unless checkpoint.present? || funnels.empty?
-      raise ArgumentError, "Unknown funnel checkpoint: #{checkpoint}" unless checkpoint.nil? || funnels.any? { |funnel| funnel == checkpoint.to_s.underscore.to_sym }
-      return false if participant.key?(funnel_key(checkpoint))
-
-      chosen = variants.find { |var| var == participant[storage_key] }
-
-      participant[funnel_key(checkpoint)] = Time.now.to_i
-
-      if resettable?
-        participant.delete(storage_key)
-        participant.delete(timestamp_key)
-        participant.delete(funnel_key(checkpoint))
+      raise ArgumentError, "You must provide a valid goal checkpoint for #{experiment_name}" unless checkpoint.present? || funnels.empty?
+      raise ArgumentError, "Unknown goal checkpoint: #{checkpoint}" unless checkpoint.nil? || funnels.any? { |funnel| funnel == checkpoint.to_s.underscore.to_sym }
+      # TODO eventually allow progressing through funnel checkpoints towards goals
+      if converted?(checkpoint)
+        return false unless allow_multiple_conversions?
+      elsif converted?
+        return false unless allow_multiple_goals?
       end
-      chosen.increment_conversion!(checkpoint)
-      chosen
+
+      variant = variants.find { |var| var == participant[storage_key] }
+      # TODO eventually only reset if we're at the final goal in a funnel
+      participant.converted!(variant, checkpoint, reset: resettable?)
+      variant.increment_conversion!(checkpoint)
+      variant
     end
 
     def participating?
-      return false unless started?
-      return false unless participant.key?(storage_key) && participant.key?(timestamp_key)
-
-      # make sure if they have a previously selected variant, that it came from
-      # the current test run (i.e. after an resets or restarts)
-      chosen_at = Time.at(participant[timestamp_key].to_i) 
-      chosen_at >= started_at
+      participant.participating?(self)
     end
 
-    private
-
-    def funnel_key(checkpoint=nil)
-      checkpoint ||= :converted
-      "#{storage_key}:#{checkpoint.to_s.underscore}"
-    end
-
-    def timestamp_key
-      "#{storage_key}:chosen_at"
+    def converted?(checkpoint=nil)
+      participant.converted?(self, checkpoint)
     end
   end
 end

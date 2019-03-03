@@ -46,6 +46,7 @@ module TrailGuide
 
       # requires a single experiment
       def choose!(**opts, &block)
+        raise ArgumentError, "Please provide a single experiment" unless experiments.length == 1
         variant = experiment.choose!(**opts) # TODO override: variant
         if block_given?
           yield variant
@@ -56,6 +57,7 @@ module TrailGuide
 
       # requires a single experiment
       def run!
+        raise ArgumentError, "Please provide a single experiment" unless experiments.length == 1
         choose! do |variant|
           puts "RUN METHODS"
           # TODO run methods
@@ -64,6 +66,7 @@ module TrailGuide
 
       # requires a single experiment
       def render!
+        raise ArgumentError, "Please provide a single experiment" unless experiments.length == 1
         choose! do |variant|
           puts "RENDER TEMPLATES"
           # TODO render templates
@@ -73,7 +76,7 @@ module TrailGuide
       # can use a metric for multiple experiments
       def convert!(checkpoint=nil, &block)
         checkpoints = experiments.map { |experiment| experiment.convert!(checkpoint) }
-        return unless checkpoints.any?
+        return false unless checkpoints.any?
         if block_given?
           yield checkpoints
         else
