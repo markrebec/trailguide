@@ -68,6 +68,10 @@ module TrailGuide
           def key?(field)
             TrailGuide.redis.hexists(storage_key, field.to_s)
           end
+
+          def to_h
+            TrailGuide.redis.hgetall(storage_key)
+          end
         end
       end
     end

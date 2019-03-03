@@ -57,14 +57,14 @@ module TrailGuide
     end
 
     def converted(checkpoint=nil)
-      if experiment.checkpoints.empty?
-        raise ArgumentError, "Invalid checkpoint: #{checkpoint}" unless checkpoint.nil?
+      if experiment.funnels.empty?
+        raise ArgumentError, "This experiment does not have any defined funnel checkpoints" unless checkpoint.nil?
         (TrailGuide.redis.hget(storage_key, 'converted') || 0).to_i
       elsif !checkpoint.nil?
-        raise ArgumentError, "Invalid checkpoint: #{checkpoint}" unless experiment.checkpoints.any? { |ckp| ckp == checkpoint.to_s.underscore.to_sym }
+        raise ArgumentError, "Invalid funnel checkpoint: #{checkpoint}" unless experiment.funnels.any? { |funnel| funnel == checkpoint.to_s.underscore.to_sym }
         (TrailGuide.redis.hget(storage_key, checkpoint.to_s.underscore) || 0).to_i
       else
-        experiment.checkpoints.sum do |checkpoint|
+        experiment.funnels.sum do |checkpoint|
           (TrailGuide.redis.hget(storage_key, checkpoint.to_s.underscore) || 0).to_i
         end
       end

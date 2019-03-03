@@ -1,7 +1,7 @@
 module TrailGuide
   class Participant
     attr_reader :context
-    delegate :key?, :keys, :[], :[]=, :delete, to: :adapter
+    delegate :key?, :keys, :[], :[]=, :delete, :to_h, to: :adapter
 
     def initialize(context, adapter: nil)
       @context = context
@@ -9,19 +9,21 @@ module TrailGuide
     end
 
     def adapter
-      @adapter ||= TrailGuide.configuration.adapter.new(context)
+      @adapter ||= begin
+        config_adapter = TrailGuide.configuration.adapter
+        config_adapter = config_adapter.constantize if config_adapter.is_a?(String)
+        config_adapter.new(context)
+      end
     end
 
-    def participating!(experiment)
-      # would this be better here instead of in experiment?
-    end
+    def participating_in_active_experiments?
+      return false if adapter.keys.empty?
 
-    def checkpoint!(experiment, checkpoint=nil)
-      # would this be better here instead of in experiment?
-    end
-
-    def variant(experiment)
-      # would this be better here instead of in experiment?
+      keys.any? do |key|
+        experiment_name = key.split(":").first.to_sym
+        experiment = TrailGuide.catalog.find(experiment_name)
+        experiment && experiment.started? && experiment.participating?(self)
+      end
     end
   end
 end

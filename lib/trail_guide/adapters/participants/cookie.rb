@@ -60,6 +60,10 @@ module TrailGuide
             cookie.key?(key)
           end
 
+          def to_h
+            cookie.to_h
+          end
+
           private
 
           def cookie

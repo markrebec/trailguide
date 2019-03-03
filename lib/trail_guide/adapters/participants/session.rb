@@ -53,6 +53,10 @@ module TrailGuide
             session.key?(key)
           end
 
+          def to_h
+            session.to_h
+          end
+
           private
 
           def session

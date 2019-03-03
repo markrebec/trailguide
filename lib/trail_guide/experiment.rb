@@ -6,6 +6,8 @@ module TrailGuide
         TrailGuide::Catalog.register(child)
       end
 
+      # TODO could probably move all this configuration stuff at the class level
+      # into a canfig object instead...?
       def experiment_name(name=nil)
         @experiment_name = name.to_s.underscore.to_sym unless name.nil?
         @experiment_name || self.name.try(:underscore).try(:to_sym)
@@ -14,6 +16,14 @@ module TrailGuide
       def algorithm(algo=nil)
         @algorithm = algo unless algo.nil?
         @algorithm ||= TrailGuide.configuration.algorithm
+      end
+
+      def resettable(reset)
+        @resettable = reset
+      end
+
+      def resettable?
+        !!@resettable
       end
 
       def variant(name, metadata: {}, weight: 1, control: false)
@@ -50,15 +60,15 @@ module TrailGuide
         return variant
       end
 
-      def checkpoint(name)
-        checkpoints << name.to_s.underscore.to_sym
+      def funnel(name)
+        funnels << name.to_s.underscore.to_sym
       end
-      alias_method :goal, :checkpoint
+      alias_method :goal, :funnel
 
-      def checkpoints
-        @checkpoints ||= []
+      def funnels
+        @funnels ||= []
       end
-      alias_method :goals, :checkpoints
+      alias_method :goals, :funnels
 
       def metric(key=nil)
         @metric = key.to_s.underscore.to_sym unless key.nil?
@@ -118,6 +128,10 @@ module TrailGuide
         delete! && save!
       end
 
+      def participating?(participant)
+        new(participant).participating?
+      end
+
       def as_json(opts={})
         {
           experiment_name: experiment_name,
@@ -132,8 +146,8 @@ module TrailGuide
     end
 
     attr_reader :participant
-    delegate :experiment_name, :variants, :control, :checkpoints, :storage_key,
-      :started?, :started_at, :winner?, :winner, to: :class
+    delegate :experiment_name, :variants, :control, :funnels, :storage_key,
+      :started?, :started_at, :resettable?, :winner?, :winner, to: :class
 
     def initialize(participant)
       @participant = participant
@@ -149,6 +163,7 @@ module TrailGuide
 
     def choose!(override: nil)
       # TODO return override if provided (should be passed through from context helpers)
+      # TODO handle multiple experiments NOT allowed when user is already participating in experiments
       return control if TrailGuide.configuration.disabled
       return winner if winner?
       return control if excluded?
@@ -156,25 +171,32 @@ module TrailGuide
       return control if !started?
 
       chosen = algorithm.choose!
+
       participant[storage_key] = chosen.name
       participant[timestamp_key] = Time.now.to_i
+
       chosen.increment_participation!
       chosen
     end
 
-    def checkpoint!(checkpoint=nil)
-      # TODO either require nested hash format for nested checkpoints, or require
-      # the participant has completed the checkpoint
+    def convert!(checkpoint=nil)
       return false unless participating?
-      raise ArgumentError, "You must provide a valid checkpoint for #{experiment_name}" unless checkpoint.present? || checkpoints.empty?
-      raise ArgumentError, "Unknown checkpoint: #{checkpoint}" unless checkpoint.nil? || checkpoints.any? { |ckp| ckp == checkpoint.to_s.underscore.to_sym }
+      raise ArgumentError, "You must provide a valid funnel checkpoint for #{experiment_name}" unless checkpoint.present? || funnels.empty?
+      raise ArgumentError, "Unknown funnel checkpoint: #{checkpoint}" unless checkpoint.nil? || funnels.any? { |funnel| funnel == checkpoint.to_s.underscore.to_sym }
+      return false if participant.key?(funnel_key(checkpoint))
 
-      variant = variants.find { |var| var == participant[storage_key] }
-      participant[checkpoint_key(checkpoint)] = Time.now.to_i
-      variant.increment_conversion!(checkpoint)
+      chosen = variants.find { |var| var == participant[storage_key] }
+
+      participant[funnel_key(checkpoint)] = Time.now.to_i
+
+      if resettable?
+        participant.delete(storage_key)
+        participant.delete(timestamp_key)
+        participant.delete(funnel_key(checkpoint))
+      end
+      chosen.increment_conversion!(checkpoint)
+      chosen
     end
-
-    private
 
     def participating?
       return false unless started?
@@ -186,7 +208,9 @@ module TrailGuide
       chosen_at >= started_at
     end
 
-    def checkpoint_key(checkpoint=nil)
+    private
+
+    def funnel_key(checkpoint=nil)
       checkpoint ||= :converted
       "#{storage_key}:#{checkpoint.to_s.underscore}"
     end
