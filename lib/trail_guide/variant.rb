@@ -92,6 +92,10 @@ module TrailGuide
       }
     end
 
+    def to_s
+      name.to_s
+    end
+
     def storage_key
       "#{experiment.experiment_name}:#{name}"
     end
