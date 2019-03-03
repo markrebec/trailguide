@@ -13,18 +13,14 @@ module TrailGuide
   include Canfig::Module
 
   configure do |config|
+    config.redis = ENV['REDIS_URL']
     config.disabled = false
     config.start_manually = false
     config.reset_manually = false
     config.store_override = false
     config.allow_multiple_experiments = true # false / :control
-
-    config.redis = ENV['REDIS_URL']
-
-    config.algorithm = TrailGuide::Algorithms::Weighted
-
-    # TODO use cookie adapter by default?
-    config.adapter = TrailGuide::Adapters::Participants::Redis
+    config.algorithm = :weighted
+    config.adapter = :cookie
   end
 
   def self.catalog

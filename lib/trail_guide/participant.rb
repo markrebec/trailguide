@@ -11,7 +11,16 @@ module TrailGuide
     def adapter
       @adapter ||= begin
         config_adapter = TrailGuide.configuration.adapter
-        config_adapter = config_adapter.constantize if config_adapter.is_a?(String)
+        case config_adapter
+        when :cookie
+          config_adapter = TrailGuide::Adapters::Participants::Cookie
+        when :session
+          config_adapter = TrailGuide::Adapters::Participants::Session
+        when :redis
+          config_adapter = TrailGuide::Adapters::Participants::Redis
+        else
+          config_adapter = config_adapter.constantize if config_adapter.is_a?(String)
+        end
         config_adapter.new(context)
       end
     end
