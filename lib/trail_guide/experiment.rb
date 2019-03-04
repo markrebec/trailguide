@@ -250,18 +250,14 @@ module TrailGuide
       @algorithm ||= self.class.algorithm.new(self)
     end
 
-    def excluded?
-      false # TODO maybe at the context helper/proxy level?
-    end
-
-    def choose!(override: nil)
+    def choose!(override: nil, excluded: false)
       return control if TrailGuide.configuration.disabled
       if override.present?
         variant = variants.find { |var| var == override }
-        return variant unless TrailGuide.configuration.store_override
+        return variant unless TrailGuide.configuration.store_override && started?
       else
         return winner if winner?
-        return control if excluded?
+        return control if excluded
         return control if !started? && TrailGuide.configuration.start_manually
         start! unless started?
         return variants.find { |var| var == participant[storage_key] } if participating?

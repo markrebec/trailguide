@@ -30,6 +30,14 @@ module TrailGuide
     config.on_experiment_stop = nil    # -> (experiment) { ... }
     config.on_experiment_reset = nil   # -> (experiment) { ... }
     config.on_experiment_delete = nil  # -> (experiment) { ... }
+
+    config.filtered_user_agents = []
+    config.filtered_ip_addresses = []
+    config.request_filter = -> (context) do
+      is_preview? ||
+        is_filtered_user_agent? ||
+        is_filtered_ip_address?
+    end
   end
 
   def self.catalog

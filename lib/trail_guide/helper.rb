@@ -69,7 +69,7 @@ module TrailGuide
 
       def choose!(**opts, &block)
         raise ArgumentError, "Please provide a single experiment" unless experiments.length == 1
-        opts = {override: override_variant}.merge(opts) if override_variant?
+        opts = {override: override_variant, excluded: exclude_visitor?}.merge(opts)
         variant = experiment.choose!(**opts)
         if block_given?
           yield variant
@@ -143,10 +143,6 @@ module TrailGuide
         @experiment ||= experiments.first
       end
 
-      def override_variant?
-        !!override_variant
-      end
-
       def override_variant
         return unless context.respond_to?(:params, true)
         params = context.send(:params)
@@ -156,6 +152,45 @@ module TrailGuide
         varname = experiment_params[experiment.experiment_name.to_s]
         variant = experiment.variants.find { |var| var == varname }
         variant.try(:name)
+      end
+
+      def exclude_visitor?
+        instance_exec(context, &TrailGuide.configuration.request_filter)
+      end
+
+      def is_preview?
+        return false unless context.respond_to?(:request, true)
+        headers = context.send(:request).try(:headers)
+        headers && headers['x-purpose'] == 'preview'
+      end
+
+      def is_filtered_user_agent?
+        return false if TrailGuide.configuration.filtered_user_agents.empty?
+        return false unless context.respond_to?(:request, true)
+        request = context.send(:request)
+        return false unless request && request.user_agent
+
+        TrailGuide.configuration.filtered_user_agents do |ua|
+          return true if ua.class == String && request.user_agent == ua
+          return true if ua.class == Regexp && request.user_agent =~ ua
+        end
+
+        return false
+      end
+
+      def is_filtered_ip_address?
+        return false if TrailGuide.configuration.filtered_ip_addresses.empty?
+        return false unless context.respond_to?(:request, true)
+        request = context.send(:request)
+        return false unless request && request.ip
+
+        TrailGuide.configuration.filtered_ip_addresses.each do |ip|
+          return true if ip.class == String && request.ip == ip
+          return true if ip.class == Regexp && request.ip =~ ip
+          return true if ip.class == Range && ip.first.class == IPAddr && ip.include?(IPAddr.new(request.ip))
+        end
+
+        return false
       end
     end
   end
