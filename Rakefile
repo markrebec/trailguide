@@ -20,3 +20,16 @@ load 'rails/tasks/engine.rake'
 load 'rails/tasks/statistics.rake'
 
 require 'bundler/gem_tasks'
+
+task :build do
+  puts `gem build trailguide.gemspec`
+end
+
+task :push do
+  require 'trail_guide/version'
+  puts `gem push trailguide-#{TrailGuide::VERSION}.gem`
+end
+
+task release: [:build, :push] do
+  puts `rm -f trailguide*.gem`
+end
