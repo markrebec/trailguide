@@ -24,6 +24,7 @@ module TrailGuide
     config.adapter = :multi
 
     config.on_experiment_choose = nil  # -> (experiment, variant, metadata) { ... }
+    config.on_experiment_use = nil     # -> (experiment, variant, metadata) { ... }
     config.on_experiment_convert = nil # -> (experiment, variant, checkpoint, metadata) { ... }
 
     config.on_experiment_start = nil   # -> (experiment) { ... }

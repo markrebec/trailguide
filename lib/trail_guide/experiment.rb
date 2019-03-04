@@ -117,6 +117,7 @@ module TrailGuide
         @callbacks ||= begin
           callbacks = {
             on_choose:   [TrailGuide.configuration.on_experiment_choose].compact,
+            on_use:      [TrailGuide.configuration.on_experiment_use].compact,
             on_convert:  [TrailGuide.configuration.on_experiment_convert].compact,
             on_start:    [TrailGuide.configuration.on_experiment_start].compact,
             on_stop:     [TrailGuide.configuration.on_experiment_stop].compact,
@@ -128,6 +129,10 @@ module TrailGuide
 
       def on_choose(meth=nil, &block)
         callbacks[:on_choose] << (meth || block)
+      end
+
+      def on_use(meth=nil, &block)
+        callbacks[:on_use] << (meth || block)
       end
 
       def on_convert(meth=nil, &block)
@@ -250,7 +255,15 @@ module TrailGuide
       @algorithm ||= self.class.algorithm.new(self)
     end
 
-    def choose!(override: nil, excluded: false, metadata: nil)
+    def choose!(metadata: nil, **opts)
+      return control if TrailGuide.configuration.disabled
+
+      variant = choose_variant!(metadata: metadata, **opts)
+      run_callbacks(:on_use, variant, metadata)
+      variant
+    end
+
+    def choose_variant!(override: nil, excluded: false, metadata: nil)
       return control if TrailGuide.configuration.disabled
       if override.present?
         variant = variants.find { |var| var == override }
