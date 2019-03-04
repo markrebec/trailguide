@@ -115,7 +115,7 @@ module TrailGuide
         checkpoints = experiments.map { |experiment| experiment.convert!(checkpoint, **opts) }
         return false unless checkpoints.any?
         if block_given?
-          yield checkpoints
+          yield checkpoints, opts[:metadata]
         else
           checkpoints
         end
