@@ -21,7 +21,7 @@ module TrailGuide
     config.override_parameter = :experiment
     config.allow_multiple_experiments = true # false / :control
     config.algorithm = :weighted
-    config.adapter = :cookie
+    config.adapter = :multi
 
     config.on_experiment_choose = nil  # -> (experiment, variant) { ... }
     config.on_experiment_convert = nil # -> (experiment, variant, checkpoint) { ... }

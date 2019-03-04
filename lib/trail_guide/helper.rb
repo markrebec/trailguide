@@ -38,16 +38,7 @@ module TrailGuide
       end
 
       def participant
-        @participant ||= begin
-          if context.respond_to?(:trailguide_participant, true)
-            TrailGuide::Participant.new(Struct.new(:current_user).new(context.send(:trailguide_participant)))
-          elsif context.respond_to?(:current_user, true)
-            TrailGuide::Participant.new(context)
-          else
-            # TODO temporary while devloping/testing
-            TrailGuide::Participant.new(Struct.new(:current_user).new(Struct.new(:id).new(rand(1...9999))))
-          end
-        end
+        @participant ||= TrailGuide::Participant.new(context)
       end
 
       def context_type

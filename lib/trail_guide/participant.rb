@@ -18,6 +18,10 @@ module TrailGuide
           config_adapter = TrailGuide::Adapters::Participants::Session
         when :redis
           config_adapter = TrailGuide::Adapters::Participants::Redis
+        when :anonymous
+          config_adapter = TrailGuide::Adapters::Participants::Anonymous
+        when :multi
+          config_adapter = TrailGuide::Adapters::Participants::Multi
         else
           config_adapter = config_adapter.constantize if config_adapter.is_a?(String)
         end

@@ -1,7 +1,7 @@
 module TrailGuide
   module Adapters
     module Participants
-      class Session
+      class Anonymous
         include Canfig::Instance
 
         class << self
@@ -13,15 +13,12 @@ module TrailGuide
 
         def initialize(&block)
           configure do |config|
-            config.key = :trailguide
-
             yield(config) if block_given?
           end
         end
 
         # instance method, creates a new adapter and passes through config
         def new(context)
-          raise NoMethodError, "Your current context (#{context}) does not support sessions" unless context.respond_to?(:session, true)
           Adapter.new(context, configuration)
         end
 
@@ -34,33 +31,33 @@ module TrailGuide
           end
 
           def [](key)
-            session[key]
+            hash[key]
           end
 
           def []=(key, value)
-            session[key] = value
+            hash[key] = value
           end
 
           def delete(key)
-            session.delete(key)
+            hash.delete(key)
           end
 
           def keys
-            session.keys
+            hash.keys
           end
 
           def key?(key)
-            session.key?(key)
+            hash.key?(key)
           end
 
           def to_h
-            session.to_h
+            hash.to_h
           end
 
           private
 
-          def session
-            context.send(:session)[config.key] ||= {}
+          def hash
+            @hash ||= {}
           end
         end
       end

@@ -8,8 +8,8 @@ module TrailGuide
 
         class << self
           alias_method :configure, :new
-          def new(context, **opts, &block)
-            configure(&block).new(context, **opts)
+          def new(context, &block)
+            configure(&block).new(context)
           end
         end
 
