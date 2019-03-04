@@ -27,7 +27,7 @@ end
 
 task :push do
   require 'trail_guide/version'
-  puts `gem push trailguide-#{TrailGuide::VERSION}.gem`
+  puts `gem push trailguide-#{TrailGuide::Version::VERSION}.gem`
 end
 
 task release: [:build, :push] do
