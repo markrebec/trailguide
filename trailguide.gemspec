@@ -28,6 +28,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "rails", "~> 5.2.2"
   spec.add_dependency "canfig", ">= 0.0.7"
   spec.add_dependency "redis"
+  spec.add_dependency "simple-random", ">= 0.9.3"
 
   spec.add_development_dependency "sqlite3", "~> 1.3.6"
   spec.add_development_dependency "rspec-rails"

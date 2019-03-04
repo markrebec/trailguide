@@ -13,24 +13,26 @@ module TrailGuide
         @experiment_name || self.name.try(:underscore).try(:to_sym)
       end
 
-      def algorithm(algo=nil)
-        @algorithm = algo unless algo.nil?
-        @algorithm ||= begin
-          config_algo = TrailGuide.configuration.algorithm
-          case config_algo
-          when :weighted
-            config_algo = TrailGuide::Algorithms::Weighted
-          #when :bandit
-          #  config_algo = TrailGuide::Algorithms::Bandit
-          #when :distributed
-          #  config_algo = TrailGuide::Algorithms::Distributed
-          #when :random
-          #  config_algo = TrailGuide::Algorithms::Random
-          else
-            config_algo = config_algo.constantize if config_algo.is_a?(String)
-          end
-          config_algo
+      def config_algorithm
+        config_algo = TrailGuide.configuration.algorithm
+        case config_algo
+        when :weighted
+          config_algo = TrailGuide::Algorithms::Weighted
+        when :bandit
+          config_algo = TrailGuide::Algorithms::Bandit
+        when :distributed
+          config_algo = TrailGuide::Algorithms::Distributed
+        when :random
+          config_algo = TrailGuide::Algorithms::Random
+        else
+          config_algo = config_algo.constantize if config_algo.is_a?(String)
         end
+        config_algo
+      end
+
+      def algorithm(algo=nil)
+        @algorithm = TrailGuide::Algorithms.algorithm(algo) unless algo.nil?
+        @algorithm ||= TrailGuide::Algorithms.algorithm(TrailGuide.configuration.algorithm)
       end
 
       def resettable(reset)
