@@ -88,11 +88,20 @@ module TrailGuide
       end
     end
 
+    def active_experiments(include_control=true)
+      return false if adapter.keys.empty?
+      adapter.keys.map { |key| key.to_s.split(":").first.to_sym }.uniq.map do |key|
+        experiment = TrailGuide.catalog.find(key)
+        next unless experiment && experiment.started? && participating?(experiment, include_control)
+        [ experiment.experiment_name, adapter[experiment.storage_key] ]
+      end.compact.to_h
+    end
+
     def participating_in_active_experiments?(include_control=true)
       return false if adapter.keys.empty?
 
-      keys.any? do |key|
-        experiment_name = key.split(":").first.to_sym
+      adapter.keys.any? do |key|
+        experiment_name = key.to_s.split(":").first.to_sym
         experiment = TrailGuide.catalog.find(experiment_name)
         experiment && experiment.started? && participating?(experiment, include_control)
       end
