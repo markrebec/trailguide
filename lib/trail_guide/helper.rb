@@ -30,8 +30,8 @@ module TrailGuide
         new(metric).render!(**opts)
       end
 
-      def convert!(metric, checkpoint=nil, &block)
-        new(metric).convert!(checkpoint, &block)
+      def convert!(metric, checkpoint=nil, **opts, &block)
+        new(metric).convert!(checkpoint, **opts, &block)
       end
 
       def participant
@@ -60,7 +60,7 @@ module TrailGuide
         opts = {override: override_variant, excluded: exclude_visitor?}.merge(opts)
         variant = experiment.choose!(**opts)
         if block_given?
-          yield variant
+          yield variant, opts[:metadata]
         else
           variant
         end
@@ -68,7 +68,7 @@ module TrailGuide
 
       def run!(methods: nil, **opts)
         raise ArgumentError, "Please provide a single experiment" unless experiments.length == 1
-        choose!(**opts) do |variant|
+        choose!(**opts) do |variant, metadata|
           varmeth = methods[variant.name] if methods
           varmeth ||= variant.name
 
@@ -99,7 +99,7 @@ module TrailGuide
       def render!(prefix: nil, templates: nil, **opts)
         raise NoMethodError, "The current context does not support rendering. Rendering is only available for controllers and views." unless context.respond_to?(:render, true)
         raise ArgumentError, "Please provide a single experiment" unless experiments.length == 1
-        choose!(**opts) do |variant|
+        choose!(**opts) do |variant, metadata|
           locals = { variant: variant, metadata: variant.metadata }
           locals = { locals: locals } if context_type == :controller
 
@@ -111,8 +111,8 @@ module TrailGuide
         end
       end
 
-      def convert!(checkpoint=nil, &block)
-        checkpoints = experiments.map { |experiment| experiment.convert!(checkpoint) }
+      def convert!(checkpoint=nil, **opts, &block)
+        checkpoints = experiments.map { |experiment| experiment.convert!(checkpoint, **opts) }
         return false unless checkpoints.any?
         if block_given?
           yield checkpoints

@@ -23,8 +23,8 @@ module TrailGuide
     config.algorithm = :weighted
     config.adapter = :multi
 
-    config.on_experiment_choose = nil  # -> (experiment, variant) { ... }
-    config.on_experiment_convert = nil # -> (experiment, variant, checkpoint) { ... }
+    config.on_experiment_choose = nil  # -> (experiment, variant, metadata) { ... }
+    config.on_experiment_convert = nil # -> (experiment, variant, checkpoint, metadata) { ... }
 
     config.on_experiment_start = nil   # -> (experiment) { ... }
     config.on_experiment_stop = nil    # -> (experiment) { ... }

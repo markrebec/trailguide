@@ -250,7 +250,7 @@ module TrailGuide
       @algorithm ||= self.class.algorithm.new(self)
     end
 
-    def choose!(override: nil, excluded: false)
+    def choose!(override: nil, excluded: false, metadata: nil)
       return control if TrailGuide.configuration.disabled
       if override.present?
         variant = variants.find { |var| var == override }
@@ -268,11 +268,11 @@ module TrailGuide
 
       participant.participating!(variant)
       variant.increment_participation!
-      run_callbacks(:on_choose, variant)
+      run_callbacks(:on_choose, variant, metadata)
       variant
     end
 
-    def convert!(checkpoint=nil)
+    def convert!(checkpoint=nil, metadata: nil)
       return false unless participating?
       raise ArgumentError, "You must provide a valid goal checkpoint for #{experiment_name}" unless checkpoint.present? || funnels.empty?
       raise ArgumentError, "Unknown goal checkpoint: #{checkpoint}" unless checkpoint.nil? || funnels.any? { |funnel| funnel == checkpoint.to_s.underscore.to_sym }
@@ -287,7 +287,7 @@ module TrailGuide
       # TODO eventually only reset if we're at the final goal in a funnel
       participant.converted!(variant, checkpoint, reset: resettable?)
       variant.increment_conversion!(checkpoint)
-      run_callbacks(:on_convert, variant, checkpoint)
+      run_callbacks(:on_convert, variant, checkpoint, metadata)
       variant
     end
 
