@@ -3,15 +3,15 @@ module TrailGuide
     class Distributed
       attr_reader :experiment
 
-      def self.choose!(experiment)
-        new(experiment).choose!
+      def self.choose!(experiment, **opts)
+        new(experiment).choose!(**opts)
       end
 
       def initialize(experiment)
         @experiment = experiment
       end
 
-      def choose!
+      def choose!(**opts)
         variants.sample
       end
 
