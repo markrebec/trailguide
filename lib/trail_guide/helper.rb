@@ -38,7 +38,6 @@ module TrailGuide
       end
 
       def participant
-        # TODO rework participant adapters to accept a user instead of a context
         @participant ||= begin
           if context.respond_to?(:trailguide_participant, true)
             TrailGuide::Participant.new(Struct.new(:current_user).new(context.send(:trailguide_participant)))
@@ -70,7 +69,8 @@ module TrailGuide
 
       def choose!(**opts, &block)
         raise ArgumentError, "Please provide a single experiment" unless experiments.length == 1
-        variant = experiment.choose!(**opts) # TODO override: variant
+        opts = {override: override_variant}.merge(opts) if override_variant?
+        variant = experiment.choose!(**opts)
         if block_given?
           yield variant
         else
@@ -141,6 +141,21 @@ module TrailGuide
 
       def experiment
         @experiment ||= experiments.first
+      end
+
+      def override_variant?
+        !!override_variant
+      end
+
+      def override_variant
+        return unless context.respond_to?(:params, true)
+        params = context.send(:params)
+        return unless params.key?(TrailGuide.configuration.override_parameter)
+        experiment_params = params[TrailGuide.configuration.override_parameter]
+        return unless experiment_params.key?(experiment.experiment_name.to_s)
+        varname = experiment_params[experiment.experiment_name.to_s]
+        variant = experiment.variants.find { |var| var == varname }
+        variant.try(:name)
       end
     end
   end

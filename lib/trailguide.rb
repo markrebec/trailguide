@@ -18,6 +18,7 @@ module TrailGuide
     config.start_manually = false
     config.reset_manually = false
     config.store_override = false
+    config.override_parameter = :experiment
     config.allow_multiple_experiments = true # false / :control
     config.algorithm = :weighted
     config.adapter = :cookie
