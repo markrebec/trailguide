@@ -1,12 +1,9 @@
 module TrailGuide
   module Helper
     def trailguide(metric=nil, **opts, &block)
-      @trailguide_proxy ||= HelperProxy.new(self)
-      if metric.nil?
-        @trailguide_proxy
-      else
-        @trailguide_proxy.choose!(metric, **opts, &block)
-      end
+      proxy = HelperProxy.new(self)
+      return proxy if metric.nil?
+      proxy.choose!(metric, **opts, &block)
     end
 
     class HelperProxy
@@ -108,7 +105,7 @@ module TrailGuide
 
           template = templates[variant.name] if templates
           prefix ||= (context.try(:view_context) || context).lookup_context.prefixes.first + '/'
-          template ||= "#{prefix.to_s}#{metric_descriptor.to_s.underscore}/#{variant.name.to_s.underscore}"
+          template ||= "#{prefix.to_s}#{variant.experiment.experiment_name.to_s.underscore}/#{variant.name.to_s.underscore}"
 
           context.send(:render, template.to_s, **locals)
         end

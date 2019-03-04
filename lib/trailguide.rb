@@ -15,8 +15,8 @@ module TrailGuide
   configure do |config|
     config.redis = ENV['REDIS_URL']
     config.disabled = false
-    config.start_manually = false
-    config.reset_manually = false
+    config.start_manually = true
+    config.reset_manually = true
     config.store_override = false
     config.override_parameter = :experiment
     config.allow_multiple_experiments = true # false / :control
