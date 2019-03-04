@@ -70,6 +70,8 @@ module TrailGuide
         end
 
         def merge!
+          user_adapter = configuration.user_adapter.new(unity.user_id)
+          visitor_adapter = configuration.visitor_adapter.new(unity.visitor_id)
           user_adapter.keys.each do |key|
             visitor_adapter[key] = user_adapter[key] unless visitor_adapter[key].present?
           end
