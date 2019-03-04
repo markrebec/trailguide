@@ -21,6 +21,14 @@ module TrailGuide
     config.allow_multiple_experiments = true # false / :control
     config.algorithm = :weighted
     config.adapter = :cookie
+
+    config.on_experiment_choose = nil  # -> (experiment, variant) { ... }
+    config.on_experiment_convert = nil # -> (experiment, variant, checkpoint) { ... }
+
+    config.on_experiment_start = nil   # -> (experiment) { ... }
+    config.on_experiment_stop = nil    # -> (experiment) { ... }
+    config.on_experiment_reset = nil   # -> (experiment) { ... }
+    config.on_experiment_delete = nil  # -> (experiment) { ... }
   end
 
   def self.catalog

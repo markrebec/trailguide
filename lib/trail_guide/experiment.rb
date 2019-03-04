@@ -111,15 +111,68 @@ module TrailGuide
         !!@allow_multiple_goals
       end
 
+      def callbacks
+        @callbacks ||= begin
+          callbacks = {
+            on_choose:   [TrailGuide.configuration.on_experiment_choose].compact,
+            on_convert:  [TrailGuide.configuration.on_experiment_convert].compact,
+            on_start:    [TrailGuide.configuration.on_experiment_start].compact,
+            on_stop:     [TrailGuide.configuration.on_experiment_stop].compact,
+            on_reset:    [TrailGuide.configuration.on_experiment_reset].compact,
+            on_delete:   [TrailGuide.configuration.on_experiment_delete].compact,
+          }
+        end
+      end
+
+      def on_choose(meth=nil, &block)
+        callbacks[:on_choose] << (meth || block)
+      end
+
+      def on_convert(meth=nil, &block)
+        callbacks[:on_convert] << (meth || block)
+      end
+
+      def on_start(meth=nil, &block)
+        callbacks[:on_start] << (meth || block)
+      end
+
+      def on_stop(meth=nil, &block)
+        callbacks[:on_stop] << (meth || block)
+      end
+
+      def on_reset(meth=nil, &block)
+        callbacks[:on_reset] << (meth || block)
+      end
+
+      def on_delete(meth=nil, &block)
+        callbacks[:on_delete] << (meth || block)
+      end
+
+      def run_callbacks(hook, *args)
+        return unless callbacks[hook]
+        args.unshift(self)
+        callbacks[hook].each do |callback|
+          if callback.respond_to?(:call)
+            callback.call(*args)
+          else
+            send(callback, *args)
+          end
+        end
+      end
+
       def start!
         return false if started?
         save! unless persisted?
-        TrailGuide.redis.hset(storage_key, 'started_at', Time.now.to_i)
+        started = TrailGuide.redis.hset(storage_key, 'started_at', Time.now.to_i)
+        run_callbacks(:on_start)
+        started
       end
 
       def stop!
         return false unless started?
-        TrailGuide.redis.hdel(storage_key, 'started_at')
+        stopped = TrailGuide.redis.hdel(storage_key, 'started_at')
+        run_callbacks(:on_stop)
+        stopped
       end
 
       def started_at
@@ -156,12 +209,15 @@ module TrailGuide
 
       def delete!
         variants.each(&:delete!)
-        TrailGuide.redis.del(storage_key)
-        # TODO also clear out stats, etc.
+        deleted = TrailGuide.redis.del(storage_key)
+        run_callbacks(:on_delete)
+        deleted
       end
 
       def reset!
-        delete! && save!
+        reset = (delete! && save!)
+        run_callbacks(:on_reset)
+        reset
       end
 
       def as_json(opts={})
@@ -181,7 +237,8 @@ module TrailGuide
     attr_reader :participant
     delegate :experiment_name, :variants, :control, :funnels, :storage_key,
       :started?, :started_at, :start!, :resettable?, :winner?, :winner,
-      :allow_multiple_conversions?, :allow_multiple_goals?, to: :class
+      :allow_multiple_conversions?, :allow_multiple_goals?, :callbacks,
+      to: :class
 
     def initialize(participant)
       @participant = participant
@@ -213,6 +270,7 @@ module TrailGuide
 
       participant.participating!(variant)
       variant.increment_participation!
+      run_callbacks(:on_choose, variant)
       variant
     end
 
@@ -231,6 +289,7 @@ module TrailGuide
       # TODO eventually only reset if we're at the final goal in a funnel
       participant.converted!(variant, checkpoint, reset: resettable?)
       variant.increment_conversion!(checkpoint)
+      run_callbacks(:on_convert, variant, checkpoint)
       variant
     end
 
@@ -240,6 +299,18 @@ module TrailGuide
 
     def converted?(checkpoint=nil)
       participant.converted?(self, checkpoint)
+    end
+
+    def run_callbacks(hook, *args)
+      return unless callbacks[hook]
+      args.unshift(self)
+      callbacks[hook].each do |callback|
+        if callback.respond_to?(:call)
+          callback.call(*args)
+        else
+          send(callback, *args)
+        end
+      end
     end
   end
 end
