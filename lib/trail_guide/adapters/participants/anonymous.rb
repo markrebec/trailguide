@@ -42,6 +42,10 @@ module TrailGuide
             hash.delete(key)
           end
 
+          def destroy!
+            @hash = nil
+          end
+
           def keys
             hash.keys
           end

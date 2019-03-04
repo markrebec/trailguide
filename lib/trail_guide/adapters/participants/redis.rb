@@ -61,6 +61,10 @@ module TrailGuide
             TrailGuide.redis.hdel(storage_key, field.to_s)
           end
 
+          def destroy!
+            TrailGuide.redis.del(storage_key)
+          end
+
           def keys
             TrailGuide.redis.hkeys(storage_key)
           end

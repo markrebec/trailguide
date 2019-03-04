@@ -45,6 +45,10 @@ module TrailGuide
             session.delete(key)
           end
 
+          def destroy!
+            context.send(:session).delete(config.key)
+          end
+
           def keys
             session.keys
           end

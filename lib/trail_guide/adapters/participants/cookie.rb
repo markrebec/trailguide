@@ -52,6 +52,10 @@ module TrailGuide
             write_cookie
           end
 
+          def destroy!
+            cookies.delete(config.cookie.to_s)
+          end
+
           def keys
             cookie.keys
           end
