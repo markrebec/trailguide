@@ -1,5 +1,13 @@
-<h1>Experiments</h1>
+<div class="container-fluid">
+  <div class="row justify-content-center">
+    <div class="col-sm-12 col-md-10 col-lg-8">
+      <h1>Experiments</h1>
+    </div>
+  </div>
 
-<% TrailGuide.catalog.each do |experiment| %>
-  <%= render 'experiment', experiment: experiment %>
-<% end %>
+  <hr />
+
+  <% TrailGuide.catalog.each do |experiment| %>
+    <%= render 'experiment', experiment: experiment %>
+  <% end %>
+</div>
