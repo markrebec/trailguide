@@ -89,7 +89,9 @@ module TrailGuide
 
         def logged_out_context?
           return false unless configuration.visitor_cookie.present?
-          context.respond_to?(:cookies, true) && context.send(:cookies)[configuration.visitor_cookie].present?
+          context.send(:cookies)[configuration.visitor_cookie].present?
+        rescue => e
+          return false
         end
 
         def user_context?
