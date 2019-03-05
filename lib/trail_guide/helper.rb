@@ -167,12 +167,15 @@ module TrailGuide
       end
 
       def is_filtered_ip_address?
-        return false if TrailGuide.configuration.filtered_ip_addresses.empty?
+        filtered_ips = TrailGuide.configuration.filtered_ip_addresses
+        filtered_ips = filtered_ips.call if filtered_ips.respond_to?(:call)
+        return false if filtered_ips.nil? || filtered_ips.empty?
+
         return false unless context.respond_to?(:request, true)
         request = context.send(:request)
         return false unless request && request.ip
 
-        TrailGuide.configuration.filtered_ip_addresses.each do |ip|
+        filtered_ips.each do |ip|
           return true if ip.class == String && request.ip == ip
           return true if ip.class == Regexp && request.ip =~ ip
           return true if ip.class == Range && ip.first.class == IPAddr && ip.include?(IPAddr.new(request.ip))
