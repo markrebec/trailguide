@@ -1,12 +1,15 @@
 class WeedTest < TrailGuide::Experiment
+  experiment_name :types_of_weed
+
   variant :sativa
   variant :indica
   variant :hybrid
 
   algorithm :distributed
 
-  goal :couch
-  goal :work
+  goal :sat_on_couch
+  goal :got_work_done
+  goal :cleaned_the_house
 
   on_choose do |experiment, variant, metadata|
     ap "ON CHOOSE"
