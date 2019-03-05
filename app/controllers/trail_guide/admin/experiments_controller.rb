@@ -1,6 +1,8 @@
 module TrailGuide
   module Admin
-    class ExperimentsController < TrailGuide::Admin::ApplicationController
+    class ExperimentsController < ActionController::Base
+      protect_from_forgery with: :exception
+
       before_action except: [:index] do
         (redirect_to :back rescue redirect_to trail_guide_admin.experiments_path) and return unless experiment.present?
       end

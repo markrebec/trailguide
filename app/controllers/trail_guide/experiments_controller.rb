@@ -1,5 +1,5 @@
 module TrailGuide
-  class ApplicationController < ::ApplicationController
+  class ExperimentsController < ::ApplicationController
     before_action do
       render json: { error: "Experiment does not exist" }, status: 404 and return unless experiment.present?
     end
