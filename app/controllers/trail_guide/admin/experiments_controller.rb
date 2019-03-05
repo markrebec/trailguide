@@ -1,8 +1,6 @@
 module TrailGuide
   module Admin
-    class ExperimentsController < ActionController::Base
-      protect_from_forgery with: :exception
-
+    class ExperimentsController < ApplicationController
       before_action except: [:index] do
         (redirect_to :back rescue redirect_to trail_guide_admin.experiments_path) and return unless experiment.present?
       end
@@ -31,7 +29,7 @@ module TrailGuide
       end
 
       def winner
-        experiment.declare_winner!(params[:winner])
+        experiment.declare_winner!(params[:variant])
         redirect_to :back rescue redirect_to trail_guide_admin.experiments_path
       end
 

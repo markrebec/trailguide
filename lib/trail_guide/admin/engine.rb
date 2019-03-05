@@ -9,5 +9,3 @@ module TrailGuide
     end
   end
 end
-
-load TrailGuide::Admin::Engine.root.join("config/admin/routes.rb")
