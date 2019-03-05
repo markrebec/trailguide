@@ -265,10 +265,11 @@ module TrailGuide
       @algorithm ||= self.class.algorithm.new(self)
     end
 
-    def choose!(metadata: nil, **opts)
+    def choose!(override: nil, metadata: nil, **opts)
       return control if TrailGuide.configuration.disabled
 
-      variant = choose_variant!(metadata: metadata, **opts)
+      variant = choose_variant!(override: override, metadata: metadata, **opts)
+      participant.participating!(variant) unless override.present? && !TrailGuide.configuration.store_override
       run_callbacks(:on_use, variant, metadata)
       variant
     end
@@ -277,7 +278,7 @@ module TrailGuide
       return control if TrailGuide.configuration.disabled
       if override.present?
         variant = variants.find { |var| var == override }
-        return variant unless TrailGuide.configuration.store_override && started?
+        return variant unless TrailGuide.configuration.track_override && started?
       else
         return winner if winner?
         return control if excluded
@@ -289,7 +290,6 @@ module TrailGuide
         variant = algorithm.choose!(metadata: metadata)
       end
 
-      participant.participating!(variant)
       variant.increment_participation!
       run_callbacks(:on_choose, variant, metadata)
       variant
