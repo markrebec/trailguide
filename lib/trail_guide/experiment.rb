@@ -202,7 +202,7 @@ module TrailGuide
       end
 
       def winner?
-        !!winner
+        TrailGuide.redis.hexists(storage_key, 'winner')
       end
 
       def persisted?
