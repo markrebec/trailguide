@@ -39,6 +39,22 @@ module TrailGuide
         is_filtered_user_agent? ||
         is_filtered_ip_address?
     end
+
+    def filtered_user_agents
+      @filtered_user_agents ||= begin
+        uas = @state[:filtered_user_agents]
+        uas = uas.call if uas.respond_to?(:call)
+        uas
+      end
+    end
+
+    def filtered_ip_addresses
+      @filtered_ip_addresses ||= begin
+        ips = @state[:filtered_ip_addresses]
+        ips = ips.call if ips.respond_to?(:call)
+        ips
+      end
+    end
   end
 
   def self.catalog
