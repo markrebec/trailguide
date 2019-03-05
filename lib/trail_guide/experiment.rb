@@ -228,12 +228,22 @@ module TrailGuide
       end
 
       def as_json(opts={})
-        # TODO fill in the rest of the values i've added
-        {
-          experiment_name: experiment_name,
-          algorithm: algorithm,
-          variants: variants.as_json
-        }
+        { experiment_name => {
+          configuration: {
+            metric: metric,
+            algorithm: algorithm.name,
+            variants: variants.as_json,
+            goals: goals.as_json,
+            resettable: resettable?,
+            allow_multiple_conversions: allow_multiple_conversions?,
+            allow_multiple_goals: allow_multiple_goals?
+          },
+          statistics: {
+            # TODO expand on this for variants/goals
+            participants: variants.sum(&:participants),
+            converted: variants.sum(&:converted)
+          }
+        } }
       end
 
       def storage_key
