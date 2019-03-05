@@ -1,1 +1,5 @@
 <h1>Experiments</h1>
+
+<% TrailGuide.catalog.each do |experiment| %>
+  <%= render 'experiment', experiment: experiment %>
+<% end %>

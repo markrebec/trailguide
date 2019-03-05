@@ -1,0 +1,72 @@
+<table>
+  <thead>
+    <tr>
+      <th colspan="3"><%= experiment.experiment_name.to_s.humanize %></th>
+    </tr>
+
+    <tr>
+      <td>
+        <% if experiment.started? %>
+          <%= link_to "stop", trail_guide_admin.stop_experiment_path(experiment.experiment_name), method: :put %>
+          <%= link_to "reset", trail_guide_admin.reset_experiment_path(experiment.experiment_name), method: :put %>
+          <%= link_to "restart", trail_guide_admin.restart_experiment_path(experiment.experiment_name), method: :put %>
+        <% else %>
+          <%= link_to "start", trail_guide_admin.start_experiment_path(experiment.experiment_name), method: :put %>
+        <% end %>
+      </td>
+
+      <th>participants</th>
+
+      <% if experiment.goals.empty? %>
+        <th>converted</th>
+      <% else %>
+        <% experiment.goals.each do |goal| %>
+          <th><%= goal %></th>
+        <% end %>
+      <% end %>
+
+      <th>&nbsp;</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% experiment.variants.each do |variant| %>
+      <tr>
+        <th><%= variant.name %></th>
+
+        <td><%= variant.participants %></td>
+
+        <% if experiment.goals.empty? %>
+          <td><%= variant.converted %></td>
+        <% else %>
+          <% experiment.goals.each do |goal| %>
+            <td><%= variant.converted(goal) %></td>
+          <% end %>
+        <% end %>
+
+        <td>
+          <% if experiment.winner? && variant == experiment.winner %>
+            <span>winner</span>
+          <% else %>
+            <%= link_to "use this", trail_guide_admin.winner_experiment_path(experiment.experiment_name, variant.name), method: :put %>
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+
+  <tfoot>
+    <tr>
+      <td>&nbsp;</td>
+      <td><%= experiment.variants.sum(&:participants) %></td>
+      <% if experiment.goals.empty? %>
+        <td><%= experiment.variants.sum(&:converted) %></td>
+      <% else %>
+        <% experiment.goals.each do |goal| %>
+          <td><%= experiment.variants.sum { |var| var.converted(goal) } %></td>
+        <% end %>
+      <% end %>
+      <td>&nbsp;</td>
+    </tr>
+  </tfoot>
+</table>
