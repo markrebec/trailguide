@@ -1,50 +1,42 @@
 module TrailGuide
   class Experiment
+    # TODO maybe use a custon canfig object with specific keys and methods built-in? could also initialize with the top-level config defaults... and ensure it's created with a reference to self...
+    extend Canfig::Instance
+
     class << self
       def inherited(child)
         # TODO allow inheriting algo, variants, goals, metrics, etc.
         TrailGuide::Catalog.register(child)
-      end
-
-      # TODO could probably move all this configuration stuff at the class level
-      # into a canfig object instead...?
-      def experiment_name(name=nil)
-        @experiment_name = name.to_s.underscore.to_sym unless name.nil?
-        @experiment_name || self.name.try(:underscore).try(:to_sym)
-      end
-
-      def config_algorithm
-        config_algo = TrailGuide.configuration.algorithm
-        case config_algo
-        when :weighted
-          config_algo = TrailGuide::Algorithms::Weighted
-        when :bandit
-          config_algo = TrailGuide::Algorithms::Bandit
-        when :distributed
-          config_algo = TrailGuide::Algorithms::Distributed
-        when :random
-          config_algo = TrailGuide::Algorithms::Random
-        else
-          config_algo = config_algo.constantize if config_algo.is_a?(String)
+        child.configure do |config|
+          [:start_manually, :reset_manually, :store_override, :track_override, :algorithm, :allow_multiple_conversions, :allow_multiple_goals].each do |key|
+            config.send("#{key}=".to_sym, TrailGuide.configuration.send(key.to_sym))
+          end
         end
-        config_algo
-      end
-
-      def algorithm(algo=nil)
-        @algorithm = TrailGuide::Algorithms.algorithm(algo) unless algo.nil?
-        @algorithm ||= TrailGuide::Algorithms.algorithm(TrailGuide.configuration.algorithm)
-      end
-
-      def resettable(reset)
-        @resettable = reset
       end
 
       def resettable?
-        if @resettable.nil?
-          !TrailGuide.configuration.reset_manually
-        else
-          !!@resettable
-        end
+        !configuration.reset_manually
+      end
+
+      def allow_multiple_conversions?
+        configuration.allow_multiple_conversions
+      end
+
+      def allow_multiple_goals?
+        configuration.allow_multiple_goals
+      end
+
+      def experiment_name
+        # TODO can maybe be smarter about memoizing this in the config?
+        @experiment_name ||= (configuration.name || name).try(:to_s).try(:underscore).try(:to_sym)
+      end
+
+      def metric
+        @metric ||= (configuration.metric || experiment_name).try(:to_s).try(:underscore).try(:to_sym)
+      end
+
+      def algorithm
+        @algorithm ||= TrailGuide::Algorithms.algorithm(configuration.algorithm)
       end
 
       def variant(name, metadata: {}, weight: 1, control: false)
@@ -91,27 +83,6 @@ module TrailGuide
         @funnels ||= []
       end
       alias_method :goals, :funnels
-
-      def metric(key=nil)
-        @metric = key.to_s.underscore.to_sym unless key.nil?
-        @metric ||= experiment_name
-      end
-
-      def allow_multiple_conversions(allow)
-        @allow_multiple_conversions = allow
-      end
-
-      def allow_multiple_conversions?
-        !!@allow_multiple_conversions
-      end
-
-      def allow_multiple_goals(allow)
-        @allow_multiple_goals = allow
-      end
-
-      def allow_multiple_goals?
-        !!@allow_multiple_goals
-      end
 
       def callbacks
         @callbacks ||= begin
@@ -252,9 +223,9 @@ module TrailGuide
     end
 
     attr_reader :participant
-    delegate :experiment_name, :variants, :control, :funnels, :storage_key,
-      :started?, :started_at, :start!, :resettable?, :winner?, :winner,
-      :allow_multiple_conversions?, :allow_multiple_goals?, :callbacks,
+    delegate :configuration, :experiment_name, :variants, :control, :funnels,
+      :storage_key, :started?, :started_at, :start!, :resettable?, :winner?,
+      :winner, :allow_multiple_conversions?, :allow_multiple_goals?, :callbacks,
       to: :class
 
     def initialize(participant)
@@ -269,7 +240,7 @@ module TrailGuide
       return control if TrailGuide.configuration.disabled
 
       variant = choose_variant!(override: override, metadata: metadata, **opts)
-      participant.participating!(variant) unless override.present? && !TrailGuide.configuration.store_override
+      participant.participating!(variant) unless override.present? && !configuration.store_override
       run_callbacks(:on_use, variant, metadata)
       variant
     end
@@ -278,11 +249,11 @@ module TrailGuide
       return control if TrailGuide.configuration.disabled
       if override.present?
         variant = variants.find { |var| var == override }
-        return variant unless TrailGuide.configuration.track_override && started?
+        return variant unless configuration.track_override && started?
       else
         return winner if winner?
         return control if excluded
-        return control if !started? && TrailGuide.configuration.start_manually
+        return control if !started? && configuration.start_manually
         start! unless started?
         return variants.find { |var| var == participant[storage_key] } if participating?
         return control unless TrailGuide.configuration.allow_multiple_experiments == true || !participant.participating_in_active_experiments?(TrailGuide.configuration.allow_multiple_experiments == false) 

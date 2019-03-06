@@ -21,9 +21,11 @@ module TrailGuide
     config.store_override = false
     config.track_override = false
     config.override_parameter = :experiment
-    config.allow_multiple_experiments = true # false / :control
     config.algorithm = :weighted
     config.adapter = :multi
+    config.allow_multiple_experiments = true # false / :control
+    config.allow_multiple_conversions = false
+    config.allow_multiple_goals = false
 
     config.on_experiment_choose = nil  # -> (experiment, variant, metadata) { ... }
     config.on_experiment_use = nil     # -> (experiment, variant, metadata) { ... }
