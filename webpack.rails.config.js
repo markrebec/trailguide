@@ -7,7 +7,7 @@ module.exports = {
     path: path.resolve(__dirname, 'app/assets/javascripts/'),
     filename: 'trailguide.js',
     library: 'TrailGuide',
-    libraryTarget: 'assign'
+    libraryTarget: 'this'
   },
   module: {
     rules: [
