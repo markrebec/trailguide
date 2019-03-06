@@ -48,7 +48,7 @@ module TrailGuide
       end
 
       def variant(name, metadata: {}, weight: 1, control: false)
-        raise ArgumentError, "The variant #{name} already exists in experiment #{experiment_name}" if variants.any? { |var| var == name }
+        raise ArgumentError, "The variant `#{name}` already exists in the experiment `#{experiment_name}`" if variants.any? { |var| var == name }
         control = true if variants.empty?
         variant = Variant.new(self, name, metadata: metadata, weight: weight, control: control)
         variants << variant
@@ -297,8 +297,8 @@ module TrailGuide
 
     def convert!(checkpoint=nil, metadata: nil)
       return false unless participating?
-      raise ArgumentError, "You must provide a valid goal checkpoint for #{experiment_name}" unless checkpoint.present? || funnels.empty?
-      raise ArgumentError, "Unknown goal checkpoint: #{checkpoint}" unless checkpoint.nil? || funnels.any? { |funnel| funnel == checkpoint.to_s.underscore.to_sym }
+      raise InvalidGoalError, "Invalid goal checkpoint `#{checkpoint}` for `#{experiment_name}`." unless checkpoint.present? || funnels.empty?
+      raise InvalidGoalError, "Invalid goal checkpoint `#{checkpoint}` for `#{experiment_name}`." unless checkpoint.nil? || funnels.any? { |funnel| funnel == checkpoint.to_s.underscore.to_sym }
       # TODO eventually allow progressing through funnel checkpoints towards goals
       if converted?(checkpoint)
         return false unless allow_multiple_conversions?

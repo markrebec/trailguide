@@ -53,10 +53,11 @@ module TrailGuide
       def initialize(context, metric, **opts)
         super(context, **opts)
         @metric = metric
+        raise NoExperimentsError, "Could not find any experiments matching `#{metric}`." if experiments.empty?
       end
 
       def choose!(**opts, &block)
-        raise ArgumentError, "Please provide a single experiment" unless experiments.length == 1
+        raise TooManyExperimentsError, "Selecting a variant requires a single experiment, but the metric `#{metric}` matches more than one experiment." if experiments.length > 1
         opts = {override: override_variant, excluded: exclude_visitor?}.merge(opts)
         variant = experiment.choose!(**opts)
         if block_given?
@@ -67,21 +68,20 @@ module TrailGuide
       end
 
       def run!(methods: nil, **opts)
-        raise ArgumentError, "Please provide a single experiment" unless experiments.length == 1
         choose!(**opts) do |variant, metadata|
           varmeth = methods[variant.name] if methods
           varmeth ||= variant.name
 
           unless context.respond_to?(varmeth, true)
             if context_type == :controller
-              raise NoMethodError,
-                "You must define a controller method that matches variant `#{variant.name}` in your experiment `#{metric}`. In this case it looks like you need to define #{context.class.name}##{varmeth}(metadata={})"
+              raise NoVariantMethodError,
+                "Undefined local method `#{varmeth}`. You must define a controller method matching the variant `#{variant.name}` in your experiment `#{metric}`. In this case it looks like you need to define #{context.class.name}##{varmeth}(metadata={})"
             elsif context_type == :template
-              raise NoMethodError,
-                "You must define a helper method that matches variant `#{variant.name}` in your experiment `#{metric}`. In this case it looks like you need to define ApplicationHelper##{varmeth}(metadata={})"
+              raise NoVariantMethodError,
+                "Undefined local method `#{varmeth}`. You must define a helper method matching the variant `#{variant.name}` in your experiment `#{metric}`. In this case it looks like you need to define ApplicationHelper##{varmeth}(metadata={})"
             else
-              raise NoMethodError,
-                "You must define a method that matches variant `#{variant.name}` in your experiment `#{metric}`. In this case it looks like you need to define #{context.class.name}##{varmeth}(metadata={})"
+              raise NoVariantMethodError,
+                "Undefined local method `#{varmeth}`. You must define a method matching the variant `#{variant.name}` in your experiment `#{metric}`. In this case it looks like you need to define #{context.class.name}##{varmeth}(metadata={})"
             end
           end
 
@@ -97,8 +97,7 @@ module TrailGuide
       end
 
       def render!(prefix: nil, templates: nil, **opts)
-        raise NoMethodError, "The current context does not support rendering. Rendering is only available for controllers and views." unless context.respond_to?(:render, true)
-        raise ArgumentError, "Please provide a single experiment" unless experiments.length == 1
+        raise UnsupportedContextError, "The current context (#{context}) does not support rendering. Rendering is only available in controllers and views." unless context.respond_to?(:render, true)
         choose!(**opts) do |variant, metadata|
           locals = { variant: variant, metadata: variant.metadata }
           locals = { locals: locals } if context_type == :controller

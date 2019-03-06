@@ -21,7 +21,7 @@ module TrailGuide
 
         # instance method, creates a new adapter and passes through config
         def new(context)
-          raise NoMethodError, "Your current context (#{context}) does not support sessions" unless context.respond_to?(:session, true)
+          raise UnsupportedContextError, "Your current context (#{context}) does not support sessions" unless context.respond_to?(:session, true)
           Adapter.new(context, configuration)
         end
 

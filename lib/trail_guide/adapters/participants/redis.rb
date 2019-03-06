@@ -43,8 +43,7 @@ module TrailGuide
               end
               @storage_key = "#{config.namespace}:#{key}"
             else
-              # TODO better error
-              raise ArgumentError, "You must configure a `lookup` proc"
+              raise ArgumentError, "You must configure a `lookup` proc to use the redis adapter."
             end
           end
 

@@ -58,10 +58,10 @@ module TrailGuide
 
     def converted(checkpoint=nil)
       if experiment.funnels.empty?
-        raise ArgumentError, "This experiment does not have any defined goal checkpoints" unless checkpoint.nil?
+        raise InvalidGoalError, "You provided the checkpoint `#{checkpoint}` but the experiment `#{experiment.experiment_name}` does not have any goals defined." unless checkpoint.nil?
         (TrailGuide.redis.hget(storage_key, 'converted') || 0).to_i
       elsif !checkpoint.nil?
-        raise ArgumentError, "Invalid goal checkpoint: #{checkpoint}" unless experiment.funnels.any? { |funnel| funnel == checkpoint.to_s.underscore.to_sym }
+        raise InvalidGoalError, "Invalid goal checkpoint `#{checkpoint}` for experiment `#{experiment.experiment_name}`." unless experiment.funnels.any? { |funnel| funnel == checkpoint.to_s.underscore.to_sym }
         (TrailGuide.redis.hget(storage_key, checkpoint.to_s.underscore) || 0).to_i
       else
         experiment.funnels.sum do |checkpoint|

@@ -1,5 +1,6 @@
 require "canfig"
 require "redis"
+require "trail_guide/errors"
 require "trail_guide/adapters"
 require "trail_guide/algorithms"
 require "trail_guide/participant"
