@@ -21,7 +21,9 @@ module TrailGuide
     end
 
     def convert
-      trailguide.convert!(experiment.experiment_name, checkpoint, metadata: metadata)
+      # we use the param here because convert can trigger multiple experiements
+      # based on the passed key via shared metrics
+      trailguide.convert!(params[:experiment_name], checkpoint, metadata: metadata)
       render json: {
         experiment: experiment.experiment_name,
         checkpoint: checkpoint,
