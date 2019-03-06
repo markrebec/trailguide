@@ -2,10 +2,14 @@
   "name": "trailguide",
   "version": "0.1.0",
   "description": "TrailGuide javascript client",
-  "main": "build/index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "build": "webpack --mode production",
-    "watch": "webpack --mode production --watch"
+    "build:rails": "webpack --mode production --config webpack.rails.config.js",
+    "watch:rails": "webpack --mode production --config webpack.rails.config.js --watch",
+    "build:node": "webpack --mode production --config webpack.node.config.js",
+    "watch:node": "webpack --mode production --config webpack.node.config.js --watch",
+    "build": "concurrently \"yarn build:rails\" \"yarn build:node\"",
+    "watch": "concurrently \"yarn watch:rails\" \"yarn watch:node\""
   },
   "devDependencies": {
     "@babel/core": "^7.3.3",
@@ -13,6 +17,7 @@
     "@babel/preset-react": "^7.0.0",
     "axios": "^0.18.0",
     "babel-loader": "^8.0.5",
+    "concurrently": "^4.1.0",
     "webpack": "^4.29.5",
     "webpack-cli": "^3.2.3"
   }
