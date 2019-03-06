@@ -1,16 +1,25 @@
 module TrailGuide
-  class ExperimentConfig < Canfig::OpenConfig
-    attr_reader :experiment
+  class ExperimentConfig < Canfig::Config
+    DEFAULT_CONFIG = { name: nil, metric: nil, variants: [], goals: [] }.freeze
 
-    def initialize(experiment, *args, **opts, &block)
-      @experiment = experiment
-      # TODO clean this up, use Canfig::Config
-      opts = opts.merge([:start_manually, :reset_manually, :store_override, :track_override, :algorithm, :allow_multiple_conversions, :allow_multiple_goals].map do |key|
+    ENGINE_CONFIG_KEYS = [
+      :start_manually, :reset_manually, :store_override, :track_override,
+      :algorithm, :allow_multiple_conversions, :allow_multiple_goals
+    ].freeze
+
+    def self.default_config
+      DEFAULT_CONFIG
+    end
+
+    def self.engine_config
+      ENGINE_CONFIG_KEYS.map do |key|
         [key, TrailGuide.configuration.send(key.to_sym)]
-      end.to_h)
-      opts = opts.merge({name: nil, metric: nil, variants: [], goals: []})
-      opts = opts.merge({callbacks:
-        {
+      end.to_h
+    end
+
+    def self.callbacks_config
+      {
+        callbacks: {
           on_choose:   [TrailGuide.configuration.on_experiment_choose].flatten.compact,
           on_use:      [TrailGuide.configuration.on_experiment_use].flatten.compact,
           on_convert:  [TrailGuide.configuration.on_experiment_convert].flatten.compact,
@@ -19,8 +28,16 @@ module TrailGuide
           on_reset:    [TrailGuide.configuration.on_experiment_reset].flatten.compact,
           on_delete:   [TrailGuide.configuration.on_experiment_delete].flatten.compact,
         }
-      })
-      args << :callbacks
+      }
+    end
+
+    attr_reader :experiment
+
+    def initialize(experiment, *args, **opts, &block)
+      @experiment = experiment
+      opts.merge!(self.class.default_config)
+      opts.merge!(self.class.engine_config)
+      opts.merge!(self.class.callbacks_config)
       super(*args, **opts, &block)
     end
 
