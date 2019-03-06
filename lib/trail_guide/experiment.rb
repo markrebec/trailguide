@@ -3,6 +3,10 @@ require "trail_guide/experiment_config"
 module TrailGuide
   class Experiment
     class << self
+      delegate :metric, :algorithm, :control, :goals, :callbacks,
+        :allow_multiple_conversions?, :allow_multiple_goals?, to: :configuration
+      alias_method :funnels, :goals
+
       def inherited(child)
         TrailGuide::Catalog.register(child)
       end
@@ -19,24 +23,8 @@ module TrailGuide
         !configuration.reset_manually
       end
 
-      def allow_multiple_conversions?
-        configuration.allow_multiple_conversions
-      end
-
-      def allow_multiple_goals?
-        configuration.allow_multiple_goals
-      end
-
       def experiment_name
         configuration.name
-      end
-
-      def metric
-        configuration.metric
-      end
-
-      def algorithm
-        configuration.algorithm
       end
 
       def variants(include_control=true)
@@ -45,19 +33,6 @@ module TrailGuide
         else
           configuration.variants.select { |var| !var.control? }
         end
-      end
-
-      def control
-        configuration.control
-      end
-
-      def goals
-        configuration.goals
-      end
-      alias_method :funnels, :goals
-
-      def callbacks
-        configuration.callbacks
       end
 
       def run_callbacks(hook, *args)
