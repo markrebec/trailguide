@@ -71,9 +71,17 @@ module TrailGuide
         !!started_at
       end
 
+      def running?
+        started?
+      end
+
       def declare_winner!(variant)
         variant = variant.name if variant.is_a?(Variant)
         TrailGuide.redis.hset(storage_key, 'winner', variant.to_s.underscore)
+      end
+
+      def clear_winner!
+        TrailGuide.redis.hdel(storage_key, 'winner')
       end
 
       def winner
