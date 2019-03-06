@@ -23,6 +23,7 @@ module TrailGuide
           on_convert:  [TrailGuide.configuration.on_experiment_convert].flatten.compact,
           on_start:    [TrailGuide.configuration.on_experiment_start].flatten.compact,
           on_stop:     [TrailGuide.configuration.on_experiment_stop].flatten.compact,
+          on_resume:   [TrailGuide.configuration.on_experiment_resume].flatten.compact,
           on_reset:    [TrailGuide.configuration.on_experiment_reset].flatten.compact,
           on_delete:   [TrailGuide.configuration.on_experiment_delete].flatten.compact,
         }
@@ -119,6 +120,10 @@ module TrailGuide
 
     def on_stop(meth=nil, &block)
       callbacks[:on_stop] << (meth || block)
+    end
+
+    def on_resume(meth=nil, &block)
+      callbacks[:on_resume] << (meth || block)
     end
 
     def on_reset(meth=nil, &block)

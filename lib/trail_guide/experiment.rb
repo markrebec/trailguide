@@ -56,10 +56,17 @@ module TrailGuide
       end
 
       def stop!
-        return false unless started?
-        stopped = TrailGuide.redis.hdel(storage_key, 'started_at')
+        return false unless running?
+        stopped = TrailGuide.redis.hset(storage_key, 'stopped_at', Time.now.to_i)
         run_callbacks(:on_stop)
         stopped
+      end
+
+      def resume!
+        return false unless started? && stopped?
+        restarted = TrailGuide.redis.hdel(storage_key, 'stopped_at')
+        run_callbacks(:on_resume)
+        restarted
       end
 
       def started_at
@@ -67,12 +74,21 @@ module TrailGuide
         return Time.at(started.to_i) if started
       end
 
+      def stopped_at
+        stopped = TrailGuide.redis.hget(storage_key, 'stopped_at')
+        return Time.at(stopped.to_i) if stopped
+      end
+
       def started?
         !!started_at
       end
 
+      def stopped?
+        !!stopped_at
+      end
+
       def running?
-        started?
+        started? && !stopped?
       end
 
       def declare_winner!(variant)
@@ -141,9 +157,9 @@ module TrailGuide
 
     attr_reader :participant
     delegate :configuration, :experiment_name, :variants, :control, :funnels,
-      :storage_key, :started?, :started_at, :start!, :resettable?, :winner?,
-      :winner, :allow_multiple_conversions?, :allow_multiple_goals?, :callbacks,
-      to: :class
+      :storage_key, :running?, :started?, :started_at, :start!, :resettable?,
+      :winner?, :winner, :allow_multiple_conversions?, :allow_multiple_goals?,
+      :callbacks, to: :class
 
     def initialize(participant)
       @participant = participant
@@ -166,12 +182,13 @@ module TrailGuide
       return control if TrailGuide.configuration.disabled
       if override.present?
         variant = variants.find { |var| var == override }
-        return variant unless configuration.track_override && started?
+        return variant unless configuration.track_override && running?
       else
         return winner if winner?
         return control if excluded
         return control if !started? && configuration.start_manually
         start! unless started?
+        return control unless running?
         return variants.find { |var| var == participant[storage_key] } if participating?
         return control unless TrailGuide.configuration.allow_multiple_experiments == true || !participant.participating_in_active_experiments?(TrailGuide.configuration.allow_multiple_experiments == false) 
 

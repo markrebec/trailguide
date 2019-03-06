@@ -10,13 +10,15 @@
         </h3>
       </div>
       <div class="col-sm-12 col-md-6 col-lg-4 text-right">
-        <% if experiment.started? %>
+        <% if experiment.running? %>
           <%= link_to "stop", trail_guide_admin.stop_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-warning', method: :put %>
           <%= link_to "restart", trail_guide_admin.restart_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-danger',method: :put %>
+        <% elsif experiment.started? %>
+          <%= link_to "resume", trail_guide_admin.resume_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-primary',method: :put %>
         <% else %>
           <%= link_to "start", trail_guide_admin.start_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-success',method: :put %>
         <% end %>
-        <%= link_to "reset", trail_guide_admin.reset_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-danger',method: :put %>
+        <%= link_to "reset", trail_guide_admin.reset_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-outline-danger',method: :put %>
       </div>
     </div>
 

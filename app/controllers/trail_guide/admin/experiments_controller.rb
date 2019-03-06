@@ -23,6 +23,11 @@ module TrailGuide
         redirect_to :back rescue redirect_to trail_guide_admin.experiments_path
       end
 
+      def resume
+        experiment.resume!
+        redirect_to :back rescue redirect_to trail_guide_admin.experiments_path
+      end
+
       def restart
         experiment.reset! && experiment.start!
         redirect_to :back rescue redirect_to trail_guide_admin.experiments_path

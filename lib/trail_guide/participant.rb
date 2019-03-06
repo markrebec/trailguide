@@ -30,6 +30,7 @@ module TrailGuide
     end
 
     def participating?(experiment, include_control=true)
+      return false unless experiment.started?
       return false unless adapter.key?(experiment.storage_key)
       varname = adapter[experiment.storage_key]
       variant = experiment.variants.find { |var| var == varname }
@@ -41,6 +42,7 @@ module TrailGuide
     end
 
     def converted?(experiment, checkpoint=nil)
+      return false unless experiment.started?
       if experiment.funnels.empty?
         raise InvalidGoalError, "You provided the checkpoint `#{checkpoint}` but the experiment `#{experiment.experiment_name}` does not have any goals defined." unless checkpoint.nil?
         storage_key = "#{experiment.storage_key}:converted"
@@ -92,7 +94,7 @@ module TrailGuide
       return false if adapter.keys.empty?
       adapter.keys.map { |key| key.to_s.split(":").first.to_sym }.uniq.map do |key|
         experiment = TrailGuide.catalog.find(key)
-        next unless experiment && experiment.started? && participating?(experiment, include_control)
+        next unless experiment && experiment.running? && participating?(experiment, include_control)
         [ experiment.experiment_name, adapter[experiment.storage_key] ]
       end.compact.to_h
     end
@@ -103,7 +105,7 @@ module TrailGuide
       adapter.keys.any? do |key|
         experiment_name = key.to_s.split(":").first.to_sym
         experiment = TrailGuide.catalog.find(experiment_name)
-        experiment && experiment.started? && participating?(experiment, include_control)
+        experiment && experiment.running? && participating?(experiment, include_control)
       end
     end
   end
