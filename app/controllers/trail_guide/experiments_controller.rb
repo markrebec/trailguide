@@ -1,7 +1,12 @@
 module TrailGuide
   class ExperimentsController < ::ApplicationController
-    before_action do
-      render json: { error: "Experiment does not exist" }, status: 404 and return unless experiment.present?
+    before_action :ensure_experiment, except: [:index]
+
+    def index
+      participant = TrailGuide::Participant.new(self)
+      render json: {
+        experiments: participant.active_experiments
+      }
     end
 
     def choose
@@ -38,6 +43,10 @@ module TrailGuide
 
     def metadata
       @metadata ||= params[:metadata].try(:permit!) || {}
+    end
+
+    def ensure_experiment
+      render json: { error: "Experiment does not exist" }, status: 404 and return false unless experiment.present?
     end
   end
 end

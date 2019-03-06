@@ -1,4 +1,6 @@
 TrailGuide::Engine.routes.draw do
+  get   '/' => 'experiments#index',
+        defaults: { format: :json }
   get   '/:experiment_name' => 'experiments#choose',
         defaults: { format: :json }
   match '/:experiment_name' => 'experiments#convert',
