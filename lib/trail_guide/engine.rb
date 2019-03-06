@@ -59,9 +59,7 @@ module TrailGuide
     class DSL
       def self.experiment(name, &block)
         Class.new(TrailGuide::Experiment) do
-          configure do |config|
-            config.name = name
-          end
+          configure name: name
           configure &block
         end
       end

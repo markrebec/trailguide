@@ -15,8 +15,8 @@ module TrailGuide
         @configuration ||= ExperimentConfig.new(self)
       end
 
-      def configure(&block)
-        configuration.configure(&block)
+      def configure(*args, &block)
+        configuration.configure(*args, &block)
       end
 
       def resettable?
