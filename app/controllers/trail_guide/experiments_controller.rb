@@ -3,7 +3,7 @@ module TrailGuide
     before_action :ensure_experiment, except: [:index]
 
     def index
-      participant = TrailGuide::Participant.new(self)
+      participant = trailguide.participant
       render json: {
         experiments: participant.active_experiments
       }
