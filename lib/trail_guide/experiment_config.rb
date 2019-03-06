@@ -1,20 +1,18 @@
 module TrailGuide
   class ExperimentConfig < Canfig::Config
-    DEFAULT_CONFIG = { name: nil, metric: nil, variants: [], goals: [] }.freeze
-
     ENGINE_CONFIG_KEYS = [
       :start_manually, :reset_manually, :store_override, :track_override,
       :algorithm, :allow_multiple_conversions, :allow_multiple_goals
     ].freeze
 
-    def self.default_config
-      DEFAULT_CONFIG
-    end
-
     def self.engine_config
       ENGINE_CONFIG_KEYS.map do |key|
         [key, TrailGuide.configuration.send(key.to_sym)]
       end.to_h
+    end
+
+    def self.default_config
+      { name: nil, metric: nil, variants: [], goals: [] }
     end
 
     def self.callbacks_config
@@ -35,9 +33,9 @@ module TrailGuide
 
     def initialize(experiment, *args, **opts, &block)
       @experiment = experiment
-      opts.merge!(self.class.default_config)
-      opts.merge!(self.class.engine_config)
-      opts.merge!(self.class.callbacks_config)
+      opts = opts.merge(self.class.engine_config)
+      opts = opts.merge(self.class.default_config)
+      opts = opts.merge(self.class.callbacks_config)
       super(*args, **opts, &block)
     end
 

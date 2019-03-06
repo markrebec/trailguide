@@ -61,8 +61,8 @@ module TrailGuide
         Class.new(TrailGuide::Experiment) do
           configure do |config|
             config.name = name
-            instance_eval &block
           end
+          configure &block
         end
       end
     end
