@@ -38,17 +38,20 @@ module TrailGuide
           end
         end
 
-        DSL.experiment(name) do
+        DSL.experiment(name) do |config|
           expvars.each do |expvar|
             variant *expvar
           end
-          control                     options[:control] if options[:control]
-          algorithm                   options[:algorithm] if options[:algorithm]
-          goals                       options[:goals] if options[:goals]
-          metric                      options[:metric] if options[:metric]
-          resettable                  options[:resettable] if options.key?(:resettable)
-          allow_multiple_conversions  options[:allow_multiple_conversions] if options.key?(:allow_multiple_conversions)
-          allow_multiple_goals        options[:allow_multiple_goals] if options.key?(:allow_multiple_goals)
+          config.control                    = options[:control] if options[:control]
+          config.metric                     = options[:metric] if options[:metric]
+          config.algorithm                  = options[:algorithm] if options[:algorithm]
+          config.goals                      = options[:goals] if options[:goals]
+          config.reset_manually             = options[:reset_manually] if options.key?(:reset_manually)
+          config.start_manually             = options[:start_manually] if options.key?(:start_manually)
+          config.store_override             = options[:store_override] if options.key?(:store_override)
+          config.track_override             = options[:track_override] if options.key?(:track_override)
+          config.allow_multiple_conversions = options[:allow_multiple_conversions] if options.key?(:allow_multiple_conversions)
+          config.allow_multiple_goals       = options[:allow_multiple_goals] if options.key?(:allow_multiple_goals)
         end
       end
     end
@@ -58,9 +61,8 @@ module TrailGuide
         Class.new(TrailGuide::Experiment) do
           configure do |config|
             config.name = name
+            instance_eval &block
           end
-
-          instance_eval &block
         end
       end
     end

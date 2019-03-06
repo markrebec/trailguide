@@ -1,17 +1,18 @@
+require "trail_guide/experiment_config"
+
 module TrailGuide
   class Experiment
-    # TODO maybe use a custon canfig object with specific keys and methods built-in? could also initialize with the top-level config defaults... and ensure it's created with a reference to self...
-    extend Canfig::Instance
-
     class << self
       def inherited(child)
-        # TODO allow inheriting algo, variants, goals, metrics, etc.
         TrailGuide::Catalog.register(child)
-        child.configure do |config|
-          [:start_manually, :reset_manually, :store_override, :track_override, :algorithm, :allow_multiple_conversions, :allow_multiple_goals].each do |key|
-            config.send("#{key}=".to_sym, TrailGuide.configuration.send(key.to_sym))
-          end
-        end
+      end
+
+      def configuration
+        @configuration ||= ExperimentConfig.new(self)
+      end
+
+      def configure(&block)
+        configuration.configure(&block)
       end
 
       def resettable?
@@ -27,103 +28,36 @@ module TrailGuide
       end
 
       def experiment_name
-        # TODO can maybe be smarter about memoizing this in the config?
-        @experiment_name ||= (configuration.name || name).try(:to_s).try(:underscore).try(:to_sym)
+        configuration.name
       end
 
       def metric
-        @metric ||= (configuration.metric || experiment_name).try(:to_s).try(:underscore).try(:to_sym)
+        configuration.metric
       end
 
       def algorithm
-        @algorithm ||= TrailGuide::Algorithms.algorithm(configuration.algorithm)
-      end
-
-      def variant(name, metadata: {}, weight: 1, control: false)
-        raise ArgumentError, "The variant `#{name}` already exists in the experiment `#{experiment_name}`" if variants.any? { |var| var == name }
-        control = true if variants.empty?
-        variant = Variant.new(self, name, metadata: metadata, weight: weight, control: control)
-        variants << variant
-        variant
+        configuration.algorithm
       end
 
       def variants(include_control=true)
-        @variants ||= []
         if include_control
-          @variants
+          configuration.variants
         else
-          @variants.select { |var| !var.control? }
+          configuration.variants.select { |var| !var.control? }
         end
       end
 
-      def control(name=nil)
-        return variants.find { |var| var.control? } || variants.first if name.nil?
-
-        variants.each(&:variant!)
-        var_idx = variants.index { |var| var == name }
-
-        if var_idx.nil?
-          variant = Variant.new(self, name, control: true)
-        else
-          variant = variants.slice!(var_idx, 1)[0]
-          variant.control!
-        end
-
-        variants.unshift(variant)
-        return variant
+      def control
+        configuration.control
       end
 
-      def funnel(name)
-        funnels << name.to_s.underscore.to_sym
+      def goals
+        configuration.goals
       end
-      alias_method :goal, :funnel
-
-      def funnels(arr=nil)
-        @funnels = arr unless arr.nil?
-        @funnels ||= []
-      end
-      alias_method :goals, :funnels
+      alias_method :funnels, :goals
 
       def callbacks
-        @callbacks ||= begin
-          callbacks = {
-            on_choose:   [TrailGuide.configuration.on_experiment_choose].compact,
-            on_use:      [TrailGuide.configuration.on_experiment_use].compact,
-            on_convert:  [TrailGuide.configuration.on_experiment_convert].compact,
-            on_start:    [TrailGuide.configuration.on_experiment_start].compact,
-            on_stop:     [TrailGuide.configuration.on_experiment_stop].compact,
-            on_reset:    [TrailGuide.configuration.on_experiment_reset].compact,
-            on_delete:   [TrailGuide.configuration.on_experiment_delete].compact,
-          }
-        end
-      end
-
-      def on_choose(meth=nil, &block)
-        callbacks[:on_choose] << (meth || block)
-      end
-
-      def on_use(meth=nil, &block)
-        callbacks[:on_use] << (meth || block)
-      end
-
-      def on_convert(meth=nil, &block)
-        callbacks[:on_convert] << (meth || block)
-      end
-
-      def on_start(meth=nil, &block)
-        callbacks[:on_start] << (meth || block)
-      end
-
-      def on_stop(meth=nil, &block)
-        callbacks[:on_stop] << (meth || block)
-      end
-
-      def on_reset(meth=nil, &block)
-        callbacks[:on_reset] << (meth || block)
-      end
-
-      def on_delete(meth=nil, &block)
-        callbacks[:on_delete] << (meth || block)
+        configuration.callbacks
       end
 
       def run_callbacks(hook, *args)
