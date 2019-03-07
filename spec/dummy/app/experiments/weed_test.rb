@@ -1,3 +1,4 @@
+=begin
 class WeedTest < TrailGuide::Experiment
   configure do |config|
     config.name = :types_of_weed
@@ -40,3 +41,4 @@ class WeedTest < TrailGuide::Experiment
     end
   end
 end
+=end

@@ -2,12 +2,7 @@
   <div class="col-sm-12 col-md-10 col-lg-8">
     <div class="row">
       <div class="col-sm-12 col-md-6 col-lg-8">
-        <h3>
-          <%= combined_experiment.experiment_name.to_s.humanize.titleize %>
-          <% if combined_experiment.started? %>
-            <small class="text-muted"><%= combined_experiment.started_at.strftime('%b %e %Y @ %l:%M %p') %></small>
-          <% end %>
-        </h3>
+        <h3 style="margin: 0; padding: 0;"><%= combined_experiment.experiment_name.to_s.humanize.titleize %></h3>
       </div>
       <div class="col-sm-12 col-md-6 col-lg-4 text-right">
         <% if combined_experiment.running? %>
@@ -19,6 +14,22 @@
           <%= link_to "start", trail_guide_admin.start_experiment_path(combined_experiment.experiment_name), class: 'btn btn-sm btn-success',method: :put %>
         <% end %>
         <%= link_to "reset", trail_guide_admin.reset_experiment_path(combined_experiment.experiment_name), class: 'btn btn-sm btn-outline-danger',method: :put %>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-sm-12 text-right">
+        <% if combined_experiment.started? %>
+          <small class="text-muted"><%= combined_experiment.started_at.strftime('%b %e %Y @ %l:%M %p') %></small>
+          <span class="text-muted">&mdash;</span>
+          <% if combined_experiment.stopped? %>
+            <small class="text-muted"><%= combined_experiment.stopped_at.strftime('%b %e %Y @ %l:%M %p') %></small>
+          <% else %>
+            <small class="text-muted">running</small>
+          <% end %>
+        <% else %>
+          <small class="text-muted">not running</small>
+        <% end %>
       </div>
     </div>
 
@@ -80,7 +91,7 @@
       <tfoot class="thead-light">
         <tr>
           <th scope="row">Totals</th>
-          <th><%= combined_experiments.sum { |e| e.variants.sum(&:participants) } %></th>
+          <th><%= combined_experiment.variants.sum(&:participants) %></th>
           <% if combined_experiment.goals.empty? %>
             <th><%= combined_experiments.sum { |e| e.variants.sum(&:converted) } %></th>
           <% else %>

@@ -2,12 +2,7 @@
   <div class="col-sm-12 col-md-10 col-lg-8">
     <div class="row">
       <div class="col-sm-12 col-md-6 col-lg-8">
-        <h3>
-          <%= experiment.experiment_name.to_s.humanize.titleize %>
-          <% if experiment.started? %>
-            <small class="text-muted"><%= experiment.started_at.strftime('%b %e %Y @ %l:%M %p') %></small>
-          <% end %>
-        </h3>
+        <h3 style="margin: 0; padding: 0;"><%= experiment.experiment_name.to_s.humanize.titleize %></h3>
       </div>
       <div class="col-sm-12 col-md-6 col-lg-4 text-right">
         <% if experiment.running? %>
@@ -19,6 +14,22 @@
           <%= link_to "start", trail_guide_admin.start_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-success',method: :put %>
         <% end %>
         <%= link_to "reset", trail_guide_admin.reset_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-outline-danger',method: :put %>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-sm-12 text-right">
+        <% if experiment.started? %>
+          <small class="text-muted"><%= experiment.started_at.strftime('%b %e %Y @ %l:%M %p') %></small>
+          <span class="text-muted">&mdash;</span>
+          <% if experiment.stopped? %>
+            <small class="text-muted"><%= experiment.stopped_at.strftime('%b %e %Y @ %l:%M %p') %></small>
+          <% else %>
+            <small class="text-muted">running</small>
+          <% end %>
+        <% else %>
+          <small class="text-muted">not running</small>
+        <% end %>
       </div>
     </div>
 
