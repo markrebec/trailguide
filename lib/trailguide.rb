@@ -36,6 +36,7 @@ module TrailGuide
     config.on_experiment_start = nil   # -> (experiment) { ... }
     config.on_experiment_stop = nil    # -> (experiment) { ... }
     config.on_experiment_resume = nil  # -> (experiment) { ... }
+    config.on_experiment_winner = nil  # -> (experiment, winner) { ... }
     config.on_experiment_reset = nil   # -> (experiment) { ... }
     config.on_experiment_delete = nil  # -> (experiment) { ... }
 

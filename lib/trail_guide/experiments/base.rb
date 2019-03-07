@@ -90,8 +90,9 @@ module TrailGuide
         end
 
         def declare_winner!(variant)
-          variant = variant.name if variant.is_a?(Variant)
-          TrailGuide.redis.hset(storage_key, 'winner', variant.to_s.underscore)
+          variant = variants.find { |var| var == variant } unless variant.is_a?(Variant)
+          run_callbacks(:on_winner, variant)
+          TrailGuide.redis.hset(storage_key, 'winner', variant.name.to_s.underscore)
         end
 
         def clear_winner!
