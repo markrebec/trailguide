@@ -11,7 +11,7 @@ end
 experiment :combined_experiment do |config|
   variant :option_a
   variant :option_b
-  variant :option_c
+  variant :option_c, control: true
   config.goals = [:some_goal, :other_goal]
   config.combined = [:first_combo, :last_combo]
 end

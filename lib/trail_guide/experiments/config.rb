@@ -91,12 +91,12 @@ module TrailGuide
 
         if var_idx.nil?
           variant = Variant.new(experiment, name, control: true)
+          variants.push(variant)
         else
-          variant = variants.slice!(var_idx, 1)[0]
+          variant = variants[var_idx]
           variant.control!
         end
 
-        variants.unshift(variant)
         variant
       end
 
