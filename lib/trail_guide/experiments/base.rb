@@ -158,7 +158,7 @@ module TrailGuide
       end
 
       attr_reader :participant
-      delegate :configuration, :experiment_name, :variants, :control, :funnels,
+      delegate :configuration, :experiment_name, :variants, :control, :goals,
         :storage_key, :running?, :started?, :started_at, :start!, :resettable?,
         :winner?, :allow_multiple_conversions?, :allow_multiple_goals?,
         :track_winner_conversions?, :callbacks, to: :class
@@ -221,8 +221,8 @@ module TrailGuide
       def convert!(checkpoint=nil, metadata: nil)
         return false if !running? || (winner? && !track_winner_conversions?)
         return false unless participating?
-        raise InvalidGoalError, "Invalid goal checkpoint `#{checkpoint}` for `#{experiment_name}`." unless checkpoint.present? || funnels.empty?
-        raise InvalidGoalError, "Invalid goal checkpoint `#{checkpoint}` for `#{experiment_name}`." unless checkpoint.nil? || funnels.any? { |funnel| funnel == checkpoint.to_s.underscore.to_sym }
+        raise InvalidGoalError, "Invalid goal checkpoint `#{checkpoint}` for `#{experiment_name}`." unless checkpoint.present? || goals.empty?
+        raise InvalidGoalError, "Invalid goal checkpoint `#{checkpoint}` for `#{experiment_name}`." unless checkpoint.nil? || goals.any? { |goal| goal == checkpoint.to_s.underscore.to_sym }
         # TODO eventually allow progressing through funnel checkpoints towards goals
         if converted?(checkpoint)
           return false unless allow_multiple_conversions?

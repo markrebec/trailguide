@@ -48,7 +48,7 @@ module TrailGuide
 
     def converted?(experiment, checkpoint=nil)
       return false unless experiment.started?
-      if experiment.funnels.empty?
+      if experiment.goals.empty?
         raise InvalidGoalError, "You provided the checkpoint `#{checkpoint}` but the experiment `#{experiment.experiment_name}` does not have any goals defined." unless checkpoint.nil?
         storage_key = "#{experiment.storage_key}:converted"
         return false unless adapter.key?(storage_key)
@@ -56,15 +56,15 @@ module TrailGuide
         converted_at = Time.at(adapter[storage_key].to_i)
         converted_at >= experiment.started_at
       elsif !checkpoint.nil?
-        raise InvalidGoalError, "Invalid goal checkpoint `#{checkpoint}` for experiment `#{experiment.experiment_name}`." unless experiment.funnels.any? { |funnel| funnel == checkpoint.to_s.underscore.to_sym }
+        raise InvalidGoalError, "Invalid goal checkpoint `#{checkpoint}` for experiment `#{experiment.experiment_name}`." unless experiment.goals.any? { |goal| goal == checkpoint.to_s.underscore.to_sym }
         storage_key = "#{experiment.storage_key}:#{checkpoint.to_s.underscore}"
         return false unless adapter.key?(storage_key)
 
         converted_at = Time.at(adapter[storage_key].to_i)
         converted_at >= experiment.started_at
       else
-        experiment.funnels.each do |funnel|
-          storage_key = "#{experiment.storage_key}:#{funnel.to_s}"
+        experiment.goals.each do |goal|
+          storage_key = "#{experiment.storage_key}:#{goal.to_s}"
           next unless adapter.key?(storage_key)
           converted_at = Time.at(adapter[storage_key].to_i)
           return true if converted_at >= experiment.started_at
@@ -90,9 +90,9 @@ module TrailGuide
         adapter.delete(variant.experiment.storage_key)
         adapter.delete(variant.storage_key)
         adapter.delete(storage_key)
-        variant.experiment.funnels.each do |funnel|
-          funnel_key = "#{variant.experiment.storage_key}:#{funnel.to_s}"
-          adapter.delete(funnel_key)
+        variant.experiment.goals.each do |goal|
+          goal_key = "#{variant.experiment.storage_key}:#{goal.to_s}"
+          adapter.delete(goal_key)
         end
       else
         adapter[storage_key] = Time.now.to_i
