@@ -34,15 +34,25 @@ module TrailGuide
       end
 
       def join
-        variant = experiment.variants.find { |var| var == params[:variant] }
         participant.exit!(experiment)
+        variant = experiment.variants.find { |var| var == params[:variant] }
         variant.increment_participation!
         participant.participating!(variant)
         redirect_to trail_guide_admin.experiments_path(anchor: experiment.experiment_name)
       end
 
+      def leave
+        participant.exit!(experiment)
+        redirect_to trail_guide_admin.experiments_path(anchor: experiment.experiment_name)
+      end
+
       def winner
         experiment.declare_winner!(params[:variant])
+        redirect_to trail_guide_admin.experiments_path(anchor: experiment.experiment_name)
+      end
+
+      def clear
+        experiment.clear_winner!
         redirect_to trail_guide_admin.experiments_path(anchor: experiment.experiment_name)
       end
 

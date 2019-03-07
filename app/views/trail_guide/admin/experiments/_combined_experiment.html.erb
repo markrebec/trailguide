@@ -88,13 +88,17 @@
 
               <td class="text-right">
                 <% if experiment.running? && !experiment.winner? %>
-                  <% if participant.variant(experiment) != variant %>
-                    <%= link_to "join group", trail_guide_admin.join_experiment_path(experiment.experiment_name, variant.name), class: "btn btn-sm btn-secondary", method: :put %>
+                  <% if participant.variant(experiment) == variant %>
+                    <%= link_to "leave group", trail_guide_admin.leave_experiment_path(experiment.experiment_name), class: "btn btn-sm btn-outline-secondary", method: :put %>
+                  <% else %>
+                    <%= link_to "enter group", trail_guide_admin.join_experiment_path(experiment.experiment_name, variant.name), class: "btn btn-sm btn-secondary", method: :put %>
                   <% end %>
                 <% end %>
 
                 <% if !experiment.winner? || variant != experiment.winner %>
                   <%= link_to "select winner", trail_guide_admin.winner_experiment_path(experiment.experiment_name, variant.name), class: "btn btn-sm btn-#{experiment.winner? ? "outline-" : ""}primary", method: :put %>
+                <% elsif experiment.winner? && variant == experiment.winner %>
+                  <%= link_to "remove winner", trail_guide_admin.clear_experiment_path(experiment.experiment_name), class: "btn btn-sm btn-warning", method: :put %>
                 <% end %>
               </td>
             </tr>

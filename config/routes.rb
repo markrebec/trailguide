@@ -21,8 +21,12 @@ if defined?(TrailGuide::Admin::Engine)
         match :reset,   via: [:put, :post, :get]
         match :resume,  via: [:put, :post, :get]
         match :restart, via: [:put, :post, :get]
+
         match :join,    via: [:put, :post, :get], path: 'join/:variant'
+        match :leave,   via: [:put, :post, :get]
+
         match :winner,  via: [:put, :post, :get], path: 'winner/:variant'
+        match :clear,   via: [:put, :post, :get]
       end
     end
   end
