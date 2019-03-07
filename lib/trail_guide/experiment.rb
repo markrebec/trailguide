@@ -111,11 +111,13 @@ module TrailGuide
       end
 
       def save!
+        combined.each { |combo| TrailGuide.catalog.find(combo).save! }
         variants.each(&:save!)
         TrailGuide.redis.hsetnx(storage_key, 'name', experiment_name)
       end
 
       def delete!
+        combined.each { |combo| TrailGuide.catalog.find(combo).delete! }
         variants.each(&:delete!)
         deleted = TrailGuide.redis.del(storage_key)
         run_callbacks(:on_delete)
@@ -202,6 +204,7 @@ module TrailGuide
     end
 
     def convert!(checkpoint=nil, metadata: nil)
+      return false if winner?
       return false unless participating?
       raise InvalidGoalError, "Invalid goal checkpoint `#{checkpoint}` for `#{experiment_name}`." unless checkpoint.present? || funnels.empty?
       raise InvalidGoalError, "Invalid goal checkpoint `#{checkpoint}` for `#{experiment_name}`." unless checkpoint.nil? || funnels.any? { |funnel| funnel == checkpoint.to_s.underscore.to_sym }
