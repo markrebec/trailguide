@@ -5,7 +5,7 @@ module TrailGuide
     class << self
       delegate :metric, :algorithm, :control, :goals, :callbacks, :combined,
         :combined?, :allow_multiple_conversions?, :allow_multiple_goals?,
-        to: :configuration
+        :track_winner_conversions?, to: :configuration
       alias_method :funnels, :goals
 
       def configuration
@@ -158,7 +158,7 @@ module TrailGuide
     delegate :configuration, :experiment_name, :variants, :control, :funnels,
       :storage_key, :running?, :started?, :started_at, :start!, :resettable?,
       :winner?, :winner, :allow_multiple_conversions?, :allow_multiple_goals?,
-      :callbacks, to: :class
+      :track_winner_conversions?, :callbacks, to: :class
 
     def initialize(participant)
       @participant = participant
@@ -183,15 +183,19 @@ module TrailGuide
         variant = variants.find { |var| var == override }
         return variant unless configuration.track_override && running?
       else
-        return winner if winner?
-        return control if excluded
-        return control if !started? && configuration.start_manually
-        start! unless started?
-        return control unless running?
-        return variants.find { |var| var == participant[storage_key] } if participating?
-        return control unless TrailGuide.configuration.allow_multiple_experiments == true || !participant.participating_in_active_experiments?(TrailGuide.configuration.allow_multiple_experiments == false) 
+        if winner?
+          variant = winner
+          return variant unless track_winner_conversions? && running?
+        else
+          return control if excluded
+          return control if !started? && configuration.start_manually
+          start! unless started?
+          return control unless running?
+          return variants.find { |var| var == participant[storage_key] } if participating?
+          return control unless TrailGuide.configuration.allow_multiple_experiments == true || !participant.participating_in_active_experiments?(TrailGuide.configuration.allow_multiple_experiments == false) 
 
-        variant = algorithm_choose!(metadata: metadata)
+          variant = algorithm_choose!(metadata: metadata)
+        end
       end
 
       variant.increment_participation!
@@ -204,7 +208,7 @@ module TrailGuide
     end
 
     def convert!(checkpoint=nil, metadata: nil)
-      return false if winner?
+      return false if !running? || (winner? && !track_winner_conversions?)
       return false unless participating?
       raise InvalidGoalError, "Invalid goal checkpoint `#{checkpoint}` for `#{experiment_name}`." unless checkpoint.present? || funnels.empty?
       raise InvalidGoalError, "Invalid goal checkpoint `#{checkpoint}` for `#{experiment_name}`." unless checkpoint.nil? || funnels.any? { |funnel| funnel == checkpoint.to_s.underscore.to_sym }

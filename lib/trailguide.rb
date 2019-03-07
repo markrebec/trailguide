@@ -24,6 +24,7 @@ module TrailGuide
     config.algorithm = :weighted
     config.adapter = :multi
     config.allow_multiple_experiments = true # false / :control
+    config.track_winner_conversions = false
     config.allow_multiple_conversions = false
     config.allow_multiple_goals = false
 

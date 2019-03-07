@@ -2,7 +2,8 @@ module TrailGuide
   class ExperimentConfig < Canfig::Config
     ENGINE_CONFIG_KEYS = [
       :start_manually, :reset_manually, :store_override, :track_override,
-      :algorithm, :allow_multiple_conversions, :allow_multiple_goals
+      :algorithm, :allow_multiple_conversions, :allow_multiple_goals,
+      :track_winner_conversions
     ].freeze
 
     def self.engine_config
@@ -50,6 +51,10 @@ module TrailGuide
 
     def allow_multiple_goals?
       allow_multiple_goals
+    end
+
+    def track_winner_conversions?
+      track_winner_conversions
     end
 
     def name
