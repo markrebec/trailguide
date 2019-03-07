@@ -54,8 +54,8 @@ module TrailGuide
         return experiment if experiment.present?
 
         combined = experiments.find do |exp|
-          next unless exp.configuration.combined?
-          exp.configuration.combined.any? { |combo| combo.to_s.underscore.to_sym == name.to_s.underscore.to_sym }
+          next unless exp.combined?
+          exp.combined.any? { |combo| combo.to_s.underscore.to_sym == name.to_s.underscore.to_sym }
         end
         return nil unless combined.present?
 
@@ -67,15 +67,14 @@ module TrailGuide
       if name.is_a?(Class)
         experiments.select { |exp| exp == name }
       else
-        selected = experiments.select do |exp|
+        # TODO we can be more efficient than mapping twice here
+        experiments.select do |exp|
           exp.experiment_name == name.to_s.underscore.to_sym ||
             exp.metric == name.to_s.underscore.to_sym ||
             exp.name == name.to_s.classify ||
-            (exp.configuration.combined? && exp.configuration.combined.any? { |combo| combo.to_s.underscore.to_sym == name.to_s.underscore.to_sym })
-        end
-
-        selected.map do |exp|
-          if exp.configuration.combined? && exp.configuration.combined.any? { |combo| combo.to_s.underscore.to_sym == name.to_s.underscore.to_sym }
+            (exp.combined? && exp.combined.any? { |combo| combo.to_s.underscore.to_sym == name.to_s.underscore.to_sym })
+        end.map do |exp|
+          if exp.combined? && exp.combined.any? { |combo| combo.to_s.underscore.to_sym == name.to_s.underscore.to_sym }
             self.class.combined_experiment(exp, name)
           else
             exp

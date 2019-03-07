@@ -3,8 +3,9 @@ require "trail_guide/experiment_config"
 module TrailGuide
   class BaseExperiment
     class << self
-      delegate :metric, :algorithm, :control, :goals, :callbacks,
-        :allow_multiple_conversions?, :allow_multiple_goals?, to: :configuration
+      delegate :metric, :algorithm, :control, :goals, :callbacks, :combined,
+        :combined?, :allow_multiple_conversions?, :allow_multiple_goals?,
+        to: :configuration
       alias_method :funnels, :goals
 
       def configuration
@@ -243,8 +244,12 @@ module TrailGuide
   end
 
   class CombinedExperiment < BaseExperiment
-    def self.configuration
-      @configuration ||= CombinedExperimentConfig.new(self)
+    class << self
+      delegate :parent, to: :configuration
+
+      def configuration
+        @configuration ||= CombinedExperimentConfig.new(self)
+      end
     end
   end
 end
