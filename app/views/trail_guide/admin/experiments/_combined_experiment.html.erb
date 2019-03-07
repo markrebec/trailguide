@@ -2,7 +2,9 @@
   <div class="col-sm-12 col-md-10 col-lg-8">
     <div class="row">
       <div class="col-sm-12 col-md-6 col-lg-8">
-        <h3 style="margin: 0; padding: 0;"><%= combined_experiment.experiment_name.to_s.humanize.titleize %></h3>
+        <h3 style="margin: 0; padding: 0;" id="<%= combined_experiment.experiment_name %>">
+          <%= link_to combined_experiment.experiment_name.to_s.humanize.titleize, trail_guide_admin.experiments_path(anchor: combined_experiment.experiment_name), class: "text-dark" %>
+        </h3>
       </div>
       <div class="col-sm-12 col-md-6 col-lg-4 text-right">
         <% if combined_experiment.running? %>
@@ -38,7 +40,11 @@
       <% combined_experiments.each do |experiment| %>
         <thead class="thead-light">
           <tr>
-            <th scope="col"><h4 style="margin: 0; padding: 0"><%= experiment.experiment_name.to_s.humanize.titleize %></h4></th>
+            <th scope="col">
+              <h4 style="margin: 0; padding: 0" id="<%= experiment.experiment_name %>">
+                <%= link_to experiment.experiment_name.to_s.humanize.titleize, trail_guide_admin.experiments_path(anchor: experiment.experiment_name), class: "text-dark" %>
+              </h4>
+            </th>
 
             <th scope="col">Participants</th>
 
