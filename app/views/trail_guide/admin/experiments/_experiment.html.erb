@@ -59,6 +59,9 @@
           <tr class="<%= "table-secondary" if variant.control? %>">
             <th scope="row">
               <%= variant.name.to_s.humanize.titleize %>
+              <% if experiment.running? && !experiment.winner? && participant.variant(experiment) == variant %>
+                <span class="badge badge-secondary">joined</span>
+              <% end %>
               <% if experiment.winner? && variant == experiment.winner %>
                 <span class="badge badge-primary">winner</span>
               <% end %>
@@ -78,6 +81,12 @@
             <% end %>
 
             <td class="text-right">
+              <% if experiment.running? && !experiment.winner? %>
+                <% if participant.variant(experiment) != variant %>
+                  <%= link_to "join group", trail_guide_admin.join_experiment_path(experiment.experiment_name, variant.name), class: "btn btn-sm btn-secondary", method: :put %>
+                <% end %>
+              <% end %>
+
               <% if !experiment.winner? || variant != experiment.winner %>
                 <%= link_to "select winner", trail_guide_admin.winner_experiment_path(experiment.experiment_name, variant.name), class: "btn btn-sm btn-#{experiment.winner? ? "outline-" : ""}primary", method: :put %>
               <% end %>
