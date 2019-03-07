@@ -8,6 +8,10 @@
   <hr />
 
   <% TrailGuide.catalog.each do |experiment| %>
-    <%= render 'experiment', experiment: experiment %>
+    <% if experiment.combined? %>
+      <%= render 'combined_experiment', combined_experiment: experiment %>
+    <% else %>
+      <%= render 'experiment', experiment: experiment %>
+    <% end %>
   <% end %>
 </div>

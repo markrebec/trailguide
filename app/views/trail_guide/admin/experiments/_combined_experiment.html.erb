@@ -1,0 +1,100 @@
+<div class="row justify-content-center">
+  <div class="col-sm-12 col-md-10 col-lg-8">
+    <div class="row">
+      <div class="col-sm-12 col-md-6 col-lg-8">
+        <h3>
+          <%= combined_experiment.experiment_name.to_s.humanize.titleize %>
+          <% if combined_experiment.started? %>
+            <small class="text-muted"><%= combined_experiment.started_at.strftime('%b %e %Y @ %l:%M %p') %></small>
+          <% end %>
+        </h3>
+      </div>
+      <div class="col-sm-12 col-md-6 col-lg-4 text-right">
+        <% if combined_experiment.running? %>
+          <%= link_to "stop", trail_guide_admin.stop_experiment_path(combined_experiment.experiment_name), class: 'btn btn-sm btn-warning', method: :put %>
+          <%= link_to "restart", trail_guide_admin.restart_experiment_path(combined_experiment.experiment_name), class: 'btn btn-sm btn-danger',method: :put %>
+        <% elsif combined_experiment.started? %>
+          <%= link_to "resume", trail_guide_admin.resume_experiment_path(combined_experiment.experiment_name), class: 'btn btn-sm btn-primary',method: :put %>
+        <% else %>
+          <%= link_to "start", trail_guide_admin.start_experiment_path(combined_experiment.experiment_name), class: 'btn btn-sm btn-success',method: :put %>
+        <% end %>
+        <%= link_to "reset", trail_guide_admin.reset_experiment_path(combined_experiment.experiment_name), class: 'btn btn-sm btn-outline-danger',method: :put %>
+      </div>
+    </div>
+
+    <table class="table table-hover">
+      <% combined_experiments = combined_experiment.combined.map { |e| TrailGuide.catalog.find(e) } %>
+      <% combined_experiments.each do |experiment| %>
+        <thead class="thead-light">
+          <tr>
+            <th scope="col"><h4 style="margin: 0; padding: 0"><%= experiment.experiment_name.to_s.humanize.titleize %></h4></th>
+
+            <th scope="col">Participants</th>
+
+            <% if experiment.goals.empty? %>
+              <th scope="col">Converted</th>
+            <% else %>
+              <% experiment.goals.each do |goal| %>
+                <th scope="col"><%= goal.to_s.humanize.titleize %></th>
+              <% end %>
+            <% end %>
+
+            <th>&nbsp;</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <% experiment.variants.each do |variant| %>
+            <tr class="<%= "table-secondary" if variant.control? %>">
+              <th scope="row">
+                <%= variant.name.to_s.humanize.titleize %>
+                <% if variant.control? %>
+                  <small class="text-muted">control</small>
+                <% end %>
+              </th>
+
+              <td><%= variant.participants %></td>
+
+              <% if experiment.goals.empty? %>
+                <td><%= variant.converted %></td>
+              <% else %>
+                <% experiment.goals.each do |goal| %>
+                  <td><%= variant.converted(goal) %></td>
+                <% end %>
+              <% end %>
+
+              <td class="text-right">
+                <% if experiment.winner? %>
+                  <% if variant == experiment.winner %>
+                    <span class="badge badge-primary">winner</span>
+                  <% end %>
+                <% else %>
+                  <%= link_to "select winner", trail_guide_admin.winner_experiment_path(experiment.experiment_name, variant.name), class: 'btn btn-sm btn-outline-primary', method: :put %>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      <% end %>
+
+      <tfoot class="thead-light">
+        <tr>
+          <th scope="row">Totals</th>
+          <th><%= combined_experiments.sum { |e| e.variants.sum(&:participants) } %></th>
+          <% if combined_experiment.goals.empty? %>
+            <th><%= combined_experiments.sum { |e| e.variants.sum(&:converted) } %></th>
+          <% else %>
+            <% combined_experiment.goals.each do |goal| %>
+              <th><%= combined_experiments.sum { |e| e.variants.sum { |v| v.converted(goal) } } %></th>
+            <% end %>
+          <% end %>
+          <th>&nbsp;</th>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+
+<br />
+<br />
+<br />
