@@ -35,7 +35,7 @@ module TrailGuide
 
         def run_callbacks(hook, *args)
           return unless callbacks[hook]
-          return if hook == :return_winner
+          return args[0] if hook == :return_winner
           args.unshift(self)
           callbacks[hook].each do |callback|
             if callback.respond_to?(:call)
@@ -102,9 +102,7 @@ module TrailGuide
 
         def winner
           winner = TrailGuide.redis.hget(storage_key, 'winner')
-          return unless winner.present?
-          winner = variants.find { |var| var == winner }
-          run_callbacks(:return_winner, winner)
+          return variants.find { |var| var == winner } if winner
         end
 
         def winner?
@@ -162,7 +160,7 @@ module TrailGuide
       attr_reader :participant
       delegate :configuration, :experiment_name, :variants, :control, :funnels,
         :storage_key, :running?, :started?, :started_at, :start!, :resettable?,
-        :winner?, :winner, :allow_multiple_conversions?, :allow_multiple_goals?,
+        :winner?, :allow_multiple_conversions?, :allow_multiple_goals?,
         :track_winner_conversions?, :callbacks, to: :class
 
       def initialize(participant)
@@ -171,6 +169,10 @@ module TrailGuide
 
       def algorithm
         @algorithm ||= self.class.algorithm.new(self)
+      end
+
+      def winner
+        run_callbacks(:return_winner, self.class.winner)
       end
 
       def choose!(override: nil, metadata: nil, **opts)
