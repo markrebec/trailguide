@@ -29,16 +29,18 @@ module TrailGuide
     config.allow_multiple_conversions = false
     config.allow_multiple_goals = false
 
-    config.on_experiment_choose = nil  # -> (experiment, variant, metadata) { ... }
-    config.on_experiment_use = nil     # -> (experiment, variant, metadata) { ... }
-    config.on_experiment_convert = nil # -> (experiment, variant, checkpoint, metadata) { ... }
+    config.on_redis_failover = nil        # -> (experiment, error) { ... }
 
-    config.on_experiment_start = nil   # -> (experiment) { ... }
-    config.on_experiment_stop = nil    # -> (experiment) { ... }
-    config.on_experiment_resume = nil  # -> (experiment) { ... }
-    config.on_experiment_winner = nil  # -> (experiment, winner) { ... }
-    config.on_experiment_reset = nil   # -> (experiment) { ... }
-    config.on_experiment_delete = nil  # -> (experiment) { ... }
+    config.on_experiment_choose = nil     # -> (experiment, variant, metadata) { ... }
+    config.on_experiment_use = nil        # -> (experiment, variant, metadata) { ... }
+    config.on_experiment_convert = nil    # -> (experiment, variant, checkpoint, metadata) { ... }
+
+    config.on_experiment_start = nil      # -> (experiment) { ... }
+    config.on_experiment_stop = nil       # -> (experiment) { ... }
+    config.on_experiment_resume = nil     # -> (experiment) { ... }
+    config.on_experiment_reset = nil      # -> (experiment) { ... }
+    config.on_experiment_delete = nil     # -> (experiment) { ... }
+    config.on_experiment_winner = nil     # -> (experiment, winner) { ... }
 
     config.return_experiment_winner = nil # -> (experiment, winner) { ... return variant }
 

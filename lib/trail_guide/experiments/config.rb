@@ -20,16 +20,17 @@ module TrailGuide
       def self.callbacks_config
         {
           callbacks: {
-            on_choose:      [TrailGuide.configuration.on_experiment_choose].flatten.compact,
-            on_use:         [TrailGuide.configuration.on_experiment_use].flatten.compact,
-            on_convert:     [TrailGuide.configuration.on_experiment_convert].flatten.compact,
-            on_start:       [TrailGuide.configuration.on_experiment_start].flatten.compact,
-            on_stop:        [TrailGuide.configuration.on_experiment_stop].flatten.compact,
-            on_resume:      [TrailGuide.configuration.on_experiment_resume].flatten.compact,
-            on_winner:      [TrailGuide.configuration.on_experiment_winner].flatten.compact,
-            on_reset:       [TrailGuide.configuration.on_experiment_reset].flatten.compact,
-            on_delete:      [TrailGuide.configuration.on_experiment_delete].flatten.compact,
-            return_winner:  [TrailGuide.configuration.return_experiment_winner].flatten.compact,
+            on_choose:          [TrailGuide.configuration.on_experiment_choose].flatten.compact,
+            on_use:             [TrailGuide.configuration.on_experiment_use].flatten.compact,
+            on_convert:         [TrailGuide.configuration.on_experiment_convert].flatten.compact,
+            on_start:           [TrailGuide.configuration.on_experiment_start].flatten.compact,
+            on_stop:            [TrailGuide.configuration.on_experiment_stop].flatten.compact,
+            on_resume:          [TrailGuide.configuration.on_experiment_resume].flatten.compact,
+            on_winner:          [TrailGuide.configuration.on_experiment_winner].flatten.compact,
+            on_reset:           [TrailGuide.configuration.on_experiment_reset].flatten.compact,
+            on_delete:          [TrailGuide.configuration.on_experiment_delete].flatten.compact,
+            on_redis_failover:  [TrailGuide.configuration.on_redis_failover].flatten.compact,
+            return_winner:      [TrailGuide.configuration.return_experiment_winner].flatten.compact,
           }
         }
       end
@@ -148,6 +149,10 @@ module TrailGuide
 
       def on_delete(meth=nil, &block)
         callbacks[:on_delete] << (meth || block)
+      end
+
+      def on_redis_failover(meth=nil, &block)
+        callbacks[:on_redis_failover] << (meth || block)
       end
 
       def return_winner(meth=nil, &block)

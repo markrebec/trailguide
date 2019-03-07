@@ -182,6 +182,10 @@ module TrailGuide
         participant.participating!(variant) unless override.present? && !configuration.store_override
         run_callbacks(:on_use, variant, metadata)
         variant
+      rescue Errno::ECONNREFUSED, Redis::BaseError, SocketError => e
+        run_callbacks(:on_redis_failover, e)
+        return variants.find { |var| var == override } if override.present?
+        return control
       end
 
       def choose_variant!(override: nil, excluded: false, metadata: nil)
@@ -232,6 +236,9 @@ module TrailGuide
         variant.increment_conversion!(checkpoint)
         run_callbacks(:on_convert, variant, checkpoint, metadata)
         variant
+      rescue Errno::ECONNREFUSED, Redis::BaseError, SocketError => e
+        run_callbacks(:on_redis_failover, e)
+        return false
       end
 
       def participating?
