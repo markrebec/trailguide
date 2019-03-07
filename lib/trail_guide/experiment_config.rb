@@ -12,7 +12,7 @@ module TrailGuide
     end
 
     def self.default_config
-      { name: nil, metric: nil, variants: [], goals: [] }
+      { name: nil, metric: nil, variants: [], goals: [], combined: [] }
     end
 
     def self.callbacks_config
@@ -102,6 +102,10 @@ module TrailGuide
     end
     alias_method :funnels, :goals
 
+    def combined?
+      !combined.empty?
+    end
+
     def on_choose(meth=nil, &block)
       callbacks[:on_choose] << (meth || block)
     end
@@ -132,6 +136,13 @@ module TrailGuide
 
     def on_delete(meth=nil, &block)
       callbacks[:on_delete] << (meth || block)
+    end
+  end
+
+  class CombinedExperimentConfig < ExperimentConfig
+    def initialize(experiment, *args, **opts, &block)
+      args.push(:parent)
+      super(experiment, *args, **opts, &block)
     end
   end
 end

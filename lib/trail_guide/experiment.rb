@@ -1,15 +1,11 @@
 require "trail_guide/experiment_config"
 
 module TrailGuide
-  class Experiment
+  class BaseExperiment
     class << self
       delegate :metric, :algorithm, :control, :goals, :callbacks,
         :allow_multiple_conversions?, :allow_multiple_goals?, to: :configuration
       alias_method :funnels, :goals
-
-      def inherited(child)
-        TrailGuide::Catalog.register(child)
-      end
 
       def configuration
         @configuration ||= ExperimentConfig.new(self)
@@ -237,6 +233,18 @@ module TrailGuide
           send(callback, *args)
         end
       end
+    end
+  end
+
+  class Experiment < BaseExperiment
+    def self.inherited(child)
+      TrailGuide::Catalog.register(child)
+    end
+  end
+
+  class CombinedExperiment < BaseExperiment
+    def self.configuration
+      @configuration ||= CombinedExperimentConfig.new(self)
     end
   end
 end

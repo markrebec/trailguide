@@ -18,6 +18,18 @@ module TrailGuide
       def select(name)
         catalog.select(name)
       end
+
+      def combined_experiment(combined, name)
+        experiment = Class.new(TrailGuide::CombinedExperiment)
+        experiment.configure combined.configuration.to_h.merge({
+          name: name.to_s.underscore.to_sym,
+          parent: combined,
+          combined: [],
+          variants: combined.configuration.variants.map { |var| Variant.new(experiment, var.name, metadata: var.metadata, weight: var.weight, control: var.control?) },
+          # TODO also map goals
+        })
+        experiment
+      end
     end
 
     attr_reader :experiments
@@ -34,11 +46,20 @@ module TrailGuide
       if name.is_a?(Class)
         experiments.find { |exp| exp == name }
       else
-        experiments.find do |exp|
+        experiment = experiments.find do |exp|
           exp.experiment_name == name.to_s.underscore.to_sym ||
             exp.metric == name.to_s.underscore.to_sym ||
             exp.name == name.to_s.classify
         end
+        return experiment if experiment.present?
+
+        combined = experiments.find do |exp|
+          next unless exp.configuration.combined?
+          exp.configuration.combined.any? { |combo| combo.to_s.underscore.to_sym == name.to_s.underscore.to_sym }
+        end
+        return nil unless combined.present?
+
+        return self.class.combined_experiment(combined, name)
       end
     end
 
@@ -46,10 +67,19 @@ module TrailGuide
       if name.is_a?(Class)
         experiments.select { |exp| exp == name }
       else
-        experiments.select do |exp|
+        selected = experiments.select do |exp|
           exp.experiment_name == name.to_s.underscore.to_sym ||
             exp.metric == name.to_s.underscore.to_sym ||
-            exp.name == name.to_s.classify
+            exp.name == name.to_s.classify ||
+            (exp.configuration.combined? && exp.configuration.combined.any? { |combo| combo.to_s.underscore.to_sym == name.to_s.underscore.to_sym })
+        end
+
+        selected.map do |exp|
+          if exp.configuration.combined? && exp.configuration.combined.any? { |combo| combo.to_s.underscore.to_sym == name.to_s.underscore.to_sym }
+            self.class.combined_experiment(exp, name)
+          else
+            exp
+          end
         end
       end
     end

@@ -46,6 +46,7 @@ module TrailGuide
           config.metric                     = options[:metric] if options[:metric]
           config.algorithm                  = options[:algorithm] if options[:algorithm]
           config.goals                      = options[:goals] if options[:goals]
+          config.combined                   = options[:combined] if options[:combined]
           config.reset_manually             = options[:reset_manually] if options.key?(:reset_manually)
           config.start_manually             = options[:start_manually] if options.key?(:start_manually)
           config.store_override             = options[:store_override] if options.key?(:store_override)
