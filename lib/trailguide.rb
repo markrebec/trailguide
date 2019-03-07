@@ -30,6 +30,7 @@ module TrailGuide
     config.allow_multiple_goals = false
 
     config.on_redis_failover = nil        # -> (experiment, error) { ... }
+    config.on_adapter_failover = nil      # -> (adapter, error) { ... }
 
     config.on_experiment_choose = nil     # -> (experiment, variant, metadata) { ... }
     config.on_experiment_use = nil        # -> (experiment, variant, metadata) { ... }

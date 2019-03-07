@@ -26,6 +26,11 @@ module TrailGuide
           config_adapter = config_adapter.constantize if config_adapter.is_a?(String)
         end
         config_adapter.new(context)
+      rescue => e
+        [TrailGuide.configuration.on_adapter_failover].flatten.compact.each do |callback|
+          callback.call(config_adapter, e)
+        end
+        TrailGuide::Adapters::Participants::Anonymous.new(context)
       end
     end
 
