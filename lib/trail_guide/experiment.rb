@@ -148,7 +148,7 @@ module TrailGuide
       end
 
       def storage_key
-        experiment_name
+        configuration.name
       end
     end
 
@@ -189,12 +189,16 @@ module TrailGuide
         return variants.find { |var| var == participant[storage_key] } if participating?
         return control unless TrailGuide.configuration.allow_multiple_experiments == true || !participant.participating_in_active_experiments?(TrailGuide.configuration.allow_multiple_experiments == false) 
 
-        variant = algorithm.choose!(metadata: metadata)
+        variant = algorithm_choose!(metadata: metadata)
       end
 
       variant.increment_participation!
       run_callbacks(:on_choose, variant, metadata)
       variant
+    end
+
+    def algorithm_choose!(metadata: nil)
+      algorithm.choose!(metadata: metadata)
     end
 
     def convert!(checkpoint=nil, metadata: nil)
@@ -239,7 +243,7 @@ module TrailGuide
 
   class Experiment < BaseExperiment
     def self.inherited(child)
-      TrailGuide::Catalog.register(child)
+      TrailGuide.catalog.register(child)
     end
   end
 
@@ -250,6 +254,37 @@ module TrailGuide
       def configuration
         @configuration ||= CombinedExperimentConfig.new(self)
       end
+
+      # TODO if just I delegate on this inheriting class, will that override the 
+      # defined methods on the base class? and will they interplay nicely? like
+      # with `started?` calling `started_at`, etc.?
+      def start!
+        parent.start!
+      end
+
+      def stop!
+        parent.stop!
+      end
+
+      def resume!
+        parent.resume!
+      end
+
+      def started_at
+        parent.started_at
+      end
+
+      def stopped_at
+        parent.stopped_at
+      end
+    end
+
+    delegate :parent, to: :class
+    delegate :running?, :started?, :started_at, :start!, to: :parent
+
+    def algorithm_choose!(metadata: nil)
+      variant = parent.new(participant).choose!(metadata: metadata)
+      variants.find { |var| var == variant.name }
     end
   end
 end

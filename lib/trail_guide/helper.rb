@@ -121,7 +121,7 @@ module TrailGuide
       end
 
       def experiments
-        @experiments ||= TrailGuide::Catalog.select(metric).map do |experiment|
+        @experiments ||= TrailGuide.catalog.select(metric).map do |experiment|
           experiment.new(participant)
         end
       end

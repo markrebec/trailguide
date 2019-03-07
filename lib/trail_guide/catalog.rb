@@ -26,12 +26,13 @@ module TrailGuide
           parent: combined,
           combined: [],
           variants: combined.configuration.variants.map { |var| Variant.new(experiment, var.name, metadata: var.metadata, weight: var.weight, control: var.control?) },
-          # TODO also map goals
+          # TODO also map goals once they're separate classes
         })
         experiment
       end
     end
 
+    delegate :combined_experiment, to: :class
     attr_reader :experiments
 
     def initialize(experiments=[])
@@ -40,6 +41,16 @@ module TrailGuide
 
     def each(&block)
       experiments.each(&block)
+    end
+
+    def all
+      experiments.map do |exp|
+        if exp.combined?
+          exp.combined.map { |name| combined_experiment(exp, name) }
+        else
+          exp
+        end
+      end.flatten
     end
 
     def find(name)
@@ -59,7 +70,7 @@ module TrailGuide
         end
         return nil unless combined.present?
 
-        return self.class.combined_experiment(combined, name)
+        return combined_experiment(combined, name)
       end
     end
 
@@ -75,7 +86,7 @@ module TrailGuide
             (exp.combined? && exp.combined.any? { |combo| combo.to_s.underscore.to_sym == name.to_s.underscore.to_sym })
         end.map do |exp|
           if exp.combined? && exp.combined.any? { |combo| combo.to_s.underscore.to_sym == name.to_s.underscore.to_sym }
-            self.class.combined_experiment(exp, name)
+            combined_experiment(exp, name)
           else
             exp
           end
