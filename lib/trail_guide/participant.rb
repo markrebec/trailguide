@@ -38,7 +38,7 @@ module TrailGuide
       return false unless variant && adapter.key?(variant.storage_key)
 
       chosen_at = Time.at(adapter[variant.storage_key].to_i)
-      chosen_at >= experiment.started_at
+      return variant if chosen_at >= experiment.started_at
     end
 
     def converted?(experiment, checkpoint=nil)
@@ -68,6 +68,10 @@ module TrailGuide
       end
     end
 
+    def variant(experiment)
+      participating?(experiment) || nil
+    end
+
     def participating!(variant)
       adapter[variant.experiment.storage_key] = variant.name
       adapter[variant.storage_key] = Time.now.to_i
@@ -81,13 +85,24 @@ module TrailGuide
         adapter.delete(variant.experiment.storage_key)
         adapter.delete(variant.storage_key)
         adapter.delete(storage_key)
-        experiment.funnels.each do |funnel|
+        variant.experiment.funnels.each do |funnel|
           funnel_key = "#{variant.experiment.storage_key}:#{funnel.to_s}"
           adapter.delete(funnel_key)
         end
       else
         adapter[storage_key] = Time.now.to_i
       end
+    end
+
+    def exit!(experiment)
+      chosen = variant(experiment)
+      return true if chosen.nil?
+      adapter.delete(experiment.storage_key)
+      adapter.delete(chosen.storage_key)
+      experiment.goals.each do |goal|
+        adapter.delete("#{experiment.storage_key}:#{goal.to_s}")
+      end
+      return true
     end
 
     def active_experiments(include_control=true)
