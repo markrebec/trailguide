@@ -35,12 +35,22 @@ module TrailGuide
 
         def run_callbacks(hook, *args)
           return unless callbacks[hook]
-          args.unshift(self)
-          callbacks[hook].each do |callback|
-            if callback.respond_to?(:call)
-              callback.call(*args)
-            else
-              send(callback, *args)
+          if hook == :return_winner
+            callbacks[hook].reduce(args[0]) do |winner, callback|
+              if callback.respond_to?(:call)
+                callback.call(self, winner)
+              else
+                send(callback, self, winner)
+              end
+            end
+          else
+            args.unshift(self)
+            callbacks[hook].each do |callback|
+              if callback.respond_to?(:call)
+                callback.call(*args)
+              else
+                send(callback, *args)
+              end
             end
           end
         end
@@ -101,7 +111,9 @@ module TrailGuide
 
         def winner
           winner = TrailGuide.redis.hget(storage_key, 'winner')
-          return variants.find { |var| var == winner } if winner
+          return unless winner.present?
+          winner = variants.find { |var| var == winner }
+          run_callbacks(:return_winner, winner)
         end
 
         def winner?
@@ -239,12 +251,22 @@ module TrailGuide
 
       def run_callbacks(hook, *args)
         return unless callbacks[hook]
-        args.unshift(self)
-        callbacks[hook].each do |callback|
-          if callback.respond_to?(:call)
-            callback.call(*args)
-          else
-            send(callback, *args)
+        if hook == :return_winner
+          callbacks[hook].reduce(args[0]) do |winner, callback|
+            if callback.respond_to?(:call)
+              callback.call(self, winner)
+            else
+              send(callback, self, winner)
+            end
+          end
+        else
+          args.unshift(self)
+          callbacks[hook].each do |callback|
+            if callback.respond_to?(:call)
+              callback.call(*args)
+            else
+              send(callback, *args)
+            end
           end
         end
       end

@@ -40,6 +40,8 @@ module TrailGuide
     config.on_experiment_reset = nil   # -> (experiment) { ... }
     config.on_experiment_delete = nil  # -> (experiment) { ... }
 
+    config.return_experiment_winner = nil # -> (experiment, winner) { ... return variant }
+
     config.filtered_user_agents = []
     config.filtered_ip_addresses = []
     config.request_filter = -> (context) do
