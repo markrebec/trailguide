@@ -35,22 +35,13 @@ module TrailGuide
 
         def run_callbacks(hook, *args)
           return unless callbacks[hook]
-          if hook == :return_winner
-            callbacks[hook].reduce(args[0]) do |winner, callback|
-              if callback.respond_to?(:call)
-                callback.call(self, winner)
-              else
-                send(callback, self, winner)
-              end
-            end
-          else
-            args.unshift(self)
-            callbacks[hook].each do |callback|
-              if callback.respond_to?(:call)
-                callback.call(*args)
-              else
-                send(callback, *args)
-              end
+          return if hook == :return_winner
+          args.unshift(self)
+          callbacks[hook].each do |callback|
+            if callback.respond_to?(:call)
+              callback.call(*args)
+            else
+              send(callback, *args)
             end
           end
         end
