@@ -14,7 +14,14 @@ module TrailGuide
       end
 
       def self.default_config
-        { name: nil, metric: nil, variants: [], goals: [], combined: [] }
+        { name: nil,
+          metric: nil,
+          variants: [],
+          goals: [],
+          combined: [],
+          summary: nil,
+          preview_url: nil,
+        }
       end
 
       def self.callbacks_config
@@ -113,6 +120,10 @@ module TrailGuide
 
       def combined?
         !combined.empty?
+      end
+
+      def preview_url?
+        !!preview_url
       end
 
       def on_choose(meth=nil, &block)

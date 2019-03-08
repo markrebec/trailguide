@@ -2,7 +2,7 @@
   <div class="col-sm-12 col-md-10 col-lg-8">
     <div class="row">
       <div class="col-sm-12 col-md-6 col-lg-8">
-        <h4 style="margin: 0; padding: 0;" id="<%= combined_experiment.experiment_name %>">
+        <h4 id="<%= combined_experiment.experiment_name %>">
           <%= link_to combined_experiment.experiment_name.to_s.humanize.titleize, trail_guide_admin.experiments_path(anchor: combined_experiment.experiment_name), class: "text-dark" %>
         </h4>
       </div>
@@ -20,7 +20,10 @@
     </div>
 
     <div class="row">
-      <div class="col-sm-12 text-right">
+      <div class="col-sm-12 col-md-6 col-lg-8">
+        <p><%= combined_experiment.configuration.summary %></p>
+      </div>
+      <div class="col-sm-12 col-md-6 col-lg-4 text-right">
         <% if combined_experiment.started? %>
           <small class="text-muted"><%= combined_experiment.started_at.strftime('%b %e %Y @ %l:%M %p') %></small>
           <span class="text-muted">&mdash;</span>
@@ -62,9 +65,14 @@
 
         <tbody>
           <% experiment.variants.each do |variant| %>
-            <tr class="<%= "table-secondary" if variant.control? %>">
+            <tr>
               <th scope="row">
-                <%= variant.name.to_s.humanize.titleize %>
+                <% if experiment.configuration.preview_url? %>
+                  <%= link_to variant.name.to_s.humanize.titleize, preview_url(variant), target: :blank, class: "text-dark" %>
+                <% else %>
+                  <%= variant.name.to_s.humanize.titleize %>
+                <% end %>
+
                 <% if experiment.running? && !experiment.winner? && participant.variant(experiment) == variant %>
                   <span class="badge badge-secondary">joined</span>
                 <% end %>
@@ -108,7 +116,7 @@
 
       <tfoot class="thead-light">
         <tr>
-          <th scope="row">Totals</th>
+          <th scope="row">&nbsp;</th>
           <th><%= combined_experiment.variants.sum(&:participants) %></th>
           <% if combined_experiment.goals.empty? %>
             <th><%= combined_experiments.sum { |e| e.variants.sum(&:converted) } %></th>
