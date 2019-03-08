@@ -1,0 +1,8 @@
+<nav class="navbar navbar-expanded-sm navbar-light bg-light">
+  <%= link_to trail_guide_admin.experiments_path, class: "navbar-brand" do %>
+    <%= image_tag "trail_guide/trailguide.png" %>
+  <% end %>
+  <%= link_to TrailGuide::Admin.configuration.title, trail_guide_admin.experiments_path, class: "navbar-brand" %>
+  <span class="navbar-brand"><small class="text-muted"><%= TrailGuide::Admin.configuration.subtitle %></small></span>
+</nav>
+
