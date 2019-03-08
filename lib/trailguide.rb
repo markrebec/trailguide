@@ -10,6 +10,7 @@ require "trail_guide/combined_experiment"
 require "trail_guide/catalog"
 require "trail_guide/helper"
 require "trail_guide/engine"
+require "trail_guide/version"
 
 module TrailGuide
   include Canfig::Module
