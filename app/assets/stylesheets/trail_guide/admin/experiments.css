@@ -1,0 +1,13 @@
+.experiment {
+  margin-bottom: 40px;
+}
+
+.experiment table th, .experiment table td {
+  line-height: 31px;
+}
+
+.experiment table th h5 {
+  margin: 0;
+  padding: 0;
+  line-height: 31px;
+}
