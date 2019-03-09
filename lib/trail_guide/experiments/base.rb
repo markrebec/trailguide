@@ -35,7 +35,7 @@ module TrailGuide
 
         def run_callbacks(hook, *args)
           return unless callbacks[hook]
-          return args[0] if hook == :rollout
+          return args[0] if hook == :rollout_winner
           args.unshift(self)
           callbacks[hook].each do |callback|
             if callback.respond_to?(:call)
@@ -172,7 +172,7 @@ module TrailGuide
       end
 
       def winner
-        run_callbacks(:rollout, self.class.winner)
+        run_callbacks(:rollout_winner, self.class.winner)
       end
 
       def choose!(override: nil, metadata: nil, **opts)
@@ -251,7 +251,7 @@ module TrailGuide
 
       def run_callbacks(hook, *args)
         return unless callbacks[hook]
-        if hook == :rollout
+        if hook == :rollout_winner
           callbacks[hook].reduce(args[0]) do |winner, callback|
             if callback.respond_to?(:call)
               callback.call(self, winner)

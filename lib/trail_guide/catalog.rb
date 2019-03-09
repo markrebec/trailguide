@@ -1,14 +1,5 @@
 module TrailGuide
   class Catalog
-    class DSL
-      def self.experiment(name, &block)
-        Class.new(TrailGuide::Experiment) do
-          configure name: name
-          configure &block
-        end
-      end
-    end
-
     include Enumerable
 
     class << self
@@ -164,5 +155,18 @@ module TrailGuide
     def respond_to_missing?(meth, include_private=false)
       experiments.respond_to?(meth, include_private)
     end
+
+    class DSL
+      def self.experiment(name, &block)
+        Class.new(TrailGuide::Experiment) do
+          configure name: name
+          configure &block
+        end
+      end
+    end
+  end
+
+  def self.catalog
+    TrailGuide::Catalog.catalog
   end
 end

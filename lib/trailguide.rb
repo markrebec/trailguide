@@ -18,33 +18,10 @@ module TrailGuide
   configure do |config|
     config.redis = ENV['REDIS_URL']
     config.disabled = false
-    config.start_manually = true
-    config.reset_manually = true
-    config.store_override = false
-    config.track_override = false
     config.override_parameter = :experiment
-    config.algorithm = :weighted
+    config.allow_multiple_experiments = true  # false / :control
     config.adapter = :multi
-    config.allow_multiple_experiments = true # false / :control
-    config.track_winner_conversions = false
-    config.allow_multiple_conversions = false
-    config.allow_multiple_goals = false
-
-    config.on_redis_failover = nil        # -> (experiment, error) { ... }
-    config.on_adapter_failover = nil      # -> (adapter, error) { ... }
-
-    config.on_experiment_choose = nil     # -> (experiment, variant, metadata) { ... }
-    config.on_experiment_use = nil        # -> (experiment, variant, metadata) { ... }
-    config.on_experiment_convert = nil    # -> (experiment, variant, checkpoint, metadata) { ... }
-
-    config.on_experiment_start = nil      # -> (experiment) { ... }
-    config.on_experiment_stop = nil       # -> (experiment) { ... }
-    config.on_experiment_resume = nil     # -> (experiment) { ... }
-    config.on_experiment_reset = nil      # -> (experiment) { ... }
-    config.on_experiment_delete = nil     # -> (experiment) { ... }
-    config.on_experiment_winner = nil     # -> (experiment, winner) { ... }
-
-    config.return_experiment_winner = nil # -> (experiment, winner) { ... return variant }
+    config.on_adapter_failover = nil          # -> (adapter, error) { ... }
 
     config.filtered_user_agents = []
     config.filtered_ip_addresses = []
@@ -69,10 +46,6 @@ module TrailGuide
         ips
       end
     end
-  end
-
-  def self.catalog
-    TrailGuide::Catalog.catalog
   end
 
   def self.redis

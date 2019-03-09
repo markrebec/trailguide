@@ -1,50 +1,34 @@
 module TrailGuide
   module Experiments
     class Config < Canfig::Config
-      ENGINE_CONFIG_KEYS = [
+      DEFAULT_KEYS = [
+        :name, :summary, :preview_url,
+        :algorithm, :metric, :variants, :goals, :combined,
         :start_manually, :reset_manually, :store_override, :track_override,
-        :algorithm, :allow_multiple_conversions, :allow_multiple_goals,
-        :track_winner_conversions
+        :allow_multiple_conversions, :allow_multiple_goals, :track_winner_conversions,
       ].freeze
 
       CALLBACK_KEYS = [
         :on_start, :on_stop, :on_resume, :on_winner, :on_reset, :on_delete,
         :on_choose, :on_use, :on_convert,
         :on_redis_failover,
-        :rollout
+        :rollout_winner
       ].freeze
 
-      def self.engine_config
-        ENGINE_CONFIG_KEYS.map do |key|
-          [key, TrailGuide.configuration.send(key.to_sym)]
-        end.to_h
-      end
-
-      def self.default_config
-        { name: nil,
-          metric: nil,
+      def default_config
+        DEFAULT_KEYS.map do |key|
+          [key, nil]
+        end.to_h.merge({
           variants: [],
           goals: [],
-          combined: [],
-          summary: nil,
-          preview_url: nil,
-        }
+          combined: []
+        }).merge(callback_config)
       end
 
-      def self.callbacks_config
-        {
-          on_choose:          [TrailGuide.configuration.on_experiment_choose].flatten.compact,
-          on_use:             [TrailGuide.configuration.on_experiment_use].flatten.compact,
-          on_convert:         [TrailGuide.configuration.on_experiment_convert].flatten.compact,
-          on_start:           [TrailGuide.configuration.on_experiment_start].flatten.compact,
-          on_stop:            [TrailGuide.configuration.on_experiment_stop].flatten.compact,
-          on_resume:          [TrailGuide.configuration.on_experiment_resume].flatten.compact,
-          on_winner:          [TrailGuide.configuration.on_experiment_winner].flatten.compact,
-          on_reset:           [TrailGuide.configuration.on_experiment_reset].flatten.compact,
-          on_delete:          [TrailGuide.configuration.on_experiment_delete].flatten.compact,
-          on_redis_failover:  [TrailGuide.configuration.on_redis_failover].flatten.compact,
-          rollout:            [TrailGuide.configuration.return_experiment_winner].flatten.compact,
-        }
+      def callback_config
+        CALLBACK_KEYS.map do |key|
+          [key, []]
+        end.to_h
       end
 
       attr_reader :experiment
@@ -53,14 +37,15 @@ module TrailGuide
         @experiment = experiment
         ancestor = opts.delete(:inherit)
         if ancestor.present?
-          opts = opts.merge(ancestor.to_h)
+          keys = opts.keys.dup.concat(args).concat(DEFAULT_KEYS).concat(CALLBACK_KEYS).uniq
+          opts = opts.merge(ancestor.to_h.slice(*keys))
+          opts = opts.merge(ancestor.callbacks.map { |k,v| [k,[v].flatten.compact] }.to_h)
           opts[:name] = nil
           opts[:variants] = ancestor.variants.map { |var| var.dup(experiment) }
-          opts = opts.merge(ancestor.callbacks.map { |k,v| [k,v.dup] }.to_h)
+          opts[:goals] = ancestor.goals.dup
+          opts[:combined] = ancestor.combined.dup
         else
-          opts = opts.merge(self.class.engine_config)
-          opts = opts.merge(self.class.default_config)
-          opts = opts.merge(self.class.callbacks_config)
+          opts = opts.merge(default_config)
         end
         super(*args, **opts, &block)
       end
@@ -183,8 +168,8 @@ module TrailGuide
         self[:on_redis_failover] << (meth || block)
       end
 
-      def rollout(meth=nil, &block)
-        self[:rollout] << (meth || block)
+      def rollout_winner(meth=nil, &block)
+        self[:rollout_winner] << (meth || block)
       end
     end
   end
