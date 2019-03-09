@@ -2,6 +2,10 @@ module TrailGuide
   class Variant
     attr_reader :experiment, :name, :metadata, :weight
 
+    def dup(experiment)
+      self.class.new(experiment, name, metadata: metadata, weight: weight, control: control?)
+    end
+
     def initialize(experiment, name, metadata: {}, weight: 1, control: false)
       @experiment = experiment
       @name = name.to_s.underscore.to_sym
