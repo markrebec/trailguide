@@ -129,46 +129,57 @@ module TrailGuide
       end
 
       def on_choose(meth=nil, &block)
+        self[:on_choose] ||= []
         self[:on_choose] << (meth || block)
       end
 
       def on_use(meth=nil, &block)
+        self[:on_use] ||= []
         self[:on_use] << (meth || block)
       end
 
       def on_convert(meth=nil, &block)
+        self[:on_convert] ||= []
         self[:on_convert] << (meth || block)
       end
 
       def on_start(meth=nil, &block)
+        self[:on_start] ||= []
         self[:on_start] << (meth || block)
       end
 
       def on_stop(meth=nil, &block)
+        self[:on_stop] ||= []
         self[:on_stop] << (meth || block)
       end
 
       def on_resume(meth=nil, &block)
+        self[:on_resume] ||= []
         self[:on_resume] << (meth || block)
       end
 
       def on_winner(meth=nil, &block)
+        self[:on_winner] ||= []
         self[:on_winner] << (meth || block)
       end
 
       def on_reset(meth=nil, &block)
+        self[:on_reset] ||= []
         self[:on_reset] << (meth || block)
       end
 
       def on_delete(meth=nil, &block)
+        self[:on_delete] ||= []
         self[:on_delete] << (meth || block)
       end
 
       def on_redis_failover(meth=nil, &block)
+        self[:on_redis_failover] ||= []
         self[:on_redis_failover] << (meth || block)
       end
 
       def rollout_winner(meth=nil, &block)
+        self[:rollout_winner] ||= []
         self[:rollout_winner] << (meth || block)
       end
     end
