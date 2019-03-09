@@ -1,5 +1,10 @@
-<div class="footer bg-light">
-  <div class="text-right">
-    <%= link_to "TrailGuide v#{TrailGuide::Version::VERSION}", "https://github.com/markrebec/trailguide", target: :blank, class: "text-muted" %>
+<div class="footer container-fluid bg-light">
+  <div class="row">
+    <div class="col-sm text-left">
+      <%= link_to "TrailGuide v#{TrailGuide::Version::VERSION}", "https://github.com/markrebec/trailguide", target: :blank, class: "text-muted" %>
+    </div>
+    <div class="col-sm text-right">
+      <small class="text-muted">redis://<%= TrailGuide.redis._client.host %>:<%= TrailGuide.redis._client.port %>/<%= TrailGuide.redis._client.db %><%= TrailGuide.redis.respond_to?(:namespace) ? "/#{TrailGuide.redis.namespace}" : nil %></small>
+    </div>
   </div>
 </div>

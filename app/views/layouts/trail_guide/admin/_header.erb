@@ -3,6 +3,12 @@
     <%= image_tag "trail_guide/trailguide.png" %>
     <%= TrailGuide::Admin.configuration.title %>
   <% end %>
+  <div class="col-sm text-center">
+    <strong class="total"><%= TrailGuide.catalog.to_a.count %></strong> experiments
+    <span>/</span>
+    <strong class="running"><%= TrailGuide.catalog.running.count %></strong> running
+    <span>/</span>
+    <strong class="stopped"><%= TrailGuide.catalog.stopped.count %></strong> stopped
+  </div>
   <span class="navbar-brand"><small class="text-muted"><%= TrailGuide::Admin.configuration.subtitle %></small></span>
 </nav>
-
