@@ -2,7 +2,7 @@ experiment :basic_experiment do |config|
   variant :option_one, control: true
   variant :option_two
 
-  return_winner do |experiment, winner|
+  rollout_winner do |experiment, winner|
     puts "RETURNING SAMPLE"
     [experiment.control, winner].sample
   end
