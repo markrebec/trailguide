@@ -46,9 +46,17 @@ module TrailGuide
 
       def initialize(experiment, *args, **opts, &block)
         @experiment = experiment
-        opts = opts.merge(self.class.engine_config)
-        opts = opts.merge(self.class.default_config)
-        opts = opts.merge(self.class.callbacks_config)
+        ancestor = opts.delete(:inherit)
+        if ancestor.present?
+          opts = opts.merge(ancestor.to_h)
+          opts[:name] = nil
+          opts[:callbacks] = ancestor.callbacks.map { |k,v| [k,v.dup] }.to_h
+          opts[:variants] = ancestor.variants.map { |var| var.dup(experiment) }
+        else
+          opts = opts.merge(self.class.engine_config)
+          opts = opts.merge(self.class.default_config)
+          opts = opts.merge(self.class.callbacks_config)
+        end
         super(*args, **opts, &block)
       end
 
