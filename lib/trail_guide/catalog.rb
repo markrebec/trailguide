@@ -70,7 +70,7 @@ module TrailGuide
           name: name.to_s.underscore.to_sym,
           parent: combined,
           combined: [],
-          variants: combined.configuration.variants.map { |var| Variant.new(experiment, var.name, metadata: var.metadata, weight: var.weight, control: var.control?) },
+          variants: combined.configuration.variants.map { |var| var.dup(experiment) }
           # TODO also map goals once they're separate classes
         })
         experiment
