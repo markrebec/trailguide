@@ -7,6 +7,13 @@ module TrailGuide
         :track_winner_conversions
       ].freeze
 
+      CALLBACK_KEYS = [
+        :on_start, :on_stop, :on_resume, :on_winner, :on_reset, :on_delete,
+        :on_choose, :on_use, :on_convert,
+        :on_redis_failover,
+        :rollout
+      ].freeze
+
       def self.engine_config
         ENGINE_CONFIG_KEYS.map do |key|
           [key, TrailGuide.configuration.send(key.to_sym)]
@@ -26,19 +33,17 @@ module TrailGuide
 
       def self.callbacks_config
         {
-          callbacks: {
-            on_choose:          [TrailGuide.configuration.on_experiment_choose].flatten.compact,
-            on_use:             [TrailGuide.configuration.on_experiment_use].flatten.compact,
-            on_convert:         [TrailGuide.configuration.on_experiment_convert].flatten.compact,
-            on_start:           [TrailGuide.configuration.on_experiment_start].flatten.compact,
-            on_stop:            [TrailGuide.configuration.on_experiment_stop].flatten.compact,
-            on_resume:          [TrailGuide.configuration.on_experiment_resume].flatten.compact,
-            on_winner:          [TrailGuide.configuration.on_experiment_winner].flatten.compact,
-            on_reset:           [TrailGuide.configuration.on_experiment_reset].flatten.compact,
-            on_delete:          [TrailGuide.configuration.on_experiment_delete].flatten.compact,
-            on_redis_failover:  [TrailGuide.configuration.on_redis_failover].flatten.compact,
-            return_winner:      [TrailGuide.configuration.return_experiment_winner].flatten.compact,
-          }
+          on_choose:          [TrailGuide.configuration.on_experiment_choose].flatten.compact,
+          on_use:             [TrailGuide.configuration.on_experiment_use].flatten.compact,
+          on_convert:         [TrailGuide.configuration.on_experiment_convert].flatten.compact,
+          on_start:           [TrailGuide.configuration.on_experiment_start].flatten.compact,
+          on_stop:            [TrailGuide.configuration.on_experiment_stop].flatten.compact,
+          on_resume:          [TrailGuide.configuration.on_experiment_resume].flatten.compact,
+          on_winner:          [TrailGuide.configuration.on_experiment_winner].flatten.compact,
+          on_reset:           [TrailGuide.configuration.on_experiment_reset].flatten.compact,
+          on_delete:          [TrailGuide.configuration.on_experiment_delete].flatten.compact,
+          on_redis_failover:  [TrailGuide.configuration.on_redis_failover].flatten.compact,
+          rollout:            [TrailGuide.configuration.return_experiment_winner].flatten.compact,
         }
       end
 
@@ -50,8 +55,8 @@ module TrailGuide
         if ancestor.present?
           opts = opts.merge(ancestor.to_h)
           opts[:name] = nil
-          opts[:callbacks] = ancestor.callbacks.map { |k,v| [k,v.dup] }.to_h
           opts[:variants] = ancestor.variants.map { |var| var.dup(experiment) }
+          opts = opts.merge(ancestor.callbacks.map { |k,v| [k,v.dup] }.to_h)
         else
           opts = opts.merge(self.class.engine_config)
           opts = opts.merge(self.class.default_config)
@@ -134,48 +139,52 @@ module TrailGuide
         !!preview_url
       end
 
+      def callbacks
+        to_h.slice(*CALLBACK_KEYS)
+      end
+
       def on_choose(meth=nil, &block)
-        callbacks[:on_choose] << (meth || block)
+        self[:on_choose] << (meth || block)
       end
 
       def on_use(meth=nil, &block)
-        callbacks[:on_use] << (meth || block)
+        self[:on_use] << (meth || block)
       end
 
       def on_convert(meth=nil, &block)
-        callbacks[:on_convert] << (meth || block)
+        self[:on_convert] << (meth || block)
       end
 
       def on_start(meth=nil, &block)
-        callbacks[:on_start] << (meth || block)
+        self[:on_start] << (meth || block)
       end
 
       def on_stop(meth=nil, &block)
-        callbacks[:on_stop] << (meth || block)
+        self[:on_stop] << (meth || block)
       end
 
       def on_resume(meth=nil, &block)
-        callbacks[:on_resume] << (meth || block)
+        self[:on_resume] << (meth || block)
       end
 
       def on_winner(meth=nil, &block)
-        callbacks[:on_winner] << (meth || block)
+        self[:on_winner] << (meth || block)
       end
 
       def on_reset(meth=nil, &block)
-        callbacks[:on_reset] << (meth || block)
+        self[:on_reset] << (meth || block)
       end
 
       def on_delete(meth=nil, &block)
-        callbacks[:on_delete] << (meth || block)
+        self[:on_delete] << (meth || block)
       end
 
       def on_redis_failover(meth=nil, &block)
-        callbacks[:on_redis_failover] << (meth || block)
+        self[:on_redis_failover] << (meth || block)
       end
 
-      def return_winner(meth=nil, &block)
-        callbacks[:return_winner] << (meth || block)
+      def rollout(meth=nil, &block)
+        self[:rollout] << (meth || block)
       end
     end
   end
