@@ -98,6 +98,18 @@ module TrailGuide
       end.flatten
     end
 
+    def started
+      to_a.select(&:started?)
+    end
+
+    def running
+      to_a.select(&:running?)
+    end
+
+    def stopped
+      to_a.select(&:stopped?)
+    end
+
     def find(name)
       if name.is_a?(Class)
         experiments.find { |exp| exp == name }
