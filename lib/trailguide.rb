@@ -1,5 +1,6 @@
 require "canfig"
 require "redis"
+require "trail_guide/config"
 require "trail_guide/errors"
 require "trail_guide/adapters"
 require "trail_guide/algorithms"
@@ -14,6 +15,11 @@ require "trail_guide/version"
 
 module TrailGuide
   include Canfig::Module
+  @@configuration = TrailGuide::Config.new
+
+  class << self
+    delegate :redis, to: :configuration
+  end
 
   configure do |config|
     config.redis = ENV['REDIS_URL']           # url string or Redis object
@@ -36,32 +42,6 @@ module TrailGuide
       is_preview? ||
         is_filtered_user_agent? ||
         is_filtered_ip_address?
-    end
-
-    def filtered_user_agents
-      @filtered_user_agents ||= begin
-        uas = self[:filtered_user_agents]
-        uas = uas.call if uas.respond_to?(:call)
-        uas
-      end
-    end
-
-    def filtered_ip_addresses
-      @filtered_ip_addresses ||= begin
-        ips = self[:filtered_ip_addresses]
-        ips = ips.call if ips.respond_to?(:call)
-        ips
-      end
-    end
-  end
-
-  def self.redis
-    @redis ||= begin
-      if ['Redis', 'Redis::Namespace'].include?(configuration.redis.class.name)
-        configuration.redis
-      else
-        Redis.new(url: configuration.redis)
-      end
     end
   end
 end

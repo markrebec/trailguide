@@ -1,0 +1,36 @@
+module TrailGuide
+  class Config < Canfig::OpenConfig
+
+    def configure(*args, &block)
+      super(*args) do |config|
+        yield(config, TrailGuide::Experiment.configuration) if block_given?
+      end
+    end
+
+    def redis
+      @redis ||= begin
+        if ['Redis', 'Redis::Namespace'].include?(self[:redis].class.name)
+          self[:redis]
+        else
+          Redis.new(url: self[:redis])
+        end
+      end
+    end
+
+    def filtered_user_agents
+      @filtered_user_agents ||= begin
+        uas = self[:filtered_user_agents]
+        uas = uas.call if uas.respond_to?(:call)
+        uas
+      end
+    end
+
+    def filtered_ip_addresses
+      @filtered_ip_addresses ||= begin
+        ips = self[:filtered_ip_addresses]
+        ips = ips.call if ips.respond_to?(:call)
+        ips
+      end
+    end
+  end
+end
