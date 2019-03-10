@@ -35,6 +35,7 @@ module TrailGuide
 
       def initialize(experiment, *args, **opts, &block)
         @experiment = experiment
+        opts = opts.merge(default_config)
         ancestor = opts.delete(:inherit)
         if ancestor.present?
           keys = opts.keys.dup.concat(args).concat(DEFAULT_KEYS).concat(CALLBACK_KEYS).uniq
@@ -44,8 +45,6 @@ module TrailGuide
           opts[:variants] = ancestor.variants.map { |var| var.dup(experiment) }
           opts[:goals] = ancestor.goals.dup
           opts[:combined] = ancestor.combined.dup
-        else
-          opts = opts.merge(default_config)
         end
         super(*args, **opts, &block)
       end
@@ -125,7 +124,7 @@ module TrailGuide
       end
 
       def callbacks
-        to_h.slice(*CALLBACK_KEYS)
+        to_h.slice(*CALLBACK_KEYS).map { |k,v| [k, [v].flatten.compact] }.to_h
       end
 
       def on_choose(meth=nil, &block)
