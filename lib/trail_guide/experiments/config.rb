@@ -49,8 +49,12 @@ module TrailGuide
         super(*args, **opts, &block)
       end
 
-      def resettable?
-        !reset_manually
+      def start_manually?
+        !!start_manually
+      end
+
+      def reset_manually?
+        !!reset_manually
       end
 
       def allow_multiple_conversions?

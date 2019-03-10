@@ -6,7 +6,8 @@ module TrailGuide
       class << self
         delegate :metric, :algorithm, :control, :goals, :callbacks, :combined,
           :combined?, :allow_multiple_conversions?, :allow_multiple_goals?,
-          :track_winner_conversions?, to: :configuration
+          :track_winner_conversions?, :start_manually?, :reset_manually?,
+          to: :configuration
         alias_method :funnels, :goals
 
         def configuration
@@ -15,10 +16,6 @@ module TrailGuide
 
         def configure(*args, &block)
           configuration.configure(*args, &block)
-        end
-
-        def resettable?
-          !configuration.reset_manually
         end
 
         def experiment_name
@@ -140,7 +137,8 @@ module TrailGuide
               algorithm: algorithm.name,
               variants: variants.as_json,
               goals: goals.as_json,
-              resettable: resettable?,
+              start_manually: start_manually?,
+              reset_manually: reset_manually?,
               allow_multiple_conversions: allow_multiple_conversions?,
               allow_multiple_goals: allow_multiple_goals?
             },
@@ -159,9 +157,9 @@ module TrailGuide
 
       attr_reader :participant
       delegate :configuration, :experiment_name, :variants, :control, :goals,
-        :storage_key, :running?, :started?, :started_at, :start!, :resettable?,
-        :winner?, :allow_multiple_conversions?, :allow_multiple_goals?,
-        :track_winner_conversions?, :callbacks, to: :class
+        :storage_key, :running?, :started?, :started_at, :start!,
+        :start_manually?, :reset_manually?, :winner?, :allow_multiple_conversions?,
+        :allow_multiple_goals?, :track_winner_conversions?, :callbacks, to: :class
 
       def initialize(participant)
         @participant = participant
@@ -232,7 +230,7 @@ module TrailGuide
 
         variant = variants.find { |var| var == participant[storage_key] }
         # TODO eventually only reset if we're at the final goal in a funnel
-        participant.converted!(variant, checkpoint, reset: resettable?)
+        participant.converted!(variant, checkpoint, reset: !reset_manually?)
         variant.increment_conversion!(checkpoint)
         run_callbacks(:on_convert, variant, checkpoint, metadata)
         variant
