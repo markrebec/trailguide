@@ -201,7 +201,7 @@ module TrailGuide
             start! unless started?
             return control unless running?
             return variants.find { |var| var == participant[storage_key] } if participating?
-            return control unless TrailGuide.configuration.allow_multiple_experiments == true || !participant.participating_in_active_experiments?(TrailGuide.configuration.allow_multiple_experiments == false) 
+            return control unless TrailGuide.configuration.allow_multiple_experiments == true || !participant.participating_in_active_experiments?(TrailGuide.configuration.allow_multiple_experiments == false)
 
             variant = algorithm_choose!(metadata: metadata)
           end

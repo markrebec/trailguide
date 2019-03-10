@@ -31,7 +31,7 @@ module TrailGuide
       @filtered_user_agents ||= begin
         uas = self[:filtered_user_agents]
         uas = uas.call if uas.respond_to?(:call)
-        uas
+        uas || []
       end
     end
 
@@ -39,7 +39,7 @@ module TrailGuide
       @filtered_ip_addresses ||= begin
         ips = self[:filtered_ip_addresses]
         ips = ips.call if ips.respond_to?(:call)
-        ips
+        ips || []
       end
     end
   end
