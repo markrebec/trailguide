@@ -1,6 +1,11 @@
 require "trail_guide/admin"
+require "redis-namespace"
 
 TrailGuide.configure do |config|
+  config.redis = Redis::Namespace.new(
+    :trailguide_dummy,
+    redis: Redis.new(url: ENV['REDIS_URL'])
+  )
 end
 
 TrailGuide::Experiment.configure do |config|
