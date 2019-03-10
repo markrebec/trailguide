@@ -23,14 +23,18 @@ TrailGuide.configure do |config|
 end
 
 TrailGuide::Experiment.configure do |config|
+  config.algorithm = :weighted              # the algorithm to use for this experiment
+
   config.start_manually = true              # if false experiments will start the first time they're encountered
   config.reset_manually = true              # if false participants will reset and be able to re-enter the experiment upon conversion
+
   config.store_override = false             # if true using overrides to preview experiments will enter participants into that variant
   config.track_override = false             # if true using overrides to preview experiments will increment variant participants
   config.track_winner_conversions = false   # if true continues to track conversions after a winner has been selected
   config.allow_multiple_conversions = false # if true tracks multiple participant conversions for the same goal 
   config.allow_multiple_goals = false       # if true allows participants to convert more than one goal
-  config.algorithm = :weighted              # the algorithm to use for this experiment
+
+  config.skip_request_filter = false        # if true requests that would otherwise be filtered based on your request_filter config above (i.e. bots) will be allowed through to this experiment
 
   # callback when connecting to redis fails and trailguide falls back to always
   # returning control variants

@@ -142,6 +142,7 @@ module TrailGuide
       end
 
       def exclude_visitor?
+        return false if experiment.configuration.skip_request_filter?
         instance_exec(context, &TrailGuide.configuration.request_filter)
       end
 

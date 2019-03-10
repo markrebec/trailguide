@@ -2,10 +2,10 @@ module TrailGuide
   module Experiments
     class Config < Canfig::Config
       DEFAULT_KEYS = [
-        :name, :summary, :preview_url,
-        :algorithm, :metric, :variants, :goals, :combined,
+        :name, :summary, :preview_url, :algorithm, :metric, :variants, :goals,
         :start_manually, :reset_manually, :store_override, :track_override,
-        :allow_multiple_conversions, :allow_multiple_goals, :track_winner_conversions,
+        :combined, :allow_multiple_conversions, :allow_multiple_goals,
+        :track_winner_conversions, :skip_request_filter
       ].freeze
 
       CALLBACK_KEYS = [
@@ -58,15 +58,19 @@ module TrailGuide
       end
 
       def allow_multiple_conversions?
-        allow_multiple_conversions
+        !!allow_multiple_conversions
       end
 
       def allow_multiple_goals?
-        allow_multiple_goals
+        !!allow_multiple_goals
       end
 
       def track_winner_conversions?
-        track_winner_conversions
+        !!track_winner_conversions
+      end
+
+      def skip_request_filter?
+        !!skip_request_filter
       end
 
       def name
