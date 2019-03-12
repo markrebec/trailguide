@@ -128,5 +128,19 @@ module TrailGuide
         experiment && !experiment.combined? && experiment.running? && participating?(experiment, include_control)
       end
     end
+
+    def cleanup_inactive_experiments!
+      return false if adapter.keys.empty?
+
+      adapter.keys.each do |key|
+        experiment_name = key.to_s.split(":").first.to_sym
+        experiment = TrailGuide.catalog.find(experiment_name)
+        if !experiment || !experiment.running?
+          adapter.delete(key)
+        end
+      end
+
+      return true
+    end
   end
 end
