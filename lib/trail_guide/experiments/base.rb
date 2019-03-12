@@ -76,11 +76,11 @@ module TrailGuide
         end
 
         def started?
-          !!started_at
+          started_at && started_at <= Time.now
         end
 
         def stopped?
-          !!stopped_at
+          stopped_at && stopped_at <= Time.now
         end
 
         def running?
