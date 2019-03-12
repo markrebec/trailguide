@@ -12,6 +12,7 @@ require "trail_guide/catalog"
 require "trail_guide/helper"
 require "trail_guide/engine"
 require "trail_guide/version"
+require "trail_guide/spec_helper" if defined?(RSpec)
 
 module TrailGuide
   include Canfig::Module

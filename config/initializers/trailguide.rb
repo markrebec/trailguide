@@ -9,6 +9,7 @@ TrailGuide.configure do |config|
 
   # request param for overriding/previewing variants - allows previewing
   # variants with request params
+  # i.e. example.com/somepage/?experiment[my_experiment]=option_b
   config.override_parameter = :experiment
 
   # whether or not participants are allowed to enter variant groups in multiple
@@ -27,7 +28,7 @@ TrailGuide.configure do |config|
   #           in the control group for all except potentially one)
   config.allow_multiple_experiments = false
 
-  # the participant adapter for users
+  # the participant adapter for storing experiment sessions
   #
   # :redis      uses redis to persist user participation
   # :cookie     uses a cookie to persist user participation
