@@ -6,6 +6,7 @@ module TrailGuide
     def initialize(context, adapter: nil)
       @context = context
       @adapter = adapter.new(context) unless adapter.nil?
+      cleanup_inactive_experiments!
     end
 
     def adapter
@@ -135,7 +136,7 @@ module TrailGuide
       adapter.keys.each do |key|
         experiment_name = key.to_s.split(":").first.to_sym
         experiment = TrailGuide.catalog.find(experiment_name)
-        if !experiment || !experiment.running?
+        if !experiment || !experiment.started?
           adapter.delete(key)
         end
       end
