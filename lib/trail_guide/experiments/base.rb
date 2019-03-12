@@ -202,6 +202,7 @@ module TrailGuide
             return control unless running?
             return variants.find { |var| var == participant[storage_key] } if participating?
             return control unless TrailGuide.configuration.allow_multiple_experiments == true || !participant.participating_in_active_experiments?(TrailGuide.configuration.allow_multiple_experiments == false)
+            return control unless allow_participation?(metadata)
 
             variant = algorithm_choose!(metadata: metadata)
           end
@@ -248,6 +249,11 @@ module TrailGuide
         participant.converted?(self, checkpoint)
       end
 
+      def allow_participation?(metadata=nil)
+        return true if callbacks[:allow_participation].empty?
+        run_callbacks(:allow_participation, metadata)
+      end
+
       def allow_conversion?(checkpoint=nil, metadata=nil)
         return true if callbacks[:allow_conversion].empty?
         run_callbacks(:allow_conversion, checkpoint, metadata)
@@ -255,7 +261,7 @@ module TrailGuide
 
       def run_callbacks(hook, *args)
         return unless callbacks[hook]
-        if [:allow_conversion, :rollout_winner].include?(hook)
+        if [:allow_participation, :allow_conversion, :rollout_winner].include?(hook)
           callbacks[hook].reduce(args.slice!(0,1)[0]) do |result, callback|
             if callback.respond_to?(:call)
               callback.call(self, result, *args)

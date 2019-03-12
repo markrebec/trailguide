@@ -195,6 +195,15 @@ TrailGuide::Experiment.configure do |config|
   # config.on_convert = -> (experiment, variant, checkpoint, metadata) { ... }
 
 
+  # callback that can short-circuit participation based on your own logic, which
+  # gets called *after* all the core engine checks (i.e. that the user is
+  # not excluded or already participating, etc.)
+  #
+  # should return true or false
+  #
+  # config.allow_participation = -> (experiment, metadata) { ... return true }
+
+
   # callback that can short-circuit conversion based on your own logic, which
   # gets called *after* all the core engine checks (i.e. that the user is
   # participating in the experiment, is within the bounds of the experiment
