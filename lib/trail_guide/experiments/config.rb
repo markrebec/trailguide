@@ -12,7 +12,7 @@ module TrailGuide
         :on_start, :on_stop, :on_resume, :on_winner, :on_reset, :on_delete,
         :on_choose, :on_use, :on_convert,
         :on_redis_failover,
-        :rollout_winner
+        :allow_conversion, :rollout_winner
       ].freeze
 
       def default_config
@@ -183,6 +183,11 @@ module TrailGuide
       def on_redis_failover(meth=nil, &block)
         self[:on_redis_failover] ||= []
         self[:on_redis_failover] << (meth || block)
+      end
+
+      def allow_conversion(meth=nil, &block)
+        self[:allow_conversion] ||= []
+        self[:allow_conversion] << (meth || block)
       end
 
       def rollout_winner(meth=nil, &block)

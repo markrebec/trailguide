@@ -227,6 +227,7 @@ module TrailGuide
         elsif converted?
           return false unless allow_multiple_goals?
         end
+        return false unless allow_conversion?(checkpoint, metadata)
 
         variant = variants.find { |var| var == participant[storage_key] }
         # TODO eventually only reset if we're at the final goal in a funnel
@@ -247,14 +248,19 @@ module TrailGuide
         participant.converted?(self, checkpoint)
       end
 
+      def allow_conversion?(checkpoint=nil, metadata=nil)
+        return true if callbacks[:allow_conversion].empty?
+        run_callbacks(:allow_conversion, checkpoint, metadata)
+      end
+
       def run_callbacks(hook, *args)
         return unless callbacks[hook]
-        if hook == :rollout_winner
-          callbacks[hook].reduce(args[0]) do |winner, callback|
+        if [:allow_conversion, :rollout_winner].include?(hook)
+          callbacks[hook].reduce(args.slice!(0,1)[0]) do |result, callback|
             if callback.respond_to?(:call)
-              callback.call(self, winner)
+              callback.call(self, result, *args)
             else
-              send(callback, self, winner)
+              send(callback, self, result, *args)
             end
           end
         else

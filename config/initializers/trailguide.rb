@@ -195,6 +195,16 @@ TrailGuide::Experiment.configure do |config|
   # config.on_convert = -> (experiment, variant, checkpoint, metadata) { ... }
 
 
+  # callback that can short-circuit conversion based on your own logic, which
+  # gets called *after* all the core engine checks (i.e. that the user is
+  # participating in the experiment, is within the bounds of the experiment
+  # configuration for allow_multiple_*, etc.)
+  #
+  # should return true or false
+  #
+  # config.allow_conversion = -> (experiment, checkpoint, metadata) { ... return true }
+
+
   # callback that can be used to modify the rollout of a selected winner - for
   # example you could use a custom algorithm or even something like the flipper
   # gem to do a "feature rollout" from your control variant to your winner for
