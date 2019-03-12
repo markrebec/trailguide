@@ -5,6 +5,8 @@ TrailGuide.configure do |config|
     :trailguide_dummy,
     redis: Redis.new(url: ENV['REDIS_URL'])
   )
+
+  config.adapter = :multi
 end
 
 TrailGuide::Experiment.configure do |config|
