@@ -39,7 +39,14 @@ TrailGuide.configure do |config|
   )
 end
 
+module TrailGuide::SpecDSL
+  def create_experiment(name, **opts, &block)
+    TrailGuide::Catalog::DSL.experiment name, **opts, &block
+  end
+end
+
 RSpec.configure do |config|
+  config.include TrailGuide::SpecDSL
 
   config.before(:suite) do
     redis_keys = TrailGuide.redis.keys

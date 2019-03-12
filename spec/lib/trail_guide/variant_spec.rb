@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe TrailGuide::Variant do
-  let(:experiment) { TrailGuide::Catalog::DSL.experiment :test_experiment }
+  let(:experiment) { create_experiment :test_experiment }
   subject { TrailGuide::Variant.new(experiment, :test_variant_a) }
 
   describe '#==' do
@@ -152,9 +152,7 @@ RSpec.describe TrailGuide::Variant do
 
     context 'with experiment goals defined' do
       let(:experiment) do
-        TrailGuide::Catalog::DSL.experiment :test_experiment do |config|
-          config.goals = [:test_goal_one, :test_goal_two]
-        end
+        create_experiment :test_experiment, goals: [:test_goal_one, :test_goal_two]
       end
       let(:participant_count) { 20 }
       let(:goal_one_count) { 5 }
@@ -202,9 +200,7 @@ RSpec.describe TrailGuide::Variant do
 
     context 'with experiment goals defined' do
       let(:experiment) do
-        TrailGuide::Catalog::DSL.experiment :test_experiment do |config|
-          config.goals = [:test_goal_one, :test_goal_two]
-        end
+        create_experiment :test_experiment, goals: [:test_goal_one, :test_goal_two]
       end
       let(:participant_count) { 20 }
       let(:goal_one_count) { 5 }
@@ -247,9 +243,7 @@ RSpec.describe TrailGuide::Variant do
 
     context 'with experiment goals defined' do
       let(:experiment) do
-        TrailGuide::Catalog::DSL.experiment :test_experiment do |config|
-          config.goals = [:test_goal_one, :test_goal_two]
-        end
+        create_experiment :test_experiment, goals: [:test_goal_one, :test_goal_two]
       end
       let(:participant_count) { 20 }
       let(:goal_one_count) { 5 }

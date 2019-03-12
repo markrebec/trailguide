@@ -157,10 +157,9 @@ module TrailGuide
     end
 
     class DSL
-      def self.experiment(name, &block)
+      def self.experiment(name, **opts, &block)
         Class.new(TrailGuide::Experiment) do
-          configure name: name
-          configure &block
+          configure opts.merge({name: name}), &block
         end
       end
     end
