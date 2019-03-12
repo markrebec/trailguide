@@ -177,38 +177,49 @@ module TrailGuide
         return control if TrailGuide.configuration.disabled
 
         variant = choose_variant!(override: override, metadata: metadata, **opts)
-        participant.participating!(variant) unless override.present? && !configuration.store_override
         run_callbacks(:on_use, variant, metadata)
         variant
       rescue Errno::ECONNREFUSED, Redis::BaseError, SocketError => e
         run_callbacks(:on_redis_failover, e)
-        return variants.find { |var| var == override } if override.present?
+        return variants.find { |var| var == override } || control if override.present?
         return control
       end
 
       def choose_variant!(override: nil, excluded: false, metadata: nil)
         return control if TrailGuide.configuration.disabled
-        if override.present?
-          variant = variants.find { |var| var == override }
-          return variant unless configuration.track_override && running?
-        else
-          if winner?
-            variant = winner
-            return variant unless track_winner_conversions? && running?
-          else
-            return control if excluded
-            return control if !started? && configuration.start_manually
-            start! unless started?
-            return control unless running?
-            return variants.find { |var| var == participant[storage_key] } if participating?
-            return control unless TrailGuide.configuration.allow_multiple_experiments == true || !participant.participating_in_active_experiments?(TrailGuide.configuration.allow_multiple_experiments == false)
-            return control unless allow_participation?(metadata)
 
-            variant = algorithm_choose!(metadata: metadata)
+        if override.present?
+          variant = variants.find { |var| var == override } || control
+          if running?
+            variant.increment_participation! if configuration.track_override
+            participant.participating!(variant) if configuration.store_override
           end
+          return variant
         end
 
+        if winner?
+          variant = winner
+          variant.increment_participation! if track_winner_conversions?
+          return variant
+        end
+
+        return control if excluded
+        return control if !started? && configuration.start_manually
+        start! unless started?
+        return control unless running?
+
+        if participating?
+          variant = participant.variant(self)
+          participant.participating!(variant)
+          return variant
+        end
+
+        return control unless TrailGuide.configuration.allow_multiple_experiments == true || !participant.participating_in_active_experiments?(TrailGuide.configuration.allow_multiple_experiments == false)
+        return control unless allow_participation?(metadata)
+
+        variant = algorithm_choose!(metadata: metadata)
         variant.increment_participation!
+        participant.participating!(variant)
         run_callbacks(:on_choose, variant, metadata)
         variant
       end
