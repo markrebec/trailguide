@@ -5,6 +5,7 @@ require File.expand_path('../dummy/config/environment', __FILE__)
 # Prevent database truncation if the environment is production
 abort("The Rails environment is running in production mode!") if Rails.env.production?
 require 'rspec/rails'
+require 'trail_guide/spec_helper'
 # Add additional requires below this line. Rails is not loaded until this point!
 
 # Requires supporting ruby files with custom matchers and macros, etc, in
@@ -20,7 +21,7 @@ require 'rspec/rails'
 # directory. Alternatively, in the individual `*_spec.rb` files, manually
 # require only the support files necessary.
 #
-# Dir[Rails.root.join('spec', 'support', '**', '*.rb')].each { |f| require f }
+Dir[Rails.root.join('spec', 'support', '**', '*.rb')].each { |f| require f }
 
 # Checks for pending migrations and applies them before tests are run.
 # If you are not using ActiveRecord, you can remove these lines.
@@ -30,7 +31,28 @@ rescue ActiveRecord::PendingMigrationError => e
   puts e.to_s.strip
   exit 1
 end
+
+TrailGuide.configure do |config|
+  config.redis = Redis::Namespace.new(
+    :trailguide_specs,
+    redis: Redis.new(url: ENV['REDIS_URL'])
+  )
+end
+
 RSpec.configure do |config|
+
+  config.before(:suite) do
+    redis_keys = TrailGuide.redis.keys
+    TrailGuide.redis.del(redis_keys) if redis_keys.present?
+    TrailGuide.catalog.instance_variable_set :@experiments, []
+  end
+
+  config.after(:example) do
+    redis_keys = TrailGuide.redis.keys
+    TrailGuide.redis.del(redis_keys) if redis_keys.present?
+    TrailGuide.catalog.instance_variable_set :@experiments, []
+  end
+
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_path = "#{::Rails.root}/spec/fixtures"
 
