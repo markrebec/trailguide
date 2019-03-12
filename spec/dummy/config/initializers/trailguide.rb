@@ -1,4 +1,3 @@
-require "trail_guide/admin"
 require "redis-namespace"
 
 TrailGuide.configure do |config|

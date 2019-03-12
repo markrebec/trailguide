@@ -204,3 +204,10 @@ TrailGuide::Experiment.configure do |config|
   #
   # config.rollout_winner = -> (experiment, winner) { ... return variant }
 end
+
+# admin ui configuration
+#
+TrailGuide::Admin.configure do |config|
+  config.title = 'TrailGuide'
+  config.subtitle = 'Experiments and A/B Tests'
+end
