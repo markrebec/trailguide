@@ -53,7 +53,8 @@ module TrailGuide
     end
 
     def reset!
-      delete! && save!
+      delete!
+      save!
     end
 
     def participants
