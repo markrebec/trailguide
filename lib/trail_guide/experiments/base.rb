@@ -1,4 +1,5 @@
 require "trail_guide/experiments/config"
+require "trail_guide/experiments/participant"
 
 module TrailGuide
   module Experiments
@@ -162,7 +163,7 @@ module TrailGuide
         :allow_multiple_goals?, :track_winner_conversions?, :callbacks, to: :class
 
       def initialize(participant)
-        @participant = participant
+        @participant = TrailGuide::Experiments::Participant.new(self, participant)
       end
 
       def algorithm
@@ -208,8 +209,8 @@ module TrailGuide
         start! unless started?
         return control unless running?
 
-        if participating?
-          variant = participant.variant(self)
+        if participant.participating?
+          variant = participant.variant
           participant.participating!(variant)
           return variant
         end
@@ -230,18 +231,18 @@ module TrailGuide
 
       def convert!(checkpoint=nil, metadata: nil)
         return false if !running? || (winner? && !track_winner_conversions?)
-        return false unless participating?
+        return false unless participant.participating?
         raise InvalidGoalError, "Invalid goal checkpoint `#{checkpoint}` for `#{experiment_name}`." unless checkpoint.present? || goals.empty?
         raise InvalidGoalError, "Invalid goal checkpoint `#{checkpoint}` for `#{experiment_name}`." unless checkpoint.nil? || goals.any? { |goal| goal == checkpoint.to_s.underscore.to_sym }
         # TODO eventually allow progressing through funnel checkpoints towards goals
-        if converted?(checkpoint)
+        if participant.converted?(checkpoint)
           return false unless allow_multiple_conversions?
-        elsif converted?
+        elsif participant.converted?
           return false unless allow_multiple_goals?
         end
         return false unless allow_conversion?(checkpoint, metadata)
 
-        variant = variants.find { |var| var == participant[storage_key] }
+        variant = participant.variant
         # TODO eventually only reset if we're at the final goal in a funnel
         participant.converted!(variant, checkpoint, reset: !reset_manually?)
         variant.increment_conversion!(checkpoint)
@@ -250,14 +251,6 @@ module TrailGuide
       rescue Errno::ECONNREFUSED, Redis::BaseError, SocketError => e
         run_callbacks(:on_redis_failover, e)
         return false
-      end
-
-      def participating?
-        participant.participating?(self)
-      end
-
-      def converted?(checkpoint=nil)
-        participant.converted?(self, checkpoint)
       end
 
       def allow_participation?(metadata=nil)
