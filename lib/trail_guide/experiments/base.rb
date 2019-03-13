@@ -131,6 +131,24 @@ module TrailGuide
           reset
         end
 
+        def participants
+          variants.sum(&:participants)
+        end
+
+        def converted(checkpoint=nil)
+          variants.sum { |var| var.converted(checkpoint) }
+        end
+
+        def unconverted
+          participants - converted
+        end
+
+        def target_sample_size_reached?
+          return true unless configuration.target_sample_size
+          return true if participants >= configuration.target_sample_size
+          return false
+        end
+
         def as_json(opts={})
           { experiment_name => {
             configuration: {

@@ -5,7 +5,7 @@ module TrailGuide
         :name, :summary, :preview_url, :algorithm, :metric, :variants, :goals,
         :start_manually, :reset_manually, :store_override, :track_override,
         :combined, :allow_multiple_conversions, :allow_multiple_goals,
-        :track_winner_conversions, :skip_request_filter
+        :track_winner_conversions, :skip_request_filter, :target_sample_size
       ].freeze
 
       CALLBACK_KEYS = [

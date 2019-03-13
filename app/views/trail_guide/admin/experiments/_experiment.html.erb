@@ -8,6 +8,13 @@
       </div>
       <div class="col-sm-12 col-md-6 col-lg-4 text-right">
         <% if experiment.running? %>
+          <% if experiment_peekable?(experiment) %>
+            <% if experiment_peeking?(experiment) %>
+              <%= link_to "hide", trail_guide_admin.experiments_path(anchor: experiment.experiment_name), class: 'btn btn-sm btn-outline-primary', method: :put %>
+            <% else %>
+              <%= link_to "peek", peek_url(experiment), class: 'btn btn-sm btn-primary', method: :put %>
+            <% end %>
+          <% end %>
           <%= link_to "stop", trail_guide_admin.stop_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-warning', method: :put %>
           <%= link_to "restart", trail_guide_admin.restart_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-danger',method: :put %>
         <% elsif experiment.started? %>
@@ -78,13 +85,13 @@
               <% end %>
             </th>
 
-            <td><%= variant.participants %></td>
+            <td><%= experiment_metric experiment, variant.participants %></td>
 
             <% if experiment.goals.empty? %>
-              <td><%= variant.converted %></td>
+              <td><%= experiment_metric experiment, variant.converted %></td>
             <% else %>
               <% experiment.goals.each do |goal| %>
-                <td><%= variant.converted(goal) %></td>
+                <td><%= experiment_metric experiment, variant.converted(goal) %></td>
               <% end %>
             <% end %>
 
@@ -110,12 +117,12 @@
       <tfoot class="thead-light">
         <tr>
           <th scope="row">&nbsp;</th>
-          <th><%= experiment.variants.sum(&:participants) %></th>
+          <th><%= experiment.participants %></th>
           <% if experiment.goals.empty? %>
-            <th><%= experiment.variants.sum(&:converted) %></th>
+            <th><%= experiment_metric experiment, experiment.converted %></th>
           <% else %>
             <% experiment.goals.each do |goal| %>
-              <th><%= experiment.variants.sum { |var| var.converted(goal) } %></th>
+              <th><%= experiment_metric experiment, experiment.converted(goal) %></th>
             <% end %>
           <% end %>
           <th>&nbsp;</th>

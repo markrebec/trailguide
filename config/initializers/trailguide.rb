@@ -153,6 +153,12 @@ TrailGuide::Experiment.configure do |config|
   # false   default behavior, requests will be filtered based on your config
   config.skip_request_filter = false
 
+  # set a default target sample size for all experiments - this will prevent
+  # metrics and stats from being displayed in the admin UI until the sample size
+  # is reached or the experiment is stopped
+  #
+  # config.target_sample_size = nil
+
   # callback when connecting to redis fails and trailguide falls back to always
   # returning control variants
   config.on_redis_failover = -> (experiment, error) do
@@ -234,6 +240,15 @@ end
 # admin ui configuration
 #
 TrailGuide::Admin.configure do |config|
+  # display title for admin UI
+  #
   config.title = 'TrailGuide'
+
+  # display subtitle for admin UI
+  #
   config.subtitle = 'Experiments and A/B Tests'
+
+  # request parameter can be used to "peek" at results even before an
+  # experiment's target_sample_size has been hit if one is configured
+  config.peek_parameter = :peek
 end
