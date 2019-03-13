@@ -7,6 +7,13 @@ TrailGuide.configure do |config|
   # globally disable trailguide - returns control everywhere
   config.disabled = false
 
+  # whether or not to include TrailGuide::Helper into controller and view
+  # contexts
+  #
+  # true      the helper module is automatically mixed-in to controllers/views
+  # false     you'll need to include the helper module manually where you want
+  config.include_helpers = true
+
   # request param for overriding/previewing variants - allows previewing
   # variants with request params
   # i.e. example.com/somepage/?experiment[my_experiment]=option_b

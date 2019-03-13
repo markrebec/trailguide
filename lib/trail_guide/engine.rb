@@ -8,8 +8,10 @@ module TrailGuide
 
     initializer "trailguide" do |app|
       TrailGuide::Catalog.load_experiments!
-      ActionController::Base.send :include, TrailGuide::Helper
-      ActionController::Base.helper TrailGuide::Helper
+      if TrailGuide.configuration.include_helpers
+        ActionController::Base.send :include, TrailGuide::Helper
+        ActionController::Base.helper TrailGuide::Helper
+      end
     end
   end
 end
