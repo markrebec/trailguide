@@ -25,13 +25,13 @@ module TrailGuide
       helper_method :experiment_peekable?
 
       def experiment_peeking?(experiment)
-        params[:peek] == experiment.experiment_name.to_s
+        params[TrailGuide::Admin.configuration.peek_parameter] == experiment.experiment_name.to_s
       end
       helper_method :experiment_peeking?
 
       def experiment_metrics_visible?(experiment)
         return true unless experiment.running?
-        return true if params[:peek] == experiment.experiment_name.to_s
+        return true if params[TrailGuide::Admin.configuration.peek_parameter] == experiment.experiment_name.to_s
         return true if experiment.target_sample_size_reached?
         return false
       end
