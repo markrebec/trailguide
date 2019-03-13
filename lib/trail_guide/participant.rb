@@ -1,12 +1,13 @@
 module TrailGuide
   class Participant
-    attr_reader :context
+    attr_reader :context, :variants
     delegate :key?, :keys, :[], :[]=, :delete, :destroy!, :to_h, to: :adapter
 
     def initialize(context, adapter: nil)
       @context = context
       @adapter = adapter.new(context) unless adapter.nil?
-      cleanup_inactive_experiments!
+      @variants = {}
+      #cleanup_inactive_experiments!
     end
 
     def adapter
@@ -36,6 +37,7 @@ module TrailGuide
     end
 
     def participating?(experiment, include_control=true)
+      return variants[experiment.storage_key] if variants.key?(experiment.storage_key)
       return false unless experiment.started?
       return false unless adapter.key?(experiment.storage_key)
       varname = adapter[experiment.storage_key]
@@ -44,7 +46,10 @@ module TrailGuide
       return false unless variant && adapter.key?(variant.storage_key)
 
       chosen_at = Time.at(adapter[variant.storage_key].to_i)
-      return variant if chosen_at >= experiment.started_at
+      if chosen_at >= experiment.started_at
+        variants[experiment.storage_key] = variant
+        return variant
+      end
     end
 
     def converted?(experiment, checkpoint=nil)

@@ -9,15 +9,15 @@ module TrailGuide
       end
 
       def participating?
-        participant.participating?(experiment)
+        @participating ||= variant.present?#participant.participating?(experiment)
       end
 
       def converted?(checkpoint=nil)
-        participant.converted?(experiment, checkpoint)
+        @converted ||= participant.converted?(experiment, checkpoint)
       end
 
       def variant
-        participant.variant(experiment)
+        @variant ||= participant.variant(experiment)
       end
 
       def method_missing(meth, *args, &block)
