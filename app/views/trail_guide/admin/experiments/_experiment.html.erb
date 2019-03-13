@@ -117,7 +117,12 @@
       <tfoot class="thead-light">
         <tr>
           <th scope="row">&nbsp;</th>
-          <th><%= experiment.participants %></th>
+          <th>
+            <span><%= experiment.participants %></span>
+            <% if experiment_peekable?(experiment) %>
+              <span class="text-muted">/ <%= experiment.configuration.target_sample_size %></span>
+            <% end %>
+          </th>
           <% if experiment.goals.empty? %>
             <th><%= experiment_metric experiment, experiment.converted %></th>
           <% else %>

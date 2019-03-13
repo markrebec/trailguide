@@ -124,7 +124,12 @@
       <tfoot class="thead-light">
         <tr>
           <th scope="row">&nbsp;</th>
-          <th><%= combined_experiment.participants %></th>
+          <th>
+            <span><%= combined_experiment.participants %></span>
+            <% if experiment_peekable?(combined_experiment) %>
+              <span class="text-muted">/ <%= combined_experiment.configuration.target_sample_size %></span>
+            <% end %>
+          </th>
           <% if combined_experiment.goals.empty? %>
             <th><%= experiment_metric combined_experiment, combined_experiments.sum(&:converted) %></th>
           <% else %>
