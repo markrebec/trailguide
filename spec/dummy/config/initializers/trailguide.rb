@@ -13,4 +13,5 @@ TrailGuide::Experiment.configure do |config|
 end
 
 TrailGuide::Admin.configure do |config|
+  config.peek_parameter = :peek
 end
