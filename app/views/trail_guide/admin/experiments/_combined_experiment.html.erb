@@ -126,7 +126,7 @@
           <th scope="row">&nbsp;</th>
           <th>
             <span><%= combined_experiment.participants %></span>
-            <% if experiment_peekable?(combined_experiment) %>
+            <% if combined_experiment.configuration.target_sample_size %>
               <span class="text-muted">/ <%= combined_experiment.configuration.target_sample_size %></span>
             <% end %>
           </th>
