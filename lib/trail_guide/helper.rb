@@ -1,9 +1,48 @@
 module TrailGuide
   module Helper
     def trailguide(metric=nil, **opts, &block)
-      proxy = HelperProxy.new(self)
-      return proxy if metric.nil?
-      proxy.choose!(metric, **opts, &block)
+      @trailguide_proxy ||= HelperProxy.new(self)
+      return @trailguide_proxy if metric.nil?
+      @trailguide_proxy.choose!(metric, **opts, &block)
+    end
+
+    def trailguide_participant
+      @trailguide_participant ||= TrailGuide::Participant.new(self)
+    end
+
+    def trailguide_excluded_request?
+      @trailguide_excluded_request ||= instance_exec(self, &TrailGuide.configuration.request_filter)
+    end
+
+    def is_preview?
+      return false unless respond_to?(:request, true)
+      headers = request.try(:headers)
+      headers && headers['x-purpose'] == 'preview'
+    end
+
+    def is_filtered_user_agent?
+      return false if TrailGuide.configuration.filtered_user_agents.nil? || TrailGuide.configuration.filtered_user_agents.empty?
+      return false unless respond_to?(:request, true) && request.user_agent
+
+      TrailGuide.configuration.filtered_user_agents do |ua|
+        return true if ua.class == String && request.user_agent == ua
+        return true if ua.class == Regexp && request.user_agent =~ ua
+      end
+
+      return false
+    end
+
+    def is_filtered_ip_address?
+      return false if TrailGuide.configuration.filtered_ip_addresses.nil? || TrailGuide.configuration.filtered_ip_addresses.empty?
+      return false unless respond_to?(:request, true) && request.ip
+
+      TrailGuide.configuration.filtered_ip_addresses.each do |ip|
+        return true if ip.class == String && request.ip == ip
+        return true if ip.class == Regexp && request.ip =~ ip
+        return true if ip.class == Range && ip.first.class == IPAddr && ip.include?(IPAddr.new(request.ip))
+      end
+
+      return false
     end
 
     class HelperProxy
@@ -35,7 +74,7 @@ module TrailGuide
       end
 
       def participant
-        @participant ||= TrailGuide::Participant.new(context)
+        @participant ||= context.send(:trailguide_participant)
       end
 
       def context_type
@@ -143,43 +182,7 @@ module TrailGuide
 
       def exclude_visitor?
         return false if experiment.configuration.skip_request_filter?
-        instance_exec(context, &TrailGuide.configuration.request_filter)
-      end
-
-      def is_preview?
-        return false unless context.respond_to?(:request, true)
-        headers = context.send(:request).try(:headers)
-        headers && headers['x-purpose'] == 'preview'
-      end
-
-      def is_filtered_user_agent?
-        return false if TrailGuide.configuration.filtered_user_agents.nil? || TrailGuide.configuration.filtered_user_agents.empty?
-        return false unless context.respond_to?(:request, true)
-        request = context.send(:request)
-        return false unless request && request.user_agent
-
-        TrailGuide.configuration.filtered_user_agents do |ua|
-          return true if ua.class == String && request.user_agent == ua
-          return true if ua.class == Regexp && request.user_agent =~ ua
-        end
-
-        return false
-      end
-
-      def is_filtered_ip_address?
-        return false if TrailGuide.configuration.filtered_ip_addresses.nil? || TrailGuide.configuration.filtered_ip_addresses.empty?
-
-        return false unless context.respond_to?(:request, true)
-        request = context.send(:request)
-        return false unless request && request.ip
-
-        TrailGuide.configuration.filtered_ip_addresses.each do |ip|
-          return true if ip.class == String && request.ip == ip
-          return true if ip.class == Regexp && request.ip =~ ip
-          return true if ip.class == Range && ip.first.class == IPAddr && ip.include?(IPAddr.new(request.ip))
-        end
-
-        return false
+        context.send(:trailguide_excluded_request?)
       end
     end
   end
