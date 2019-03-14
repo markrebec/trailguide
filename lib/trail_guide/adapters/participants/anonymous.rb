@@ -6,8 +6,8 @@ module TrailGuide
 
         class << self
           alias_method :configure, :new
-          def new(context, &block)
-            configure(&block).new(context)
+          def new(_context, &block)
+            configure(&block).new(_context)
           end
         end
 
@@ -18,15 +18,14 @@ module TrailGuide
         end
 
         # instance method, creates a new adapter and passes through config
-        def new(context)
-          Adapter.new(context, configuration)
+        def new(_context)
+          Adapter.new(configuration)
         end
 
         class Adapter
-          attr_reader :context, :config
+          attr_reader :config
 
-          def initialize(context, config)
-            @context = context
+          def initialize(config)
             @config = config
           end
 

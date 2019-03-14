@@ -1,43 +1,38 @@
 module TrailGuide
   class Participant
-    attr_reader :context, :variants
+    attr_reader :adapter
     delegate :key?, :keys, :[], :[]=, :delete, :destroy!, :to_h, to: :adapter
 
     def initialize(context, adapter: nil)
-      @context = context
-      @adapter = adapter.new(context) unless adapter.nil?
-      @variants = {}
+      @adapter = adapter.present? ? adapter.new(context) : configured_adapter.new(context)
       #cleanup_inactive_experiments!
     end
 
-    def adapter
-      @adapter ||= begin
-        config_adapter = TrailGuide.configuration.adapter
-        case config_adapter
-        when :cookie
-          config_adapter = TrailGuide::Adapters::Participants::Cookie
-        when :session
-          config_adapter = TrailGuide::Adapters::Participants::Session
-        when :redis
-          config_adapter = TrailGuide::Adapters::Participants::Redis
-        when :anonymous
-          config_adapter = TrailGuide::Adapters::Participants::Anonymous
-        when :multi
-          config_adapter = TrailGuide::Adapters::Participants::Multi
-        else
-          config_adapter = config_adapter.constantize if config_adapter.is_a?(String)
-        end
-        config_adapter.new(context)
-      rescue => e
-        [TrailGuide.configuration.on_adapter_failover].flatten.compact.each do |callback|
-          callback.call(config_adapter, e)
-        end
-        TrailGuide::Adapters::Participants::Anonymous.new(context)
+    def configured_adapter
+      config_adapter = TrailGuide.configuration.adapter
+      case config_adapter
+      when :cookie
+        config_adapter = TrailGuide::Adapters::Participants::Cookie
+      when :session
+        config_adapter = TrailGuide::Adapters::Participants::Session
+      when :redis
+        config_adapter = TrailGuide::Adapters::Participants::Redis
+      when :anonymous
+        config_adapter = TrailGuide::Adapters::Participants::Anonymous
+      when :multi
+        config_adapter = TrailGuide::Adapters::Participants::Multi
+      else
+        config_adapter = config_adapter.constantize if config_adapter.is_a?(String)
       end
+      config_adapter
+    rescue => e
+      [TrailGuide.configuration.on_adapter_failover].flatten.compact.each do |callback|
+        callback.call(config_adapter, e)
+      end
+      TrailGuide::Adapters::Participants::Anonymous
     end
 
     def participating?(experiment, include_control=true)
-      return variants[experiment.storage_key] if variants.key?(experiment.storage_key)
       return false unless experiment.started?
       return false unless adapter.key?(experiment.storage_key)
       varname = adapter[experiment.storage_key]
@@ -46,10 +41,7 @@ module TrailGuide
       return false unless variant && adapter.key?(variant.storage_key)
 
       chosen_at = Time.at(adapter[variant.storage_key].to_i)
-      if chosen_at >= experiment.started_at
-        variants[experiment.storage_key] = variant
-        return variant
-      end
+      return variant if chosen_at >= experiment.started_at
     end
 
     def converted?(experiment, checkpoint=nil)

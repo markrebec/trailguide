@@ -27,10 +27,9 @@ module TrailGuide
         end
 
         class Adapter
-          attr_reader :context, :config, :storage_key
+          attr_reader :config, :storage_key
 
           def initialize(context, config, key: nil)
-            @context = context
             @config = config
 
             if key
