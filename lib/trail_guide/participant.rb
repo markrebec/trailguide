@@ -32,16 +32,22 @@ module TrailGuide
       TrailGuide::Adapters::Participants::Anonymous
     end
 
-    def participating?(experiment, include_control=true)
-      return false unless experiment.started?
-      return false unless adapter.key?(experiment.storage_key)
+    def variant(experiment)
+      return nil unless experiment.started?
+      return nil unless adapter.key?(experiment.storage_key)
       varname = adapter[experiment.storage_key]
       variant = experiment.variants.find { |var| var == varname }
-      return false if !include_control && variant.control?
-      return false unless variant && adapter.key?(variant.storage_key)
+      return nil unless variant && adapter.key?(variant.storage_key)
 
       chosen_at = Time.at(adapter[variant.storage_key].to_i)
       return variant if chosen_at >= experiment.started_at
+    end
+
+    def participating?(experiment, include_control=true)
+      var = variant(experiment)
+      return false if var.nil?
+      return false if !include_control && var.control?
+      return true
     end
 
     def converted?(experiment, checkpoint=nil)
@@ -69,10 +75,6 @@ module TrailGuide
         end
         return false
       end
-    end
-
-    def variant(experiment)
-      participating?(experiment) || nil
     end
 
     def participating!(variant)

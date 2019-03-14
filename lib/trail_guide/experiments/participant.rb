@@ -9,7 +9,7 @@ module TrailGuide
       end
 
       def participating?
-        @participating ||= variant.present?#participant.participating?(experiment)
+        @participating ||= variant.present?
       end
 
       def converted?(checkpoint=nil)
