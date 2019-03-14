@@ -80,25 +80,49 @@ module TrailGuide
     end
 
     def all
-      experiments.map do |exp|
+      exploded = experiments.map do |exp|
         if exp.combined?
           exp.combined.map { |name| combined_experiment(exp, name) }
         else
           exp
         end
       end.flatten
+
+      self.class.new(exploded)
     end
 
     def started
-      to_a.select(&:started?)
+      self.class.new(to_a.select(&:started?))
     end
 
     def running
-      to_a.select(&:running?)
+      self.class.new(to_a.select(&:running?))
     end
 
     def stopped
-      to_a.select(&:stopped?)
+      self.class.new(to_a.select(&:stopped?))
+    end
+
+    def by_started
+      scoped = to_a.sort do |a,b|
+        if a.running? && !b.running?
+          1
+        elsif !a.running? && b.running?
+          -1
+        else
+          if a.started? && !b.started?
+            1
+          elsif !a.started? && b.started?
+            -1
+          elsif a.started? && b.started?
+            a.started_at <=> b.started_at
+          else
+            a.experiment_name.to_s <=> b.experiment_name.to_s
+          end
+        end
+      end.reverse
+
+      self.class.new(scoped)
     end
 
     def find(name)
@@ -124,10 +148,10 @@ module TrailGuide
 
     def select(name)
       if name.is_a?(Class)
-        experiments.select { |exp| exp == name }
+        selected = experiments.select { |exp| exp == name }
       else
         # TODO we can be more efficient than mapping twice here
-        experiments.select do |exp|
+        selected = experiments.select do |exp|
           exp.experiment_name == name.to_s.underscore.to_sym ||
             exp.metric == name.to_s.underscore.to_sym ||
             exp.name == name.to_s.classify ||
@@ -140,6 +164,8 @@ module TrailGuide
           end
         end
       end
+
+      self.class.new(selected)
     end
 
     def register(klass)

@@ -1,5 +1,5 @@
 <div class="experiments">
-  <% TrailGuide.catalog.each do |experiment| %>
+  <% TrailGuide.catalog.by_started.each do |experiment| %>
     <% if experiment.combined? %>
       <%= render 'combined_experiment', combined_experiment: experiment %>
     <% else %>

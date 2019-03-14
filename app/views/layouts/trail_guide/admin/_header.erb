@@ -4,7 +4,7 @@
     <%= TrailGuide::Admin.configuration.title %>
   <% end %>
   <div class="col-sm text-center">
-    <strong class="total"><%= TrailGuide.catalog.to_a.count %></strong> experiments
+    <strong class="total"><%= TrailGuide.catalog.count %></strong> experiments
     <span>/</span>
     <strong class="running"><%= TrailGuide.catalog.running.count %></strong> running
     <span>/</span>
