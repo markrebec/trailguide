@@ -39,7 +39,7 @@ module TrailGuide
 
       def experiment_metric(experiment, metric)
         return metric if experiment_metrics_visible?(experiment)
-        return '?'
+        return helpers.content_tag('span', nil, class: 'fas fa-eye-slash', data: {toggle: 'tooltip'}, title: "metrics are hidden until this experiment reaches it's target sample size")
       end
       helper_method :experiment_metric
 

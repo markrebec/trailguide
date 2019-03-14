@@ -117,7 +117,7 @@ module TrailGuide
           elsif a.started? && b.started?
             a.started_at <=> b.started_at
           else
-            a.experiment_name.to_s <=> b.experiment_name.to_s
+            b.experiment_name.to_s <=> a.experiment_name.to_s
           end
         end
       end.reverse

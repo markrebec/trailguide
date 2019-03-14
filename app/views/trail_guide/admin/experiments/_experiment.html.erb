@@ -10,19 +10,33 @@
         <% if experiment.running? %>
           <% if experiment_peekable?(experiment) %>
             <% if experiment_peeking?(experiment) %>
-              <%= link_to "hide", trail_guide_admin.experiments_path(anchor: experiment.experiment_name), class: 'btn btn-sm btn-outline-primary', method: :put %>
+              <%= link_to trail_guide_admin.experiments_path(anchor: experiment.experiment_name), class: 'btn btn-sm btn-outline-primary', method: :put, data: {toggle: :tooltip}, title: "hide this experiment's metrics" do %>
+                <span class="fas fa-eye-slash" />
+              <% end %>
             <% else %>
-              <%= link_to "peek", peek_url(experiment), class: 'btn btn-sm btn-primary', method: :put %>
+              <%= link_to peek_url(experiment), class: 'btn btn-sm btn-primary', method: :put, data: {toggle: :tooltip}, title: "peek at this experiment's metrics" do %>
+                <span class="fas fa-eye" />
+              <% end %>
             <% end %>
           <% end %>
-          <%= link_to "stop", trail_guide_admin.stop_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-warning', method: :put %>
-          <%= link_to "restart", trail_guide_admin.restart_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-danger',method: :put %>
+          <%= link_to trail_guide_admin.stop_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-warning', method: :put, data: {toggle: :tooltip}, title: 'pause this experiment - you will have the option to resume or reset' do %>
+            <span class="fas fa-pause" />
+          <% end %>
+          <%= link_to trail_guide_admin.restart_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-danger',method: :put, data: {toggle: :tooltip}, title: 'restart this experiment - will reset all data and restart the experiment' do %>
+            <span class="fas fa-redo" />
+          <% end %>
         <% elsif experiment.started? %>
-          <%= link_to "resume", trail_guide_admin.resume_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-primary',method: :put %>
+          <%= link_to trail_guide_admin.resume_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-success',method: :put, data: {toggle: :tooltip}, title: 'resume this experiment to start bucketing users and serving variants again' do %>
+            <span class="fas fa-redo" />
+          <% end %>
         <% else %>
-          <%= link_to "start", trail_guide_admin.start_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-success',method: :put %>
+          <%= link_to trail_guide_admin.start_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-success',method: :put, data: {toggle: :tooltip}, title: 'start this experiment' do %>
+            <span class="fas fa-play" />
+          <% end %>
         <% end %>
-        <%= link_to "reset", trail_guide_admin.reset_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-outline-danger',method: :put %>
+        <%= link_to trail_guide_admin.reset_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-outline-danger',method: :put, data: {toggle: :tooltip}, title: "stop this experiment if it's running and reset all data" do %>
+          <span class="fas fa-ban" />
+        <% end %>
       </div>
     </div>
 
@@ -75,13 +89,13 @@
               <% end %>
 
               <% if experiment.running? && !experiment.winner? && participant.variant(experiment) == variant %>
-                <span class="badge badge-secondary">joined</span>
+                <span class="fas fa-user text-muted" data-toggle="tooltip" title="you are currently in this cohort"></span>
               <% end %>
               <% if experiment.winner? && variant == experiment.winner %>
-                <span class="badge badge-primary">winner</span>
+                <span class="fas fa-star text-primary" data-toggle="tooltip" title="this variant has been promoted as the winner of the experiment"></span>
               <% end %>
               <% if variant.control? %>
-                <small class="text-muted">control</small>
+                <span class="fas fa-cog text-muted" data-toggle="tooltip" title="this variant is the control group for this experiment"></span>
               <% end %>
             </th>
 
@@ -98,16 +112,24 @@
             <td class="text-right">
               <% if experiment.running? && !experiment.winner? %>
                 <% if participant.variant(experiment) == variant %>
-                  <%= link_to "leave group", trail_guide_admin.leave_experiment_path(experiment.experiment_name), class: "btn btn-sm btn-outline-secondary", method: :put %>
+                  <%= link_to trail_guide_admin.leave_experiment_path(experiment.experiment_name), class: "btn btn-sm btn-outline-secondary", method: :put, data: {toggle: :tooltip}, title: 'leave this cohort' do %>
+                    <span class="fas fa-sign-out-alt" />
+                  <% end %>
                 <% else %>
-                  <%= link_to "enter group", trail_guide_admin.join_experiment_path(experiment.experiment_name, variant.name), class: "btn btn-sm btn-secondary", method: :put %>
+                  <%= link_to trail_guide_admin.join_experiment_path(experiment.experiment_name, variant.name), class: "btn btn-sm btn-secondary", method: :put, data: {toggle: :tooltip}, title: 'join this cohort' do %>
+                    <span class="fas fa-sign-in-alt" />
+                  <% end %>
                 <% end %>
               <% end %>
 
               <% if !experiment.winner? || variant != experiment.winner %>
-                <%= link_to "select winner", trail_guide_admin.winner_experiment_path(experiment.experiment_name, variant.name), class: "btn btn-sm btn-#{experiment.winner? ? "outline-" : ""}primary", method: :put %>
+                <%= link_to trail_guide_admin.winner_experiment_path(experiment.experiment_name, variant.name), class: "btn btn-sm btn-#{experiment.winner? ? "outline-" : ""}primary", method: :put, data: {toggle: :tooltip}, title: 'rollout this variant as the winner for this experiment' do %>
+                  <span class="fas fa-star" />
+                <% end %>
               <% elsif experiment.winner? && variant == experiment.winner %>
-                <%= link_to "remove winner", trail_guide_admin.clear_experiment_path(experiment.experiment_name), class: "btn btn-sm btn-warning", method: :put %>
+                <%= link_to trail_guide_admin.clear_experiment_path(experiment.experiment_name), class: "btn btn-sm btn-warning", method: :put, data: {toggle: :tooltip}, title: 'remove this variant as the selected winner' do %>
+                  <span class="fas fa-window-close" />
+                <% end %>
               <% end %>
             </td>
           </tr>
