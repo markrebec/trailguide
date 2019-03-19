@@ -3,7 +3,8 @@ module TrailGuide
     DEFAULT_KEYS = [
       :redis, :disabled, :override_parameter, :allow_multiple_experiments,
       :adapter, :on_adapter_failover, :filtered_ip_addresses,
-      :filtered_user_agents, :request_filter, :include_helpers
+      :filtered_user_agents, :request_filter, :include_helpers,
+      :cleanup_participant_experiments
     ].freeze
 
     def initialize(*args, **opts, &block)

@@ -48,6 +48,19 @@ TrailGuide.configure do |config|
   #             logged in/out sessions and across devices
   config.adapter = :cookie
 
+  # whether or not to clean up any old/inactive experiments for participants
+  # regularly as part of the experiment flow - this is very fast, and only adds
+  # a couple milliseconds to participant initialization, but isn't strictly
+  # necessary, since expired enrollment will never affect future experiment
+  # participation - it might be good practice if you're using redis to store
+  # participant data without expiration
+  #
+  # true      will clean up any old/inactive experiment keys for each
+  #           participant the first time they're encountered during a script
+  #           execution (web request, etc.)
+  # false     will skip the cleanup process entirely
+  config.cleanup_participant_experiments = true
+
   # callback when your participant adapter fails to initialize, and trailguide
   # falls back to the anonymous adapter
   config.on_adapter_failover = -> (adapter, error) do

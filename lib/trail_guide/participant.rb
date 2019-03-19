@@ -6,7 +6,7 @@ module TrailGuide
     def initialize(context, adapter: nil)
       @context = context
       @adapter = adapter.new(context) if adapter.present?
-      #cleanup_inactive_experiments!
+      cleanup_inactive_experiments! if TrailGuide.configuration.cleanup_participant_experiments
     end
 
     def configured_adapter
