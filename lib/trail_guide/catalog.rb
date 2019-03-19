@@ -184,7 +184,8 @@ module TrailGuide
 
     class DSL
       def self.experiment(name, **opts, &block)
-        Class.new(TrailGuide::Experiment) do
+        klass = opts.delete(:class) || TrailGuide::Experiment
+        Class.new(klass) do
           configure opts.merge({name: name}), &block
         end
       end
