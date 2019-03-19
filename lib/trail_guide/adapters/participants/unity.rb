@@ -14,11 +14,13 @@ module TrailGuide
             config.user_adapter = TrailGuide::Adapters::Participants::Redis.configure do |config|
               config.namespace = 'unity:users'
               config.lookup = -> (user_id) { user_id }
+              config.expiration = 1.year.seconds
             end
 
             config.visitor_adapter = TrailGuide::Adapters::Participants::Redis.configure do |config|
               config.namespace = 'unity:visitors'
               config.lookup = -> (visitor_id) { visitor_id }
+              config.expiration = 1.year.seconds
             end
 
             config.anonymous_adapter = TrailGuide::Adapters::Participants::Anonymous

@@ -55,6 +55,11 @@ module TrailGuide
       return false unless valid?
       TrailGuide.redis.set(user_key, visitor_id)
       TrailGuide.redis.set(visitor_key, user_id)
+      if TrailGuide.configuration.unity_ttl
+        TrailGuide.redis.expire(user_key, TrailGuide.configuration.unity_ttl)
+        TrailGuide.redis.expire(visitor_key, TrailGuide.configuration.unity_ttl)
+      end
+      true
     end
 
     def delete!

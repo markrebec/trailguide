@@ -61,6 +61,15 @@ TrailGuide.configure do |config|
   # false     will skip the cleanup process entirely
   config.cleanup_participant_experiments = true
 
+  # the ttl (in seconds) for unity session unification keys - only applicable if
+  # you're using the unity adapter and/or are leveraging unity outside of
+  # trailguide experiments - particularly useful if you want to use something
+  # like the volatile-lru eviction policy for your redis instance
+  #
+  # nil       no expiration for unity session unification keys
+  # 31556952  1 year (in seconds) expiration for unity keys
+  config.unity_ttl = nil
+
   # callback when your participant adapter fails to initialize, and trailguide
   # falls back to the anonymous adapter
   config.on_adapter_failover = -> (adapter, error) do
