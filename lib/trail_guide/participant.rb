@@ -1,6 +1,6 @@
 module TrailGuide
   class Participant
-    attr_reader :context, :adapter
+    attr_reader :context
     delegate :key?, :keys, :[], :[]=, :delete, :destroy!, :to_h, to: :adapter
 
     def initialize(context, adapter: nil)
@@ -9,8 +9,8 @@ module TrailGuide
       cleanup_inactive_experiments! if TrailGuide.configuration.cleanup_participant_experiments
     end
 
-    def configured_adapter
-      @adapter = begin
+    def adapter
+      @adapter ||= begin
         config_adapter = TrailGuide.configuration.adapter
         case config_adapter
         when :cookie
