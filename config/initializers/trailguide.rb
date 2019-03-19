@@ -191,27 +191,52 @@ TrailGuide::Experiment.configure do |config|
   # automatically depending on config.start_manually, can be used for logging,
   # tracking, etc.
   #
-  # config.on_start = -> (experiment) { ... }
+  # context may or may not be present depending on how you're triggering the
+  # action - if you're using the admin, this will be the admin controller
+  # context, if you're in a console you have the option to pass a context to
+  # `experiment.start!` or not
+  #
+  # config.on_start = -> (experiment, context) { ... }
 
   # callback on experiment stop manually via UI/console, can be used for
   # logging, tracking, etc.
   #
-  # config.on_stop = -> (experiment) { ... }
+  # context may or may not be present depending on how you're triggering the
+  # action - if you're using the admin, this will be the admin controller
+  # context, if you're in a console you have the option to pass a context to
+  # `experiment.stop!` or not
+  #
+  # config.on_stop = -> (experiment, context) { ... }
 
   # callback on experiment resume manually via UI/console, can be used for
   # logging, tracking, etc.
   #
-  # config.on_resume = -> (experiment) { ... }
+  # context may or may not be present depending on how you're triggering the
+  # action - if you're using the admin, this will be the admin controller
+  # context, if you're in a console you have the option to pass a context to
+  # `experiment.resume!` or not
+  #
+  # config.on_resume = -> (experiment, context) { ... }
 
   # callback on experiment reset manually via UI/console, can be used for
   # logging, tracking, etc.
   #
-  # config.on_reset = -> (experiment) { ... }
+  # context may or may not be present depending on how you're triggering the
+  # action - if you're using the admin, this will be the admin controller
+  # context, if you're in a console you have the option to pass a context to
+  # `experiment.reset!` or not
+  #
+  # config.on_reset = -> (experiment, context) { ... }
 
   # callback when a winner is selected manually via UI/console, can be used for
   # logging, tracking, etc.
   #
-  # config.on_winner = -> (experiment, winner) { ... }
+  # context may or may not be present depending on how you're triggering the
+  # action - if you're using the admin, this will be the admin controller
+  # context, if you're in a console you have the option to pass a context to
+  # `experiment.declare_winner!` or not
+  #
+  # config.on_winner = -> (experiment, winner, context) { ... }
 
 
   # callback when a participant is entered into a variant for the first time,

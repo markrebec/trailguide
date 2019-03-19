@@ -44,25 +44,25 @@ module TrailGuide
           end
         end
 
-        def start!
+        def start!(context=nil)
           return false if started?
           save! unless persisted?
           started = TrailGuide.redis.hset(storage_key, 'started_at', Time.now.to_i)
-          run_callbacks(:on_start)
+          run_callbacks(:on_start, context)
           started
         end
 
-        def stop!
+        def stop!(context=nil)
           return false unless running?
           stopped = TrailGuide.redis.hset(storage_key, 'stopped_at', Time.now.to_i)
-          run_callbacks(:on_stop)
+          run_callbacks(:on_stop, context)
           stopped
         end
 
-        def resume!
+        def resume!(context=nil)
           return false unless started? && stopped?
           restarted = TrailGuide.redis.hdel(storage_key, 'stopped_at')
-          run_callbacks(:on_resume)
+          run_callbacks(:on_resume, context)
           restarted
         end
 
@@ -88,9 +88,9 @@ module TrailGuide
           started? && !stopped?
         end
 
-        def declare_winner!(variant)
+        def declare_winner!(variant, context=nil)
           variant = variants.find { |var| var == variant } unless variant.is_a?(Variant)
-          run_callbacks(:on_winner, variant)
+          run_callbacks(:on_winner, variant, context)
           TrailGuide.redis.hset(storage_key, 'winner', variant.name.to_s.underscore)
         end
 
@@ -117,17 +117,17 @@ module TrailGuide
           TrailGuide.redis.hsetnx(storage_key, 'name', experiment_name)
         end
 
-        def delete!
+        def delete!(context=nil)
           combined.each { |combo| TrailGuide.catalog.find(combo).delete! }
           variants.each(&:delete!)
           deleted = TrailGuide.redis.del(storage_key)
-          run_callbacks(:on_delete)
+          run_callbacks(:on_delete, context)
           deleted
         end
 
-        def reset!
+        def reset!(context=nil)
           reset = (delete! && save!)
-          run_callbacks(:on_reset)
+          run_callbacks(:on_reset, context)
           reset
         end
 

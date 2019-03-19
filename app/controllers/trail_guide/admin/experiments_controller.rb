@@ -9,27 +9,27 @@ module TrailGuide
       end
 
       def start
-        experiment.start!
+        experiment.start!(self)
         redirect_to trail_guide_admin.experiments_path(anchor: experiment.experiment_name)
       end
 
       def stop
-        experiment.stop!
+        experiment.stop!(self)
         redirect_to trail_guide_admin.experiments_path(anchor: experiment.experiment_name)
       end
 
       def reset
-        experiment.reset!
+        experiment.reset!(self)
         redirect_to trail_guide_admin.experiments_path(anchor: experiment.experiment_name)
       end
 
       def resume
-        experiment.resume!
+        experiment.resume!(self)
         redirect_to trail_guide_admin.experiments_path(anchor: experiment.experiment_name)
       end
 
       def restart
-        experiment.reset! && experiment.start!
+        experiment.reset!(self) && experiment.start!(self)
         redirect_to trail_guide_admin.experiments_path(anchor: experiment.experiment_name)
       end
 
@@ -47,7 +47,7 @@ module TrailGuide
       end
 
       def winner
-        experiment.declare_winner!(params[:variant])
+        experiment.declare_winner!(params[:variant], self)
         redirect_to trail_guide_admin.experiments_path(anchor: experiment.experiment_name)
       end
 
