@@ -135,10 +135,10 @@ module TrailGuide
         end
       end
 
-      def render!(prefix: nil, templates: nil, **opts)
+      def render!(prefix: nil, templates: nil, locals: {}, **opts)
         raise UnsupportedContextError, "The current context (#{context}) does not support rendering. Rendering is only available in controllers and views." unless context.respond_to?(:render, true)
         choose!(**opts) do |variant, metadata|
-          locals = { variant: variant, metadata: variant.metadata }
+          locals = { variant: variant, metadata: variant.metadata }.merge(locals)
           locals = { locals: locals } if context_type == :controller
 
           template = templates[variant.name] if templates
