@@ -21,28 +21,42 @@ module TrailGuide
     end
 
     def is_filtered_user_agent?
-      return false if TrailGuide.configuration.filtered_user_agents.nil? || TrailGuide.configuration.filtered_user_agents.empty?
-      return false unless respond_to?(:request, true) && request.user_agent
+      return @is_filtered_user_agent unless @is_filtered_user_agent.nil?
 
-      TrailGuide.configuration.filtered_user_agents.each do |ua|
-        return true if ua.class == String && request.user_agent == ua
-        return true if ua.class == Regexp && request.user_agent =~ ua
+      @is_filtered_user_agent = begin
+        @user_agent_filter_proc ||= -> {
+          return false if TrailGuide.configuration.filtered_user_agents.nil? || TrailGuide.configuration.filtered_user_agents.empty?
+          return false unless respond_to?(:request, true) && request.user_agent
+
+          TrailGuide.configuration.filtered_user_agents.each do |ua|
+            return true if ua.class == String && request.user_agent == ua
+            return true if ua.class == Regexp && request.user_agent =~ ua
+          end
+
+          return false
+        }
+        instance_exec(&@user_agent_filter_proc)
       end
-
-      return false
     end
 
     def is_filtered_ip_address?
-      return false if TrailGuide.configuration.filtered_ip_addresses.nil? || TrailGuide.configuration.filtered_ip_addresses.empty?
-      return false unless respond_to?(:request, true) && request.ip
+      return @is_filtered_ip_address unless @is_filtered_ip_address.nil?
 
-      TrailGuide.configuration.filtered_ip_addresses.each do |ip|
-        return true if ip.class == String && request.ip == ip
-        return true if ip.class == Regexp && request.ip =~ ip
-        return true if ip.class == Range && ip.first.class == IPAddr && ip.include?(IPAddr.new(request.ip))
+      @is_filtered_ip_address = begin
+        @ip_address_filter_proc ||= -> {
+          return false if TrailGuide.configuration.filtered_ip_addresses.nil? || TrailGuide.configuration.filtered_ip_addresses.empty?
+          return false unless respond_to?(:request, true) && request.ip
+
+          TrailGuide.configuration.filtered_ip_addresses.each do |ip|
+            return true if ip.class == String && request.ip == ip
+            return true if ip.class == Regexp && request.ip =~ ip
+            return true if ip.class == Range && ip.first.class == IPAddr && ip.include?(IPAddr.new(request.ip))
+          end
+
+          return false
+        }
+        instance_exec(&@ip_address_filter_proc)
       end
-
-      return false
     end
 
     class HelperProxy
