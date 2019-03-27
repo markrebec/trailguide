@@ -24,7 +24,7 @@ module TrailGuide
       return false if TrailGuide.configuration.filtered_user_agents.nil? || TrailGuide.configuration.filtered_user_agents.empty?
       return false unless respond_to?(:request, true) && request.user_agent
 
-      TrailGuide.configuration.filtered_user_agents do |ua|
+      TrailGuide.configuration.filtered_user_agents.each do |ua|
         return true if ua.class == String && request.user_agent == ua
         return true if ua.class == Regexp && request.user_agent =~ ua
       end
