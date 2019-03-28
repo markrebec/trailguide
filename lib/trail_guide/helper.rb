@@ -2,12 +2,14 @@ module TrailGuide
   module Helper
     def trailguide(metric=nil, **opts, &block)
       @trailguide_proxy ||= HelperProxy.new(self)
+      @trailguide_proxy = HelperProxy.new(self) if @trailguide_proxy.context != self
       return @trailguide_proxy if metric.nil?
       @trailguide_proxy.choose!(metric, **opts, &block)
     end
 
     def trailguide_participant
       @trailguide_participant ||= TrailGuide::Participant.new(self)
+      @trailguide_participant = TrailGuide::Participant.new(self) if @trailguide_participant.context != self
     end
 
     def trailguide_excluded_request?
