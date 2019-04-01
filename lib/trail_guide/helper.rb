@@ -10,6 +10,7 @@ module TrailGuide
     def trailguide_participant
       @trailguide_participant ||= TrailGuide::Participant.new(self)
       @trailguide_participant = TrailGuide::Participant.new(self) if @trailguide_participant.context != self
+      @trailguide_participant
     end
 
     def trailguide_excluded_request?
