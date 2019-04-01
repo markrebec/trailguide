@@ -1,15 +1,7 @@
 module TrailGuide
   module Adapters
     module Participants
-      class Session
-        include Canfig::Instance
-
-        class << self
-          alias_method :configure, :new
-          def new(context, &block)
-            configure(&block).new(context)
-          end
-        end
+      class Session < Base
 
         def initialize(&block)
           configure do |config|
@@ -19,18 +11,11 @@ module TrailGuide
           end
         end
 
-        # instance method, creates a new adapter and passes through config
-        def new(context)
-          raise UnsupportedContextError, "Your current context (#{context}) does not support sessions" unless context.respond_to?(:session, true)
-          Adapter.new(context, configuration)
-        end
-
-        class Adapter
-          attr_reader :context, :config
+        class Adapter < Base::Adapter
 
           def initialize(context, config)
-            @context = context
-            @config = config
+            raise UnsupportedContextError, "Your current context (#{context}) does not support sessions" unless context.respond_to?(:session, true)
+            super
           end
 
           def [](key)

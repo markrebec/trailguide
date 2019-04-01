@@ -1,15 +1,7 @@
 module TrailGuide
   module Adapters
     module Participants
-      class Redis
-        include Canfig::Instance
-
-        class << self
-          alias_method :configure, :new
-          def new(context, **opts, &block)
-            configure(&block).new(context, **opts)
-          end
-        end
+      class Redis < Base
 
         def initialize(&block)
           configure do |config|
@@ -21,16 +13,11 @@ module TrailGuide
           end
         end
 
-        # instance method, creates a new adapter and passes through config
-        def new(context, **opts)
-          Adapter.new(context, configuration, **opts)
-        end
-
-        class Adapter
-          attr_reader :config, :storage_key
+        class Adapter < Base::Adapter
+          attr_reader :storage_key
 
           def initialize(context, config, key: nil)
-            @config = config
+            super(context, config)
 
             if key
               @storage_key = "#{config.namespace}:#{key}"

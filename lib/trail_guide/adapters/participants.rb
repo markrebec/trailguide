@@ -1,3 +1,4 @@
+require "trail_guide/adapters/participants/base"
 require "trail_guide/adapters/participants/anonymous"
 require "trail_guide/adapters/participants/session"
 require "trail_guide/adapters/participants/cookie"

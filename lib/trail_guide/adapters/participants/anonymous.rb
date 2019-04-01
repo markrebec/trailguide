@@ -1,34 +1,8 @@
 module TrailGuide
   module Adapters
     module Participants
-      class Anonymous
-        include Canfig::Instance
-
-        class << self
-          alias_method :configure, :new
-          def new(_context, &block)
-            configure(&block).new(_context)
-          end
-        end
-
-        def initialize(&block)
-          configure do |config|
-            yield(config) if block_given?
-          end
-        end
-
-        # instance method, creates a new adapter and passes through config
-        def new(_context)
-          Adapter.new(configuration)
-        end
-
-        class Adapter
-          attr_reader :config
-
-          def initialize(config)
-            @config = config
-          end
-
+      class Anonymous < Base
+        class Adapter < Base::Adapter
           def [](key)
             hash[key]
           end

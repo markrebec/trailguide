@@ -1,15 +1,7 @@
 module TrailGuide
   module Adapters
     module Participants
-      class Multi
-        include Canfig::Instance
-
-        class << self
-          alias_method :configure, :new
-          def new(context, &block)
-            configure(&block).new(context)
-          end
-        end
+      class Multi < Base
 
         def initialize(&block)
           configure do |config|
@@ -29,7 +21,6 @@ module TrailGuide
           end
         end
 
-        # instance method, creates a new adapter and passes through config
         def new(context)
           adapter = configuration.adapter.call(context)
           adapter = configuration.send(adapter) if adapter.is_a?(Symbol)

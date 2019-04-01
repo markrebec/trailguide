@@ -1,17 +1,7 @@
 module TrailGuide
   module Adapters
     module Participants
-      class Cookie
-        include Canfig::Instance
-
-        # TODO maybe be a little better about checking for action dispatch, etc.?
-
-        class << self
-          alias_method :configure, :new
-          def new(context, &block)
-            configure(&block).new(context)
-          end
-        end
+      class Cookie < Base
 
         def initialize(&block)
           configure do |config|
@@ -24,18 +14,10 @@ module TrailGuide
           end
         end
 
-        # instance method, creates a new adapter and passes through config
-        def new(context)
-          raise UnsupportedContextError, "Your current context (#{context}) does not support cookies" unless context.respond_to?(:cookies, true)
-          Adapter.new(context, configuration)
-        end
-
-        class Adapter
-          attr_reader :context, :config
-
+        class Adapter < Base::Adapter
           def initialize(context, config)
-            @context = context
-            @config = config
+            raise UnsupportedContextError, "Your current context (#{context}) does not support cookies" unless context.respond_to?(:cookies, true)
+            super
           end
 
           def [](key)
