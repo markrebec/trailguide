@@ -245,7 +245,7 @@ module TrailGuide
         algorithm.choose!(metadata: metadata)
       end
 
-      def variant_chosen!(variant, metadata: metadata)
+      def variant_chosen!(variant, metadata: nil)
         variant.increment_participation!
         participant.participating!(variant)
         run_callbacks(:on_choose, variant, metadata)
