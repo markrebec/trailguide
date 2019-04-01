@@ -29,24 +29,31 @@ module TrailGuide
           end
 
           def [](key)
+            raise NotImplementedError, "You must override the `[]` method in your inheriting adapter class"
           end
 
           def []=(key, value)
+            raise NotImplementedError, "You must override the `[]=` method in your inheriting adapter class"
           end
 
           def delete(key)
+            raise NotImplementedError, "You must override the `delete` method in your inheriting adapter class"
           end
 
           def destroy!
+            raise NotImplementedError, "You must override the `destroy!` method in your inheriting adapter class"
           end
 
           def keys
+            raise NotImplementedError, "You must override the `keys` method in your inheriting adapter class"
           end
 
           def key?(key)
+            raise NotImplementedError, "You must override the `key?` method in your inheriting adapter class"
           end
 
           def to_h
+            raise NotImplementedError, "You must override the `to_h` method in your inheriting adapter class"
           end
         end
       end
