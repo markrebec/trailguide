@@ -147,9 +147,9 @@
         <tr>
           <th scope="row">&nbsp;</th>
           <th>
-            <span><%= combined_experiment.participants %></span>
+            <span><%= number_with_delimiter combined_experiment.participants %></span>
             <% if combined_experiment.configuration.target_sample_size %>
-              <span class="text-muted">/ <%= combined_experiment.configuration.target_sample_size %></span>
+              <span class="text-muted">/ <%= number_with_delimiter combined_experiment.configuration.target_sample_size %></span>
             <% end %>
           </th>
           <% if combined_experiment.goals.empty? %>
