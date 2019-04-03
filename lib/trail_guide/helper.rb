@@ -78,16 +78,32 @@ module TrailGuide
         new(metric).choose!(**opts, &block)
       end
 
+      def choose(metric, **opts, &block)
+        new(metric).choose(**opts, &block)
+      end
+
       def run!(metric, **opts)
         new(metric).run!(**opts)
+      end
+
+      def run(metric, **opts)
+        new(metric).run(**opts)
       end
 
       def render!(metric, **opts)
         new(metric).render!(**opts)
       end
 
+      def render(metric, **opts)
+        new(metric).render(**opts)
+      end
+
       def convert!(metric, checkpoint=nil, **opts, &block)
         new(metric).convert!(checkpoint, **opts, &block)
+      end
+
+      def convert(metric, checkpoint=nil, **opts, &block)
+        new(metric).convert(checkpoint, **opts, &block)
       end
 
       def participant
@@ -123,6 +139,13 @@ module TrailGuide
         end
       end
 
+      def choose(**opts, &block)
+        choose!(**opts, &block)
+      rescue => e
+        Rails.logger.error "#{e.class.name}: #{e.message}"
+        experiment.control
+      end
+
       def run!(methods: nil, **opts)
         choose!(**opts) do |variant, metadata|
           varmeth = methods[variant.name] if methods
@@ -152,6 +175,13 @@ module TrailGuide
         end
       end
 
+      def run(methods: nil, **opts)
+        run!(methods: methods, **opts)
+      rescue => e
+        Rails.logger.error "#{e.class.name}: #{e.message}"
+        false
+      end
+
       def render!(prefix: nil, templates: nil, locals: {}, **opts)
         raise UnsupportedContextError, "The current context (#{context}) does not support rendering. Rendering is only available in controllers and views." unless context.respond_to?(:render, true)
         choose!(**opts) do |variant, metadata|
@@ -166,6 +196,13 @@ module TrailGuide
         end
       end
 
+      def render(prefix: nil, templates: nil, locals: {}, **opts)
+        render!(prefix: prefix, templates: templates, locals: locals, **opts)
+      rescue => e
+        Rails.logger.error "#{e.class.name}: #{e.message}"
+        false
+      end
+
       def convert!(checkpoint=nil, **opts, &block)
         checkpoints = experiments.map { |experiment| experiment.convert!(checkpoint, **opts) }
         return false unless checkpoints.any?
@@ -174,6 +211,13 @@ module TrailGuide
         else
           checkpoints
         end
+      end
+
+      def convert(checkpoint=nil, **opts, &block)
+        convert!(checkpoint, **opts, &block)
+      rescue => e
+        Rails.logger.error "#{e.class.name}: #{e.message}"
+        false
       end
 
       def experiments
