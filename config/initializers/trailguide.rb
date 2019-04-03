@@ -1,6 +1,9 @@
 # top-level trailguide rails engine configuration
 #
 TrailGuide.configure do |config|
+  # logger object
+  config.logger = Rails.logger
+
   # url string or initialized Redis object
   config.redis = ENV['REDIS_URL']
 
@@ -73,7 +76,7 @@ TrailGuide.configure do |config|
   # callback when your participant adapter fails to initialize, and trailguide
   # falls back to the anonymous adapter
   config.on_adapter_failover = -> (adapter, error) do
-    Rails.logger.error("#{error.class.name}: #{error.message}")
+    TrailGuide.logger.error error
   end
 
   # list of user agents used by the default request filter proc below when
@@ -184,7 +187,7 @@ TrailGuide::Experiment.configure do |config|
   # callback when connecting to redis fails and trailguide falls back to always
   # returning control variants
   config.on_redis_failover = -> (experiment, error) do
-    Rails.logger.error("#{error.class.name}: #{error.message}")
+    TrailGuide.logger.error error
   end
 
   # callback on experiment start, either manually via UI/console or

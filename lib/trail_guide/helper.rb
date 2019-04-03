@@ -142,7 +142,7 @@ module TrailGuide
       def choose(**opts, &block)
         choose!(**opts, &block)
       rescue => e
-        Rails.logger.error "#{e.class.name}: #{e.message}"
+        TrailGuide.logger.error e
         experiment.control
       end
 
@@ -178,7 +178,7 @@ module TrailGuide
       def run(methods: nil, **opts)
         run!(methods: methods, **opts)
       rescue => e
-        Rails.logger.error "#{e.class.name}: #{e.message}"
+        TrailGuide.logger.error e
         false
       end
 
@@ -199,7 +199,7 @@ module TrailGuide
       def render(prefix: nil, templates: nil, locals: {}, **opts)
         render!(prefix: prefix, templates: templates, locals: locals, **opts)
       rescue => e
-        Rails.logger.error "#{e.class.name}: #{e.message}"
+        TrailGuide.logger.error e
         false
       end
 
@@ -216,7 +216,7 @@ module TrailGuide
       def convert(checkpoint=nil, **opts, &block)
         convert!(checkpoint, **opts, &block)
       rescue => e
-        Rails.logger.error "#{e.class.name}: #{e.message}"
+        TrailGuide.logger.error e
         false
       end
 

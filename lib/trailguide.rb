@@ -19,6 +19,6 @@ module TrailGuide
   @@configuration = TrailGuide::Config.new
 
   class << self
-    delegate :redis, to: :configuration
+    delegate :logger, :redis, to: :configuration
   end
 end
