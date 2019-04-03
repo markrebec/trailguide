@@ -41,7 +41,7 @@ module TrailGuide
 
     # use the parent experiment as the algorithm and map to the matching variant
     def algorithm_choose!(metadata: nil)
-      variant = parent.new(participant).choose!(metadata: metadata)
+      variant = parent.new(participant.participant).choose!(metadata: metadata)
       variants.find { |var| var == variant.name }
     end
   end
