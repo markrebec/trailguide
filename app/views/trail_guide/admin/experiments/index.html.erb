@@ -9,7 +9,7 @@
 <% end %>
 
 <div class="experiments">
-  <% TrailGuide.catalog.by_started.each do |experiment| %>
+  <% @experiments.each do |experiment| %>
     <% if experiment.combined? %>
       <%= render 'combined_experiment', combined_experiment: experiment %>
     <% else %>

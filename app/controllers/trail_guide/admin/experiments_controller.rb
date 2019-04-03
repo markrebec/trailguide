@@ -5,6 +5,8 @@ module TrailGuide
         (redirect_to :back rescue redirect_to trail_guide_admin.experiments_path) and return unless experiment.present?
       end
 
+      before_action :experiments, only: [:index]
+
       def index
       end
 
@@ -57,6 +59,12 @@ module TrailGuide
       end
 
       private
+
+      def experiments
+        @experiments = TrailGuide.catalog
+        @experiments = @experiments.send(params[:scope]) if params[:scope].present?
+        @experiments = @experiments.by_started
+      end
 
       def experiment
         @experiment ||= TrailGuide.catalog.find(params[:id])

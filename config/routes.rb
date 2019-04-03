@@ -1,31 +1,5 @@
-TrailGuide::Engine.routes.draw do
-  get   '/' => 'experiments#index',
-        defaults: { format: :json }
-  match '/:experiment_name' => 'experiments#choose',
-        defaults: { format: :json },
-        via: [:get, :post]
-  match '/:experiment_name' => 'experiments#convert',
-        defaults: { format: :json },
-        via: [:put]
-  match '/:experiment_name/:checkpoint' => 'experiments#convert',
-        defaults: { format: :json },
-        via: [:put]
-end
-
-TrailGuide::Admin::Engine.routes.draw do
-  resources :experiments, path: '/', only: [:index] do
-    member do
-      match :start,   via: [:put, :post, :get]
-      match :stop,    via: [:put, :post, :get]
-      match :reset,   via: [:put, :post, :get]
-      match :resume,  via: [:put, :post, :get]
-      match :restart, via: [:put, :post, :get]
-
-      match :join,    via: [:put, :post, :get], path: 'join/:variant'
-      match :leave,   via: [:put, :post, :get]
-
-      match :winner,  via: [:put, :post, :get], path: 'winner/:variant'
-      match :clear,   via: [:put, :post, :get]
-    end
-  end
-end
+# this not only organizes the routes, but also ensures they're only included
+# once (via ruby require behavior), because having two separate engines in the
+# gem can cause routes to be parsed twice and double up
+require_relative 'routes/engine'
+require_relative 'routes/admin'

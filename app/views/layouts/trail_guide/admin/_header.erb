@@ -4,11 +4,30 @@
     <%= TrailGuide::Admin.configuration.title %>
   <% end %>
   <div class="col-sm text-center">
-    <strong class="total"><%= TrailGuide.catalog.count %></strong> experiments
+    <%= link_to trail_guide_admin.experiments_path, class: "text-dark" do %>
+      <strong class="total">
+        <%= TrailGuide.catalog.count %>
+      </strong>
+      <span>experiments</span>
+    <% end %>
+
     <span>/</span>
-    <strong class="running"><%= TrailGuide.catalog.running.count %></strong> running
+
+    <%= link_to trail_guide_admin.scoped_experiments_path(scope: :running), class: "text-dark" do %>
+      <strong class="total">
+        <%= TrailGuide.catalog.running.count %>
+      </strong>
+      <span>running</span>
+    <% end %>
+
     <span>/</span>
-    <strong class="stopped"><%= TrailGuide.catalog.stopped.count %></strong> stopped
+
+    <%= link_to trail_guide_admin.scoped_experiments_path(scope: :not_running), class: "text-dark" do %>
+      <strong class="total">
+        <%= TrailGuide.catalog.not_running.count %>
+      </strong>
+      <span>stopped</span>
+    <% end %>
   </div>
   <span class="navbar-brand"><small class="text-muted"><%= TrailGuide::Admin.configuration.subtitle %></small></span>
 </nav>

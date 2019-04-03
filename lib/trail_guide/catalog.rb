@@ -103,6 +103,14 @@ module TrailGuide
       self.class.new(to_a.select(&:stopped?))
     end
 
+    def ended
+      self.class.new(to_a.select(&:winner?))
+    end
+
+    def not_running
+      self.class.new(to_a.select { |e| !e.running? })
+    end
+
     def by_started
       scoped = to_a.sort do |a,b|
         if a.running? && !b.running?
