@@ -653,16 +653,172 @@ trailguide.render(:experiment_name, templates: {
 
 #### Conversion
 
-In order to analyze performance and potentially select a winning variant, you'll want to track a conversion metric relevant to your experiment. This might mean clicking a button, creating an account, adding something to a shopping cart, completing an order, or some other interaction performed by the user.
+In order to analyze performance and potentially select a winning variant, you'll want to track a conversion metric relevant to your experiment. This might mean clicking a button, creating an account, adding something to a shopping cart, completing an order, or some other interaction performed by the user. You can convert a participant from pretty much any context with `trailguide.convert`.
 
+```ruby
+# converts the participant in their assigned variant, or does nothing if they haven't been enrolled in the experiment
+trailguide.convert(:experiment_name)
 
-### Service Objects
+# requires a goal for experiments configured with multiple goals
+trailguide.convert(:experiment_name, :goal_name)
+```
 
-### Background Jobs
+### Service Objects & Background Jobs
+
+The way you use trailguide outside of a request context will mostly depend on the participant adapter being used. To get started, you'll need to include the `TrailGuide::Helper` module into whatever class or context you're working with.
+
+The `:cookie` and `:session` adapters **will not work** in a background context, but the default `:redis`, `:multi` and `:unity` adapters will work if provided with a `trailguide_user`. This assumes that the `trailguide_user` matches whatever user you're assigning within your request contexts (which is commonly `current_user`) if you want assignments to match up and be consistent, and the default configurations for these supported adapters all look for either a `trailguide_user` or a `current_user` so they should work in most contexts.
+
+A simple example might be sending a welcome email in a background job with a variable discount amount depending on what variant the user was enrolled into during signup.
+
+```ruby
+# config/experiments.rb
+experiment :welcome_discount do |config|
+  variant :10
+  variant :15
+end
+
+# app/controllers/users_controller.rb
+class UsersController < ApplicationController
+  def create
+    # ... signup the user
+    amount = trailguide.choose(:welcome_discount)
+    flash[:info] = "Check your email for a $#{amount} discount!"
+  end
+end
+
+# app/jobs/send_welcome_email_job.rb
+class SendWelcomeEmailJob < ApplicationJob
+  include TrailGuide::Helper
+
+  def perform(user)
+    # set this to an instance var before choosing so it's available in the supported trailguide_user method
+    @user = user
+
+    amount = trailguide.choose(:welcome_discount)
+    UserMailer.welcome_email(@user, amount)
+  end
+
+  # using one of the supported adapters will automatically call this method if it exists
+  def trailguide_user
+    @user
+  end
+end
+```
+
+If you're using a custom adapter, you'll need to make sure that your adapter is able to infer the participant from your context.
+
+## JavaScript Client
+
+There is a simple javascript client available that mimics the ruby usage as closely as possible, and is ready to be used with the rails asset pipeline. This client uses axios to hit the API, and requires that you mount it in your routes.
+
+```javascript
+// require the trailguide client in your application.js or wherever makes sense
+//= require trailguide
+
+// create a client instance
+// make sure to pass in the route path where you've mounted the trailguide engine
+var client = TrailGuide.client('/api/experiments');
+
+// enroll in an experiment
+client.choose('experiment_name');
+
+// convert for an experiment with an optional goal
+client.convert('experiment_name', 'optional_goal');
+
+// return the participant's active experiments and their assigned variant group
+client.active();
+```
+
+## Experiment Lifecycle
+
+**TODO**
+
+## Goals
+
+You can configure experiment goals if a single experiment requires multiple conversion goals, or if you just want to define a single named goal to be more explicit.
+
+```ruby
+experiment :button_color do |config|
+  variant :red
+  variant :green
+  variant :blue
+
+  goal :signed_up
+  goal :checked_out
+
+  # if this is false (default), once a participant converts to one of the defined goals, they will not be able to convert to any of the others unless the experiment is reset
+  # if this is true, a single participant may convert to more than one goal, but only once each
+  config.allow_multiple_goals = false
+end
+```
+
+When you define one or more named goals for an experiment, you must pass one of the defined goals when converting.
+
+```ruby
+trailguide.convert(:button_color, :signed_up)
+```
+
+## Metrics
+
+If you have multiple experiments that share a relevant conversion point, you can configure them with a shared metric. This allows you to reference and convert multiple experiments at once using that shared metric, and only experiments in which participants have been enrolled will be converted.
+
+Shared metrics can only be used for conversion, not for enrollment, since experiments don't share assignments.
+
+For example if you have multiple experiments where performing a search is considered to be a successful conversion, you can configure them all with the same shared metric then use that metric in your calls to `trailguide.convert`.
+
+```ruby
+experiment :first_search_experiment do |config|
+  config.metric = :perform_search
+
+  variant :a
+  variant :b
+end
+
+experiment :second_search_experiment do |config|
+  config.metric = :perform_search
+
+  variant :one
+  variant :two
+  variant :three
+end
+
+experiment :third_search_experiment do |config|
+  config.metric = :perform_search
+
+  variant :red
+  variant :blue
+end
+
+class SearchController < ApplicationController
+  def search
+    trailguide.convert(:perform_search)
+    # ...
+  end
+end
+```
+
+Since experiments with defined goals require a goal to be passed in when converting, any experiments that are sharing a metric must define the same goals.
+
+## Combined Experiments
+
+**TODO**
+
+## Admin UI
+
+**TODO**
+
+## API
+
+**TODO**
+
+## RSpec Helpers
+
+**TODO**
 
 ## Contributing
 
-Contribution directions go here.
+**TODO**
 
 ## License
 
