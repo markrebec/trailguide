@@ -381,7 +381,13 @@ See the unity documentation for more info about unifying sessions.
 
 #### Custom Adapters
 
-*TODO* - In the meantime, checkout the cookie or session adapters for simple examples as a starting point.
+**TODO** - In the meantime, checkout the cookie or session adapters for simple examples as a starting point.
+
+```ruby
+TrailGuide.configure do |config|
+  config.adapter = MyCustom::AdapterClass
+end
+```
 
 ### Algorithms
 
@@ -442,7 +448,14 @@ end
 
 #### Custom
 
-*TODO* - In the meantime, take a look at the included algorithms as a starting point. Essentially as long as you accept an experiment and return a variant, the rest is up to you.
+**TODO** - In the meantime, take a look at the included algorithms as a starting point. Essentially as long as you accept an experiment and return a variant, the rest is up to you.
+
+```ruby
+experiment :my_experiment do |config|
+  config.algorithm = MyCustom::AlgorithmClass
+end
+```
+
 ## Usage
 
 ## Contributing
