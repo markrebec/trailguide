@@ -101,7 +101,7 @@ If you've mounted the admin engine, you can view your experiment's participants 
 
 ## Configuration
 
-The core engine and base experiment class have a number of configuration options available to customize behavior and hook into various pieces of functionality. The preferred way to configure trailguide is via a config initializer, and the gem sets it's config defaults via it's own initializer.
+The core engine and base experiment class have a number of configuration options available to customize behavior and hook into various pieces of functionality. The best way to configure trailguide is via a config initializer, and this gem configures it's own defaults the same way.
 
 ```ruby
 # config/initializers/trailguide.rb
@@ -117,11 +117,11 @@ TrailGuide::Experiment.configure do |config|
 end
 ```
 
-Take a look at `config/initializers/trailguide.rb` in this for a full list of defaults and examples of available configuration.
+Take a look at [`config/initializers/trailguide.rb`](https://github.com/markrebec/trailguide/blob/master/config/initializers/trailguide.rb) in this repo for a full list of defaults and examples of the available configuration options.
 
-### Defining Experiments
+### Configuring Experiments
 
-Before you can start running experiments in your app, you'll need to define and configure them. There are a few options for defining experiments - YAML files, a ruby DSL, or custom classes - and they all inherit the base `TrailGuide::Experiment.configuration` for defaults, which can be overridden per-experiment.
+Before you can start running experiments in your app you'll need to define and configure them. There are a few options for defining experiments - YAML files, a ruby DSL, or custom classes - and they all inherit the base `TrailGuide::Experiment.configuration` for defaults, which can be overridden per-experiment.
 
 #### YAML
 
@@ -140,10 +140,10 @@ simple_ab:
 # config/experiments/search/widget.yml
 
 search_widget:
-  start_manually: true
+  start_manually: false
   algorithm: 'distributed'
   variants:
-    - 'basic'
+    - 'original'
     - 'simple'
     - 'advanced'
 ```
@@ -156,12 +156,13 @@ The ruby DSL provides a more dynamic and flexible way to configure your experime
 # config/experiments.rb
 
 experiment :search_widget do |config|
-  config.start_manually = true
+  config.start_manually = false
   config.algorithm = :distributed
-  config.allow_multiple_goals = true
 
-  variant :basic
-  variant :simple, control: true
+  # the first variant is your control by default, but you can declare any one as
+  # the control like we do below
+  variant :simple
+  variant :original, control: true
   variant :advanced
 
   goal :interacted
@@ -222,7 +223,6 @@ end
 You can also use inheritance to setup base experiments and inherit configuration:
 
 ```ruby
-
 class ApplicationExperiment < TrailGuide::Experiment
   configure do |config|
     # ... config, variants, etc.
@@ -236,6 +236,16 @@ end
 
 class MyDefaultExperiment < TrailGuide::Experiment
   # inherits from configured trailguide defaults
+end
+```
+
+You can even use these in your DSL-defined experiments by specifying a `class:` argument:
+
+```ruby
+# config/experiments.rb
+
+experiment :my_inheriting_experiment, class: ApplicationExperiment do |config|
+  # ...
 end
 ```
 
