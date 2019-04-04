@@ -2,23 +2,15 @@
 
 TrailGuide is a rails engine providing a framework for running user experiments and A/B tests in rails apps.
 
-## Acknowledgements
-
-This gem is heavily inspired by the [split gem](https://github.com/splitrb/split). I've used split many times in the past and am a fan. It's an excellent alternative to trailguide, and really your best bet if you're not using rails. If you've used split in the past, you'll probably see a lot of familiar concepts and similarly named configuration variables. Parts of this project are even loosely modeled after some of the more brilliant patterns in split - like the user adapters for persistence.
-
-### Motivation
-
-While working on a project to more deeply integrate custom experiments into a rails app, I found myself digging into the split internals. Split has been the go-to for A/B testing in ruby for a while. It's grown and evolved over the years, but as I explored the codebase and the github repo it became clear I wouldn't be able to do a lot of what was required for the project without overriding much of the existing behavior. Additionally, there are some differing opinions and approaches taken here that directly conflicted with split's defaults - for example the way "combined experiments" work, or how split allows defining and running experiments directly inline, while trailguide requires configuration.
-
-After spending so much time with split and struggling with some of the implementation, I saw what I thought was a clear model and path forward for a more customizable and extensible rails-focused framework.
-
 ## Getting Started
 
 ### Requirements
 
-Currently only rails 5.x is officially supported, and trailguide requires redis as a datastore for experiment metadata.
+Currently only rails 5.x is officially tested/supported, and trailguide requires redis to store experiment metadata and (optionally) participants.
 
 `docker-compose` is a great way to run redis in development. Take a look at the `docker-compose.yml` in the root of this repo for an example.
+
+In production I recommend configuring redis as a persistent datastore (rather than a cache), in order to avoid evicting experiment or participant keys unexpectedly.
 
 ### Installation
 
@@ -29,6 +21,83 @@ gem 'trailguide'
 ```
 
 Then run `bundle install`.
+
+### Engine & Admin Routes
+
+If you plan on using the included javascript client, or if you just want an API to interact with experiments in other ways, you can mount the engine in your route config:
+
+```ruby
+# /config/routes.rb
+
+Rails.application.routes.draw do
+  # ...
+
+  mount TrailGuide::Engine => '/api/experiments'
+
+  # ...
+end
+```
+
+You can also mount the admin engine to manage and analyze your experiments via the built-in admin UI. You'll probably want to wrap this in some sort of authentication, though the details will vary between applications. If you're already mounting other admin engines (i.e. something like `sidekiq` or `flipper`), you should be able to apply the same technique to trailguide.
+
+```ruby
+# /config/routes.rb
+
+Rails.application.routes.draw do
+  # ...
+
+  mount TrailGuide::Engine => 'api/experiments'
+
+  # example auth route helper
+  authenticate :user, lambda { |u| u.admin? } do
+    mount TrailGuide::Admin::Engine => 'admin/trailguide'
+  end
+
+  # ...
+end
+```
+
+### Quick Start
+
+Create and configure an experiment:
+
+```ruby
+# config/experiments.rb
+
+experiment :simple_ab do |config|
+  config.summary = "This is a simple A/B test"
+
+  variant :a
+  variant :b
+end
+```
+
+Then use it (in controller actions for this example):
+
+```ruby
+def show
+  # ...
+
+  # select a group for this participant and use it
+  case trailguide.choose(:simple_ab)
+    when :a
+      # ... perform logic for group "a"
+    when :b
+      # ... perform logic for group "b"
+  end
+
+  # ...
+end
+
+def update
+  # ...
+
+  # mark this participant as having converted when they take a certain action
+  trailguide.convert(:simple_ab)
+
+  # ...
+end
+```
 
 ## Configuration
 
