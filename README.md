@@ -32,7 +32,7 @@ If you plan on using the included javascript client, or if you just want an API 
 Rails.application.routes.draw do
   # ...
 
-  mount TrailGuide::Engine => '/api/experiments'
+  mount TrailGuide::Engine => 'api/experiments'
 
   # ...
 end
@@ -76,22 +76,18 @@ Then use it (in controller actions for this example):
 
 ```ruby
 def show
-  # ...
-
-  # select a group for this participant and use it
+  # enroll in the experiment and do something based on the assigned variant group
   case trailguide.choose(:simple_ab)
     when :a
-      # ... perform logic for group "a"
+      # perform logic for group "a"
     when :b
-      # ... perform logic for group "b"
+      # perform logic for group "b"
   end
 
   # ...
 end
 
 def update
-  # ...
-
   # mark this participant as having converted when they take a certain action
   trailguide.convert(:simple_ab)
 
