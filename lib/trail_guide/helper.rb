@@ -77,10 +77,12 @@ module TrailGuide
       def choose!(metric, **opts, &block)
         new(metric).choose!(**opts, &block)
       end
+      alias_method :enroll!, :choose!
 
       def choose(metric, **opts, &block)
         new(metric).choose(**opts, &block)
       end
+      alias_method :enroll, :choose
 
       def run!(metric, **opts)
         new(metric).run!(**opts)
@@ -138,6 +140,7 @@ module TrailGuide
           variant
         end
       end
+      alias_method :enroll!, :choose!
 
       def choose(**opts, &block)
         choose!(**opts, &block)
@@ -145,6 +148,7 @@ module TrailGuide
         TrailGuide.logger.error e
         experiment.control
       end
+      alias_method :enroll, :choose
 
       def run!(methods: nil, **opts)
         choose!(**opts) do |variant, metadata|
