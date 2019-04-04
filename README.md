@@ -458,6 +458,204 @@ end
 
 ## Usage
 
+### Helpers
+
+The `TrailGuide::Helper` module is available to be mixed into just about any context, and provides a helper proxy with an easy API to interact with trailguide. These helpers are mixed into controllers and views as helper methods by default. You can disable this behavior by setting the `config.include_helpers` option to `false` if you'd rather explicitly include it where you want to use it.
+
+When mixed in, the `trailguide` method provides a reference to the helper proxy, which in turn provides a few methods to perform your experiments.
+
+```ruby
+# enroll in an experiment or reuse previous assignment
+trailguide.choose(:experiment_name)
+trailguide.choose!(:experiment_name)
+
+# choose, then automatically calls a method within the current context based on
+# the selected variant
+trailguide.run(:experiment_name)
+trailguide.run!(:experiment_name)
+
+# choose, then render a template or partial within the current context based on
+# the selected variant
+trailguide.render(:experiment_name)
+trailguide.render!(:experiment_name)
+
+# tracks a conversion for the participant's currently assigned variant
+trailguide.convert(:experiment_name)
+trailguide.convert!(:experiment_name)
+```
+
+As a general rule of thumb, the bang (`!`) methods will loudly raise exceptions on any failures, while the non-bang methods will log errors and do their best to gracefully continue.
+
+#### Enrollment
+
+The `choose` method will either enroll a participant into an experiment for the first time or return their previously assigned variant if they've already been enrolled. It can accept a block to execute and returns a `TrailGuide::Variant` object, but can be compared directly to strings or symbols.
+
+```ruby
+class MyController < ApplicationController
+  def index
+    # choose inline
+    variant = trailguide.choose(:experiment_name) # TrailGuide::Variant instance
+    if variant == 'variant_one'
+      # ...
+    elsif variant == 'variant_two'
+      # ...
+    end
+
+    # use directly in a case or other comparison
+    case trailguide.choose(:experiment_name)
+      when :variant_one
+        # ...
+      when :variant_two
+        # ...
+    end
+
+
+    # pass in a block
+    trailguide.choose(:experiment_name) do |variant, metadata|
+      # ... do something based on the assigned variant
+    end
+
+
+    # also accepts additional metadata which can be used in custom algorithms and
+    # passed to blocks along with any configured variant metadata
+    trailguide.choose(:experiment_name, metadata: {foo: :bar}) do |variant, metadata|
+      # ...
+    end
+  end
+end
+```
+
+You can also call `trailguide.choose` from your view templates, though you probably want to keep any complex logic in your controllers (or maybe helpers). This would print out the variant name into an `h1`:
+
+```erb
+<% variant = trailguide.choose(:experiment_name) %>
+<h1><%= variant.name %></h1>
+```
+
+#### Running Methods
+
+If you prefer, you can encapsulate your logic into methods for each variant and ask trailguide to execute the appropriate one for you automatically.
+
+```ruby
+class MyController < ApplicationController
+  def index
+    # this would call one of the methods below depending on assignment
+    trailguide.run(:experiment_name)
+  end
+
+  private
+
+  def variant_one(**metadata)
+    # ... do whatever, maybe use these almost like a `before_filter` to setup instance vars
+  end
+
+  def variant_two(**metadata)
+    # ...
+  end
+end
+```
+
+By default the above will attempt to call methods with a name matching your variant name, but you can configure custom methods via the `methods:` keyword argument.
+
+```ruby
+class MyController < ApplicationController
+  def index
+    # this would call one of the methods below depending on assignment
+    trailguide.run(:experiment_name, methods: {
+      variant_one: :my_first_method,
+      variant_two: :my_second_method
+    },
+    metadata: {
+      # you can also optionally pass custom metadata through to choose
+    })
+  end
+
+  private
+
+  def my_first_method(**metadata)
+    # ... do whatever, maybe use these almost like a `before_filter` to setup instance vars
+  end
+
+  def my_second_method(**metadata)
+    # ...
+  end
+end
+```
+
+You **can** use `trailguide.run` in your views, but the methods you're calling must be available in that context. This usually means defining them as helper methods, either in your controller via `helper_method` or in a helpers module.
+
+#### Rendering
+
+Many experiments include some sort of UI component, and trailguide provides a handy shortcut to render different paths when that pattern suits your needs. The `trailguide.render` method can be used in controllers to render templates or in views to render partials, and uses rails' underlying render logic for each context.
+
+```ruby
+# config/experiments/homepage_ab.rb
+experiment :homepage_ab do |config|
+  variant :old
+  variant :new
+end
+
+# app/controllers/homepage_controller.rb
+class HomepageController < ApplicationController
+  def index
+    trailguide.render(:homepage_experiment)
+  end
+end
+
+# this would render one of these templates within the layout (instead of homepage/index.html.erb)
+# app/views/homepage/homepage_ab/old.html.erb
+# app/views/homepage/homepage_ab/new.html.erb
+```
+
+You can also use render in a view to render partials instead of templates.
+
+```ruby
+# config/experiments/homepage_hero.rb
+experiment :homepage_hero do |config|
+  variant :old
+  variant :new
+end
+
+# app/controllers/homepage_controller.rb
+class HomepageController < ApplicationController
+  def index
+  end
+end
+```
+
+```erb
+<!-- app/views/homepage/index.html.erb -->
+<%= trailguide.render(:homepage_hero) %>
+
+<!-- this would render one of these partials -->
+<!-- app/views/homepage/homepage_hero/_old.html.erb -->
+<!-- app/views/homepage/homepage_hero/_new.html.erb -->
+```
+
+By default the render method looks for templates or partials matching the assigned experiment and variant within the current render context path. For templates (in controllers) this means something like `app/views/your_controller/experiment_name/variant_name.html.*`, and for partials (in views) something like `app/views/your_controller/experiment_name/_variant_name.html.*` (note the underscore for partials, following rails' conventions).
+
+You can override the prefix or the full paths to the individual templates via the `prefix:` and `templates:` keyword args respectively.
+
+```ruby
+# looks for variant templates in app/views/foo/bar/experiment_name/*
+trailguide.render(:experiment_name, prefix: 'foo/bar')
+
+# specify the path for each variant's template (relative to rails view path)
+trailguide.render(:experiment_name, templates: {
+  variant_one: 'foo/bar/custom.html.erb',
+  variant_two: 'other/custom/template.html.erb'
+})
+```
+
+#### Conversion
+
+In order to analyze performance and potentially select a winning variant, you'll want to track a conversion metric relevant to your experiment. This might mean clicking a button, creating an account, adding something to a shopping cart, completing an order, or some other interaction performed by the user.
+
+
+### Service Objects
+
+### Background Jobs
+
 ## Contributing
 
 Contribution directions go here.
