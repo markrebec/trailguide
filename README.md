@@ -255,12 +255,12 @@ While all experiment configuration, metadata and metrics are stored in redis, th
 
 The following participant adapters are included with trailguide:
 
-* cookie (default) - stores participant assignments in a cookie in their browser
-* session - stores participant assignments in a hash in their rails session
-* redis - stores participant assignments in redis, under a configurable key identifier (usually `current_user.id` or a cookie storing some sort of tracking/visitor ID for logged out users)
-* anonymous - temporary storage, in a local hash, that only exists for as long as you have a handle on the participant object (usually a last resort fallback)
-* multi - attempts to use the "best" available adapter based on the current context
-* unity - uses `TrailGuide::Unity` to attempt to unify visitor/user sessions based on your configuration
+* `:cookie` (default) - stores participant assignments in a cookie in their browser
+* `:session` - stores participant assignments in a hash in their rails session
+* `:redis` - stores participant assignments in redis, under a configurable key identifier (usually `current_user.id` or a cookie storing some sort of tracking/visitor ID for logged out users)
+* `:anonymous` - temporary storage, in a local hash, that only exists for as long as you have a handle on the participant object (usually a last resort fallback)
+* `:multi` - attempts to use the "best" available adapter based on the current context
+* `:unity` - uses `TrailGuide::Unity` to attempt to unify visitor/user sessions based on your configuration
 
 #### Cookie
 
@@ -379,8 +379,70 @@ end
 
 See the unity documentation for more info about unifying sessions.
 
+#### Custom Adapters
+
+*TODO* - In the meantime, checkout the cookie or session adapters for simple examples as a starting point.
+
 ### Algorithms
 
+There are a few common assignment algorithms included in trailguide, and it's easy to define your own and configure your experiments to use them. Algorithms can either be configured globally for all experiments in your initializer, or overridden individually per-experiment.
+
+The following algorithms are available:
+
+* `:weighted` (default) - allows favoring variants by assigning them weights
+* `:distributed` - totally even distribution across variants
+* `:random` - truly random sampling of variants on assignment
+* `:bandit` - a "multi-armed bandit" approach to assignment
+
+#### Weighted
+
+This is the default algorithm, which allows weighted assignment to variants based on each variant's configuration. All things being equal (all variants having equal weights), it's essentially a random sampling that will provide mostly even distribution across a large enough sample size. The default weight for all variants is 1.
+
+```ruby
+experiment :my_experiment do |config|
+  config.algorithm = :weighted
+
+  variant :a, weight: 2 # would be assigned roughly 40% of the time
+  variant :b, weight: 2 # would be assigned roughly 40% of the time
+  variant :c, weight: 1 # would be assigned roughly 20% of the time
+end
+```
+
+Note that the weighted algorithm is the only one that takes variant weight into account, and the other algorithms will simply ignore it if it's defined.
+
+#### Distributed
+
+The distributed algorithm ensures completely even distribution across all variants by always selecting from the variant(s) with the lowest number of participants.
+
+```ruby
+experiment :my_experiment do |config|
+  config.algorithm = :distributed
+end
+```
+
+#### Random
+
+The random algorithm provides totally random distribution by sampling from all variants on assignment.
+
+```ruby
+experiment :my_experiment do |config|
+  config.algorithm = :random
+end
+```
+
+#### Multi-Armed Bandit
+
+The bandit algorithm in trailguide was heavily inspired by [the split gem](https://github.com/splitrb/split#algorithms), and will automatically weight variants based on their performance over time. You can [read more about this approach](http://stevehanov.ca/blog/index.php?id=132) if you're interested.
+
+```ruby
+experiment :my_experiment do |config|
+  config.algorithm = :bandit
+end
+```
+
+#### Custom
+
+*TODO* - In the meantime, take a look at the included algorithms as a starting point. Essentially as long as you accept an experiment and return a variant, the rest is up to you.
 ## Usage
 
 ## Contributing
