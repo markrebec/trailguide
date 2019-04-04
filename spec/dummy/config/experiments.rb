@@ -1,5 +1,7 @@
 experiment :basic_experiment do |config|
-  config.metric = :homepage_search
+  config.summary = "simple A/B test showing off some basic configuration"
+
+  config.metric = :example_metric
 
   variant :option_one, control: true
   variant :option_two
@@ -13,6 +15,8 @@ experiment :basic_experiment do |config|
 end
 
 experiment :button_color do |config|
+  config.summary = "example combined experiment"
+
   variant :green
   variant :blue
   variant :white, control: true
