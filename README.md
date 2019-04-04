@@ -636,7 +636,7 @@ end
 <!-- app/views/homepage/homepage_hero/_new.html.erb -->
 ```
 
-By default the render method looks for templates or partials matching the assigned experiment and variant within the current render context path. For templates (in controllers) this means something like `app/views/your_controller/experiment_name/variant_name.html.*`, and for partials (in views) something like `app/views/your_controller/experiment_name/_variant_name.html.*` (note the underscore for partials, following rails' conventions).
+By default the render method looks for templates or partials matching the assigned experiment and variant within the current render context path. For templates (in controllers) this means something like `app/views/your_controller/experiment_name/variant_name.*`, and for partials (in views) something like `app/views/your_controller/experiment_name/_variant_name.*` (note the underscore for partials, following rails' conventions).
 
 You can override the prefix or the full paths to the individual templates via the `prefix:` and `templates:` keyword args respectively.
 
@@ -646,9 +646,13 @@ trailguide.render(:experiment_name, prefix: 'foo/bar')
 
 # specify the path for each variant's template (relative to rails view path)
 trailguide.render(:experiment_name, templates: {
-  variant_one: 'foo/bar/custom.html.erb',
-  variant_two: 'other/custom/template.html.erb'
+  variant_one: 'foo/bar/custom',
+  variant_two: 'other/custom/template'
 })
+
+# renders one of these
+# app/views/foo/bar/custom.html.erb
+# app/views/other/custom/template.html.erb
 ```
 
 #### Conversion
@@ -684,6 +688,7 @@ class UsersController < ApplicationController
     # ... signup the user
     amount = trailguide.choose(:welcome_discount)
     flash[:info] = "Check your email for a $#{amount} discount!"
+    SendWelcomeEmailJob.perform_later(current_user)
   end
 end
 
@@ -801,6 +806,10 @@ end
 Since experiments with defined goals require a goal to be passed in when converting, any experiments that are sharing a metric must define the same goals.
 
 ## Combined Experiments
+
+**TODO**
+
+## Filtering Requests
 
 **TODO**
 
