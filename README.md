@@ -65,12 +65,14 @@ Create and configure an experiment:
 # config/experiments.rb
 
 experiment :simple_ab do |config|
-  config.summary = "This is a simple A/B test"
+  config.summary = "This is a simple A/B test" # optional
 
   variant :a
   variant :b
 end
 ```
+
+Start your experiment either via the admin UI or from a rails console with `TrailGuide.catalog.find(:simple_ab).start!` to enable enrollment.
 
 Then use it (in controller actions for this example):
 
@@ -95,9 +97,11 @@ def update
 end
 ```
 
+If you've mounted the admin engine, you can view your experiment's participants and conversions there.
+
 ## Configuration
 
-The core engine and base experiment class have a number of configuration flags available to customize behavior and hook into various pieces of functionality. The preferred way to configure trailguide is via a config initializer, and the gem sets it's config defaults via it's own initializer.
+The core engine and base experiment class have a number of configuration options available to customize behavior and hook into various pieces of functionality. The preferred way to configure trailguide is via a config initializer, and the gem sets it's config defaults via it's own initializer.
 
 ```ruby
 # config/initializers/trailguide.rb
