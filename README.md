@@ -306,7 +306,10 @@ TrailGuide.configure do |config|
   config.adapter = TrailGuide::Adapters::Participants::Redis.configure do |config|
     config.namespace = :participants
     config.expiration = nil
-    config.lookup = -> (context) { context.current_user.id } # context is wherever you're calling trailguide, usually a controller or view
+    config.lookup = -> (context) { # context is wherever you're invoking trailguide, usually a controller or view
+      context.try(:trailguide_user).try(:id) ||
+        context.try(:current_user).try(:id)
+    }
   end
 end
 ```
@@ -317,7 +320,7 @@ The anonymous adapter is a simple, ephemeral ruby hash that only exists for as l
 
 #### Multi
 
-The multi adapter will attempt to use the "best" available adapter, depending on the context from which trailguide is being invoked (controller, view, background job, etc.). It comes with a default configuration that prefers to use redis if a `current_user` is available, otherwise tries to use cookies if possible, then session if possible, falling back to anonymous as a last resort.
+The multi adapter will attempt to use the "best" available adapter, depending on the context from which trailguide is being invoked (controller, view, background job, etc.). It comes with a default configuration that prefers to use redis if a `trailguide_user` or `current_user` is available, otherwise tries to use cookies if possible, then session if possible, falling back to anonymous as a last resort.
 
 You can use the multi adapter to wrap any adapter selection logic you like, the only requirement is that you return one of the other adapters:
 
@@ -330,7 +333,8 @@ TrailGuide.configure do |config|
   config.adapter = TrailGuide::Adapters::Participants::Multi.configure do |config|
     # should be a proc that returns another adapter to be used
     config.adapter = -> (context) do
-      if context.respond_to?(:current_user, true) && context.send(:current_user).present?
+      if (context.respond_to?(:trailguide_user, true) && context.send(:trailguide_user).present?) ||
+          (context.respond_to?(:current_user, true) && context.send(:current_user).present?)
         TrailGuide::Adapters::Participants::Redis
       elsif context.respond_to?(:cookies, true)
         TrailGuide::Adapters::Participants::Cookie

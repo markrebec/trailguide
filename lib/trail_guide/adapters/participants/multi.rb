@@ -6,7 +6,8 @@ module TrailGuide
         def initialize(&block)
           configure do |config|
             config.adapter = -> (context) do
-              if context.respond_to?(:current_user, true) && context.send(:current_user).present?
+              if (context.respond_to?(:trailguide_user, true) && context.send(:trailguide_user).present?) ||
+                  (context.respond_to?(:current_user, true) && context.send(:current_user).present?)
                 TrailGuide::Adapters::Participants::Redis
               elsif context.respond_to?(:cookies, true)
                 TrailGuide::Adapters::Participants::Cookie

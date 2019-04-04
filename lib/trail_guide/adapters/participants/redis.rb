@@ -6,7 +6,10 @@ module TrailGuide
         def initialize(&block)
           configure do |config|
             config.namespace = :participants
-            config.lookup = -> (context) { context.current_user.id }
+            config.lookup = -> (context) {
+              context.try(:trailguide_user).try(:id) ||
+                context.try(:current_user).try(:id)
+            }
             config.expiration = nil
 
             yield(config) if block_given?
