@@ -183,7 +183,7 @@ TrailGuide::Experiment.configure do |config|
   #
   # true    this experiment can be paused and resumed
   # false   this experiment can only be stopped and reset/restarted
-  config.can_resume = false
+  config.can_resume = true
 
   # set a default target sample size for all experiments - this will prevent
   # metrics and stats from being displayed in the admin UI until the sample size
