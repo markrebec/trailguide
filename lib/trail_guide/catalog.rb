@@ -99,6 +99,10 @@ module TrailGuide
       self.class.new(to_a.select(&:running?))
     end
 
+    def paused
+      self.class.new(to_a.select(&:paused?))
+    end
+
     def stopped
       self.class.new(to_a.select(&:stopped?))
     end

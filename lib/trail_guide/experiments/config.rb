@@ -5,13 +5,13 @@ module TrailGuide
         :name, :summary, :preview_url, :algorithm, :metric, :variants, :goals,
         :start_manually, :reset_manually, :store_override, :track_override,
         :combined, :allow_multiple_conversions, :allow_multiple_goals,
-        :track_winner_conversions, :skip_request_filter, :target_sample_size
+        :track_winner_conversions, :skip_request_filter, :target_sample_size,
+        :can_resume
       ].freeze
 
       CALLBACK_KEYS = [
-        :on_start, :on_stop, :on_resume, :on_winner, :on_reset, :on_delete,
-        :on_choose, :on_use, :on_convert,
-        :on_redis_failover,
+        :on_start, :on_stop, :on_pause, :on_resume, :on_winner, :on_reset,
+        :on_delete, :on_choose, :on_use, :on_convert, :on_redis_failover,
         :allow_participation, :allow_conversion, :rollout_winner
       ].freeze
 
@@ -71,6 +71,10 @@ module TrailGuide
 
       def skip_request_filter?
         !!skip_request_filter
+      end
+
+      def can_resume?
+        !!can_resume
       end
 
       def name
@@ -158,6 +162,11 @@ module TrailGuide
       def on_stop(meth=nil, &block)
         self[:on_stop] ||= []
         self[:on_stop] << (meth || block)
+      end
+
+      def on_pause(meth=nil, &block)
+        self[:on_pause] ||= []
+        self[:on_pause] << (meth || block)
       end
 
       def on_resume(meth=nil, &block)

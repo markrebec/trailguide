@@ -178,6 +178,13 @@ TrailGuide::Experiment.configure do |config|
   # false   default behavior, requests will be filtered based on your config
   config.skip_request_filter = false
 
+  # whether or not this experiment can be resumed after it's stopped - allows
+  # temporarily "pausing" an experiment then resuming it without losing metrics
+  #
+  # true    this experiment can be paused and resumed
+  # false   this experiment can only be stopped and reset/restarted
+  config.can_resume = false
+
   # set a default target sample size for all experiments - this will prevent
   # metrics and stats from being displayed in the admin UI until the sample size
   # is reached or the experiment is stopped
@@ -211,6 +218,16 @@ TrailGuide::Experiment.configure do |config|
   #
   # config.on_stop = -> (experiment, context) { ... }
 
+  # callback on experiment pause manually via UI/console, can be used for
+  # logging, tracking, etc.
+  #
+  # context may or may not be present depending on how you're triggering the
+  # action - if you're using the admin, this will be the admin controller
+  # context, if you're in a console you have the option to pass a context to
+  # `experiment.pause!` or not
+  #
+  # config.on_pause = -> (experiment, context) { ... }
+
   # callback on experiment resume manually via UI/console, can be used for
   # logging, tracking, etc.
   #
@@ -221,8 +238,18 @@ TrailGuide::Experiment.configure do |config|
   #
   # config.on_resume = -> (experiment, context) { ... }
 
+  # callback on experiment delete manually via UI/console, can be used for
+  # logging, tracking, etc. - will also be triggered by a reset
+  #
+  # context may or may not be present depending on how you're triggering the
+  # action - if you're using the admin, this will be the admin controller
+  # context, if you're in a console you have the option to pass a context to
+  # `experiment.delete!` or not
+  #
+  # config.on_delete = -> (experiment, context) { ... }
+
   # callback on experiment reset manually via UI/console, can be used for
-  # logging, tracking, etc.
+  # logging, tracking, etc. - will also trigger any on_delete callbacks
   #
   # context may or may not be present depending on how you're triggering the
   # action - if you're using the admin, this will be the admin controller

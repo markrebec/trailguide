@@ -19,6 +19,10 @@ module TrailGuide
         parent.start!
       end
 
+      def pause!
+        parent.pause!
+      end
+
       def stop!
         parent.stop!
       end
@@ -29,6 +33,10 @@ module TrailGuide
 
       def started_at
         parent.started_at
+      end
+
+      def paused_at
+        parent.paused_at
       end
 
       def stopped_at

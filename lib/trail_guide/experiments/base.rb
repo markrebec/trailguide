@@ -52,23 +52,35 @@ module TrailGuide
           started
         end
 
+        def pause!(context=nil)
+          return false unless running? && configuration.can_resume?
+          paused = TrailGuide.redis.hset(storage_key, 'paused_at', Time.now.to_i)
+          run_callbacks(:on_pause, context)
+          paused
+        end
+
         def stop!(context=nil)
-          return false unless running?
+          return false unless started? && !stopped?
           stopped = TrailGuide.redis.hset(storage_key, 'stopped_at', Time.now.to_i)
           run_callbacks(:on_stop, context)
           stopped
         end
 
         def resume!(context=nil)
-          return false unless started? && stopped?
-          restarted = TrailGuide.redis.hdel(storage_key, 'stopped_at')
+          return false unless paused? && configuration.can_resume?
+          resumed = TrailGuide.redis.hdel(storage_key, 'paused_at')
           run_callbacks(:on_resume, context)
-          restarted
+          resumed
         end
 
         def started_at
           started = TrailGuide.redis.hget(storage_key, 'started_at')
           return Time.at(started.to_i) if started
+        end
+
+        def paused_at
+          paused = TrailGuide.redis.hget(storage_key, 'paused_at')
+          return Time.at(paused.to_i) if paused
         end
 
         def stopped_at
@@ -80,12 +92,16 @@ module TrailGuide
           started_at && started_at <= Time.now
         end
 
+        def paused?
+          paused_at && paused_at <= Time.now
+        end
+
         def stopped?
           stopped_at && stopped_at <= Time.now
         end
 
         def running?
-          started? && !stopped?
+          started? && !paused? && !stopped?
         end
 
         def declare_winner!(variant, context=nil)
