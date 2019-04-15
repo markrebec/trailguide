@@ -22,9 +22,18 @@
 
     <span>/</span>
 
-    <%= link_to trail_guide_admin.scoped_experiments_path(scope: :not_running), class: "text-dark" do %>
+    <%= link_to trail_guide_admin.scoped_experiments_path(scope: :paused), class: "text-dark" do %>
       <strong class="total">
-        <%= TrailGuide.catalog.not_running.count %>
+        <%= TrailGuide.catalog.paused.count %>
+      </strong>
+      <span>paused</span>
+    <% end %>
+
+    <span>/</span>
+
+    <%= link_to trail_guide_admin.scoped_experiments_path(scope: :stopped), class: "text-dark" do %>
+      <strong class="total">
+        <%= TrailGuide.catalog.stopped.count %>
       </strong>
       <span>stopped</span>
     <% end %>

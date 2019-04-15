@@ -12,27 +12,35 @@ module TrailGuide
 
       def start
         experiment.start!(self)
-        redirect_to trail_guide_admin.experiments_path(anchor: experiment.experiment_name)
+        redirect_to trail_guide_admin.scoped_experiments_path(scope: :running, anchor: experiment.experiment_name)
+      end
+
+      def pause
+        experiment.pause!(self)
+        redirect_to trail_guide_admin.scoped_experiments_path(scope: :paused, anchor: experiment.experiment_name)
       end
 
       def stop
         experiment.stop!(self)
-        redirect_to trail_guide_admin.experiments_path(anchor: experiment.experiment_name)
+        redirect_to trail_guide_admin.scoped_experiments_path(scope: :stopped, anchor: experiment.experiment_name)
       end
 
       def reset
+        experiment.stop!(self)
         experiment.reset!(self)
         redirect_to trail_guide_admin.experiments_path(anchor: experiment.experiment_name)
       end
 
       def resume
         experiment.resume!(self)
-        redirect_to trail_guide_admin.experiments_path(anchor: experiment.experiment_name)
+        redirect_to trail_guide_admin.scoped_experiments_path(scope: :running, anchor: experiment.experiment_name)
       end
 
       def restart
-        experiment.reset!(self) && experiment.start!(self)
-        redirect_to trail_guide_admin.experiments_path(anchor: experiment.experiment_name)
+        experiment.stop!(self)
+        experiment.reset!(self)
+        experiment.start!(self)
+        redirect_to trail_guide_admin.scoped_experiments_path(scope: :running, anchor: experiment.experiment_name)
       end
 
       def join

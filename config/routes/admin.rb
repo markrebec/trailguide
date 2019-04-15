@@ -2,6 +2,7 @@ TrailGuide::Admin::Engine.routes.draw do
   resources :experiments, path: '/', only: [:index] do
     member do
       match :start,   via: [:put, :post, :get]
+      match :pause,   via: [:put, :post, :get]
       match :stop,    via: [:put, :post, :get]
       match :reset,   via: [:put, :post, :get]
       match :resume,  via: [:put, :post, :get]
