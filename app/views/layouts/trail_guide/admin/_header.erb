@@ -22,14 +22,16 @@
 
     <span>/</span>
 
-    <%= link_to trail_guide_admin.scoped_experiments_path(scope: :paused), class: "text-dark" do %>
-      <strong class="total">
-        <%= TrailGuide.catalog.paused.count %>
-      </strong>
-      <span>paused</span>
-    <% end %>
+    <% if TrailGuide.catalog.any? { |exp| exp.configuration.can_resume? } %>
+      <%= link_to trail_guide_admin.scoped_experiments_path(scope: :paused), class: "text-dark" do %>
+        <strong class="total">
+          <%= TrailGuide.catalog.paused.count %>
+        </strong>
+        <span>paused</span>
+      <% end %>
 
-    <span>/</span>
+      <span>/</span>
+    <% end %>
 
     <%= link_to trail_guide_admin.scoped_experiments_path(scope: :stopped), class: "text-dark" do %>
       <strong class="total">
