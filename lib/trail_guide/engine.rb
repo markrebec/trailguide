@@ -2,6 +2,10 @@ module TrailGuide
   class Engine < ::Rails::Engine
     isolate_namespace TrailGuide
 
+    class << self
+      attr_accessor :routes_loaded
+    end
+
     config.generators do |g|
       g.test_framework = :rspec
     end
