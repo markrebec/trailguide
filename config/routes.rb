@@ -1,10 +1,3 @@
-# we use the `routes_loaded` class attributes on the engine classes to track
-# whether routes have been loaded already.
-#
-# because there are two rails engines in this gem, and because of the way rails
-# engines and routes work, this route config will be included twice, and attempt
-# to redefine named routes, which causes rails to raise an exception
-
 TrailGuide::Engine.routes.draw do
   get   '/' => 'experiments#index',
         defaults: { format: :json }
@@ -17,9 +10,7 @@ TrailGuide::Engine.routes.draw do
   match '/:experiment_name/:checkpoint' => 'experiments#convert',
         defaults: { format: :json },
         via: [:put]
-
-  TrailGuide::Engine.routes_loaded = true
-end unless TrailGuide::Engine.routes_loaded
+end
 
 TrailGuide::Admin::Engine.routes.draw do
   resources :experiments, path: '/', only: [:index] do
@@ -39,9 +30,14 @@ TrailGuide::Admin::Engine.routes.draw do
     end
 
     collection do
-      get  '/:scope', action: :index, as: :scoped
+      # There is a weird bug (sorta?), where because we're including two rails
+      # engines within this gem, they both end up pulling in these route configs
+      # which causes the routes to be redefined a second time, which in turn
+      # causes named routes (using the `:as` key) to raise an error.
+      #
+      # This rescues that failure on the second pass, while still allowing the
+      # routes to be defined properly.
+      get  '/:scope', action: :index, as: :scoped rescue nil
     end
   end
-
-  TrailGuide::Admin::Engine.routes_loaded = true
-end unless TrailGuide::Admin::Engine.routes_loaded
+end
