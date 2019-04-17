@@ -5,7 +5,6 @@ module TrailGuide
 
     def self.inherited(child)
       child.instance_variable_set :@configuration, Experiments::Config.new(child, inherit: self.configuration)
-      TrailGuide.catalog.register(child)
     end
   end
 end

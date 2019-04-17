@@ -181,7 +181,7 @@ module TrailGuide
     end
 
     def register(klass)
-      experiments << klass unless klass.abstract? || experiments.any? { |exp| exp == klass }
+      experiments << klass unless experiments.any? { |exp| exp == klass }
       klass
     end
 
@@ -199,6 +199,7 @@ module TrailGuide
         klass = opts.delete(:class) || TrailGuide::Experiment
         Class.new(klass) do
           configure opts.merge({name: name}), &block
+          register!
         end
       end
     end
