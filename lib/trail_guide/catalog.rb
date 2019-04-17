@@ -181,7 +181,7 @@ module TrailGuide
     end
 
     def register(klass)
-      experiments << klass unless experiments.any? { |exp| exp == klass }
+      experiments << klass unless klass.abstract? || experiments.any? { |exp| exp == klass }
       klass
     end
 

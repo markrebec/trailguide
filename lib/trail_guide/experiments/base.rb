@@ -11,6 +11,15 @@ module TrailGuide
           to: :configuration
         alias_method :funnels, :goals
 
+        def abstract?
+          !!@abstract
+        end
+
+        def abstract!
+          TrailGuide.catalog.experiments.reject!(&:abstract?)
+          @abstract = true
+        end
+
         def configuration
           @configuration ||= Experiments::Config.new(self)
         end
