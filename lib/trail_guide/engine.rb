@@ -6,6 +6,8 @@ module TrailGuide
       g.test_framework = :rspec
     end
 
+    paths["config/routes.rb"] = "config/routes/engine.rb"
+
     initializer "trailguide" do |app|
       TrailGuide::Catalog.load_experiments!
       if TrailGuide.configuration.include_helpers
