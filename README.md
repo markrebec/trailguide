@@ -188,6 +188,12 @@ You can put these classes anywhere rails will autoload them (or require them you
 # app/experiments/my_complex_experiment.rb
 
 class MyComplexExperiment < TrailGuide::Experiment
+  # if you want to actually use this class as an experiment (like we do in this
+  # example), you must call `register!` in order to register it in the catalog.
+  #
+  # if you want to use your class as a base class, so other experiments can
+  # inherit from it, you should _not_ call `register!`
+  register!
 
   # all standard experiment config goes in the `configure` block
   configure do |config|
