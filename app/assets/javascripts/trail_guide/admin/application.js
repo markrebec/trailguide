@@ -19,8 +19,8 @@ $(function () {
 
   // date/time pickers for scheduling experiments
   $('.datepicker').datetimepicker({
-    format: 'YYYY-MM-DDTHH:mm:ssZ',
-    icons: { time: 'fa fa-clock' },
+    format: 'MM/DD/YYYY hh:mm A Z',
+    icons: { time: 'fas fa-clock' },
     keepOpen: true,
     allowInputToggle: true,
   })
