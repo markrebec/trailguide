@@ -9,16 +9,30 @@
           </button>
         </div>
         <div class="modal-body text-left">
-          <p><small class="text-muted">Schedule your experiment to start at a future date and time or click "Start Now" to kick it off immediately.</small></p>
+          <p class="text-muted">Schedule your experiment to start at a future date and time or click <span class="text-success"><span class="fas fa-play"></span> Start Now</span> to kick it off immediately.</p>
+
           <div class="form-group row">
-            <label for="start-experiment-at-<%= experiment.experiment_name %>" class="col-sm-3 col-form-label"><strong>Start At</strong></label>
+            <label for="start-experiment-at-<%= experiment.experiment_name %>" class="col-sm-3 col-form-label"><strong>Start</strong></label>
             <div class="col-sm-9">
               <div class="input-group date datepicker" id="start-experiment-at-<%= experiment.experiment_name %>" data-target-input="nearest">
-                <input type="text" name="experiment[start_at]" value="<%= (experiment.started_at ? Time.at(experiment.started_at) : Time.now).strftime("%Y-%m-%dT%H:%M:%S%z") %>" class="form-control datetimepicker-input" data-target="#start-experiment-at-<%= experiment.experiment_name %>"/>
+                <input type="text" name="experiment[start_at]" value="<%= (experiment.started_at ? Time.at(experiment.started_at).strftime("%Y-%m-%dT%H:%M:%S%z") : nil) %>" class="form-control datetimepicker-input" data-target="#start-experiment-at-<%= experiment.experiment_name %>"/>
                 <div class="input-group-append" data-target="#start-experiment-at-<%= experiment.experiment_name %>" data-toggle="datetimepicker">
                   <div class="input-group-text"><i class="fa fa-calendar"></i></div>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <div class="form-group row">
+            <label for="stop-experiment-at-<%= experiment.experiment_name %>" class="col-sm-3 col-form-label"><strong>Stop</strong></label>
+            <div class="col-sm-9">
+              <div class="input-group date datepicker" id="stop-experiment-at-<%= experiment.experiment_name %>" data-target-input="nearest">
+                <input type="text" name="experiment[stop_at]" value="<%= (experiment.stopped_at ? Time.at(experiment.stopped_at).strftime("%Y-%m-%dT%H:%M:%S%z") : nil) %>" class="form-control datetimepicker-input" data-target="#stop-experiment-at-<%= experiment.experiment_name %>"/>
+                <div class="input-group-append" data-target="#stop-experiment-at-<%= experiment.experiment_name %>" data-toggle="datetimepicker">
+                  <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                </div>
+              </div>
+              <small class="text-muted">You may also optionally schedule your experiment to stop automatically at a date and time after it has started.</small>
             </div>
           </div>
         </div>

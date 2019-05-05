@@ -20,11 +20,10 @@ module TrailGuide
       end
 
       def schedule
-        start_at = DateTime.parse(params.require(:experiment).permit(:start_at)[:start_at])
-        experiment.schedule!(start_at, self)
+        experiment.schedule!(schedule_params[:start_at], schedule_params[:stop_at], self)
         redirect_to trail_guide_admin.experiment_path(experiment.experiment_name)
       rescue => e
-        flash[:danger] = "Failed to start experiment: #{e.message}"
+        flash[:danger] = e.message
         redirect_to trail_guide_admin.experiment_path(experiment.experiment_name)
       end
 
@@ -89,6 +88,16 @@ module TrailGuide
 
       def experiment
         @experiment ||= TrailGuide.catalog.find(params[:id])
+      end
+
+      def schedule_params
+        @schedule_params ||= begin
+          exp_params = params.require(:experiment).permit(:start_at, :stop_at)
+          exp_params[:start_at] = DateTime.parse(exp_params[:start_at]) rescue raise(ArgumentError, "Invalid start date")
+          exp_params[:stop_at] = (DateTime.parse(exp_params[:stop_at]) rescue nil)
+          raise ArgumentError, "Experiments cannot be scheduled to stop before they start" if exp_params[:stop_at] && exp_params[:stop_at] <= exp_params[:start_at]
+          exp_params
+        end
       end
 
       def participant

@@ -13,12 +13,15 @@
 //= require_tree .
 
 $(function () {
+  // using data-tooltip allows placing custom tooltips on objects already using
+  // data-toggle="modal"
   $('[data-toggle="tooltip"], [data-tooltip="tooltip"]').tooltip()
+
+  // date/time pickers for scheduling experiments
   $('.datepicker').datetimepicker({
     format: 'YYYY-MM-DDTHH:mm:ssZ',
     icons: { time: 'fa fa-clock' },
     keepOpen: true,
     allowInputToggle: true,
-    userCurrent: true,
   })
 })
