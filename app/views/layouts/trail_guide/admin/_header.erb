@@ -1,61 +1,61 @@
 <nav class="navbar navbar-expanded-sm navbar-light bg-light fixed-top">
-  <%= link_to trail_guide_admin.experiments_path, class: "navbar-brand" do %>
+  <%= link_to trail_guide_admin.experiments_path, class: "navbar-brand d-none d-sm-inline-block" do %>
     <%= image_tag "trail_guide/trailguide.png" %>
     <%= TrailGuide::Admin.configuration.title %>
   <% end %>
   <div class="col-sm text-center">
-    <%= link_to trail_guide_admin.experiments_path, class: "text-dark" do %>
-      <strong class="total">
-        <%= TrailGuide.catalog.count %>
-      </strong>
-      <span>experiments</span>
-    <% end %>
-
-    <% if TrailGuide.catalog.running.count > 0 %>
-      <span>/</span>
-
-      <%= link_to trail_guide_admin.scoped_experiments_path(scope: :running), class: "text-dark" do %>
+    <div class="btn-group">
+      <%= link_to trail_guide_admin.experiments_path, class: "btn btn-link text-dark" do %>
         <strong class="total">
-          <%= TrailGuide.catalog.running.count %>
+          <%= TrailGuide.catalog.count %>
         </strong>
-        <span>running</span>
+        <span>experiments</span>
       <% end %>
-    <% end %>
 
-    <% if TrailGuide.catalog.paused.count > 0 %>
-      <span>/</span>
+      <button type="button" class="btn btn-link text-dark dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <span class="sr-only">Toggle Dropdown</span>
+      </button>
 
-      <%= link_to trail_guide_admin.scoped_experiments_path(scope: :paused), class: "text-dark" do %>
-        <strong class="total">
-          <%= TrailGuide.catalog.paused.count %>
-        </strong>
-        <span>paused</span>
-      <% end %>
-    <% end %>
+      <div class="dropdown-menu">
+        <% if TrailGuide.catalog.running.count > 0 %>
+          <%= link_to trail_guide_admin.scoped_experiments_path(scope: :running), class: "dropdown-item" do %>
+            <strong class="total">
+              <%= TrailGuide.catalog.running.count %>
+            </strong>
+            <span>running</span>
+          <% end %>
+        <% end %>
 
-    <% if TrailGuide.catalog.scheduled.count > 0 %>
-      <span>/</span>
+        <% if TrailGuide.catalog.paused.count > 0 %>
+          <%= link_to trail_guide_admin.scoped_experiments_path(scope: :paused), class: "dropdown-item" do %>
+            <strong class="total">
+              <%= TrailGuide.catalog.paused.count %>
+            </strong>
+            <span>paused</span>
+          <% end %>
+        <% end %>
 
-      <%= link_to trail_guide_admin.scoped_experiments_path(scope: :scheduled), class: "text-dark" do %>
-        <strong class="total">
-          <%= TrailGuide.catalog.scheduled.count %>
-        </strong>
-        <span>scheduled</span>
-      <% end %>
-    <% end %>
+        <% if TrailGuide.catalog.scheduled.count > 0 %>
+          <%= link_to trail_guide_admin.scoped_experiments_path(scope: :scheduled), class: "dropdown-item" do %>
+            <strong class="total">
+              <%= TrailGuide.catalog.scheduled.count %>
+            </strong>
+            <span>scheduled</span>
+          <% end %>
+        <% end %>
 
-    <% if TrailGuide.catalog.stopped.count > 0 %>
-      <span>/</span>
-
-      <%= link_to trail_guide_admin.scoped_experiments_path(scope: :stopped), class: "text-dark" do %>
-        <strong class="total">
-          <%= TrailGuide.catalog.stopped.count %>
-        </strong>
-        <span>stopped</span>
-      <% end %>
-    <% end %>
+        <% if TrailGuide.catalog.stopped.count > 0 %>
+          <%= link_to trail_guide_admin.scoped_experiments_path(scope: :stopped), class: "dropdown-item" do %>
+            <strong class="total">
+              <%= TrailGuide.catalog.stopped.count %>
+            </strong>
+            <span>stopped</span>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
   </div>
-  <span class="navbar-brand"><small class="text-muted"><%= TrailGuide::Admin.configuration.subtitle %></small></span>
+  <span class="navbar-brand d-none d-md-inline-block"><small class="text-muted"><%= TrailGuide::Admin.configuration.subtitle %></small></span>
 </nav>
 
 <% flash.each do |key, message| %>
