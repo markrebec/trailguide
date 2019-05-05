@@ -6,41 +6,54 @@ module TrailGuide
       end
 
       before_action :experiments, only: [:index]
+      before_action :experiment,  only: [:show]
 
       def index
       end
 
+      def show
+      end
+
       def start
         experiment.start!(self)
-        redirect_to trail_guide_admin.scoped_experiments_path(scope: :running, anchor: experiment.experiment_name)
+        redirect_to trail_guide_admin.experiment_path(experiment.experiment_name)
+      end
+
+      def schedule
+        start_at = DateTime.parse(params.require(:experiment).permit(:start_at)[:start_at])
+        experiment.schedule!(start_at, self)
+        redirect_to trail_guide_admin.experiment_path(experiment.experiment_name)
+      rescue => e
+        flash[:danger] = "Failed to start experiment: #{e.message}"
+        redirect_to trail_guide_admin.experiment_path(experiment.experiment_name)
       end
 
       def pause
         experiment.pause!(self)
-        redirect_to trail_guide_admin.scoped_experiments_path(scope: :paused, anchor: experiment.experiment_name)
+        redirect_to trail_guide_admin.experiment_path(experiment.experiment_name)
       end
 
       def stop
         experiment.stop!(self)
-        redirect_to trail_guide_admin.scoped_experiments_path(scope: :stopped, anchor: experiment.experiment_name)
+        redirect_to trail_guide_admin.experiment_path(experiment.experiment_name)
       end
 
       def reset
         experiment.stop!(self)
         experiment.reset!(self)
-        redirect_to trail_guide_admin.experiments_path(anchor: experiment.experiment_name)
+        redirect_to trail_guide_admin.experiment_path(experiment.experiment_name)
       end
 
       def resume
         experiment.resume!(self)
-        redirect_to trail_guide_admin.scoped_experiments_path(scope: :running, anchor: experiment.experiment_name)
+        redirect_to trail_guide_admin.experiment_path(experiment.experiment_name)
       end
 
       def restart
         experiment.stop!(self)
         experiment.reset!(self)
         experiment.start!(self)
-        redirect_to trail_guide_admin.scoped_experiments_path(scope: :running, anchor: experiment.experiment_name)
+        redirect_to trail_guide_admin.experiment_path(experiment.experiment_name)
       end
 
       def join
@@ -48,22 +61,22 @@ module TrailGuide
         variant = experiment.variants.find { |var| var == params[:variant] }
         variant.increment_participation!
         participant.participating!(variant)
-        redirect_to trail_guide_admin.experiments_path(anchor: experiment.experiment_name)
+        redirect_to trail_guide_admin.experiment_path(experiment.experiment_name)
       end
 
       def leave
         participant.exit!(experiment)
-        redirect_to trail_guide_admin.experiments_path(anchor: experiment.experiment_name)
+        redirect_to trail_guide_admin.experiment_path(experiment.experiment_name)
       end
 
       def winner
         experiment.declare_winner!(params[:variant], self)
-        redirect_to trail_guide_admin.experiments_path(anchor: experiment.experiment_name)
+        redirect_to trail_guide_admin.experiment_path(experiment.experiment_name)
       end
 
       def clear
         experiment.clear_winner!
-        redirect_to trail_guide_admin.experiments_path(anchor: experiment.experiment_name)
+        redirect_to trail_guide_admin.experiment_path(experiment.experiment_name)
       end
 
       private

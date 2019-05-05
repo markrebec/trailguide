@@ -1,0 +1,17 @@
+<% if TrailGuide.configuration.disabled %>
+  <div class="row justify-content-center">
+    <div class="col-sm-12 col-md-10 col-lg-8">
+      <div class="alert alert-danger">
+        TrailGuide is globally disabled. Your experiments are not running, and control variants will be returned for all users until it is enabled again.
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<div class="experiments">
+  <% if @experiment.combined? %>
+    <%= render 'combined_experiment', combined_experiment: @experiment %>
+  <% else %>
+    <%= render 'experiment', experiment: @experiment %>
+  <% end %>
+</div>

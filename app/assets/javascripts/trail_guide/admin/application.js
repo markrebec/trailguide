@@ -13,8 +13,12 @@
 //= require_tree .
 
 $(function () {
-  $('[data-toggle="tooltip"]').tooltip()
+  $('[data-toggle="tooltip"], [data-tooltip="tooltip"]').tooltip()
   $('.datepicker').datetimepicker({
-    icons: { time: 'fa fa-clock' }
+    format: 'YYYY-MM-DDTHH:mm:ssZ',
+    icons: { time: 'fa fa-clock' },
+    keepOpen: true,
+    allowInputToggle: true,
+    userCurrent: true,
   })
 })

@@ -44,7 +44,7 @@ module TrailGuide
       helper_method :experiment_metric
 
       def peek_url(experiment, *args, **opts)
-        trail_guide_admin.experiments_url(*args, opts.merge({TrailGuide::Admin.configuration.peek_parameter => experiment.experiment_name, anchor: experiment.experiment_name}))
+        trail_guide_admin.experiment_url(experiment.experiment_name, *args, opts.merge({TrailGuide::Admin.configuration.peek_parameter => experiment.experiment_name}))
       end
       helper_method :peek_url
     end
