@@ -20,9 +20,14 @@
 }
 
 main {
-  padding-top: 40px;
+  padding-top: 80px;
+  padding-bottom: 40px;
 }
 
 .footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
   padding: 10px 15px;
 }
