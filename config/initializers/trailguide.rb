@@ -218,7 +218,7 @@ TrailGuide::Experiment.configure do |config|
   # context, if you're in a console you have the option to pass a context to
   # `experiment.schedule!` or not
   #
-  # config.on_schedule = -> (experiment, start_at, context) { ... }
+  # config.on_schedule = -> (experiment, start_at, stop_at, context) { ... }
 
   # callback on experiment stop manually via UI/console, can be used for
   # logging, tracking, etc.

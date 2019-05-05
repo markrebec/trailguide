@@ -56,11 +56,12 @@ module TrailGuide
           started
         end
 
-        def schedule!(start_at, context=nil)
+        def schedule!(start_at, stop_at=nil, context=nil)
           return false if started?
           save! unless persisted?
           scheduled = TrailGuide.redis.hset(storage_key, 'started_at', start_at.to_i)
-          run_callbacks(:on_schedule, start_at, context)
+          TrailGuide.redis.hset(storage_key, 'stopped_at', stop_at.to_i) if stop_at
+          run_callbacks(:on_schedule, start_at, stop_at, context)
           scheduled
         end
 
