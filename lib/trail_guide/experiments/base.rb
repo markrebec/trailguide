@@ -96,6 +96,10 @@ module TrailGuide
           started_at && started_at <= Time.now
         end
 
+        def scheduled?
+          started_at && started_at > Time.now
+        end
+
         def paused?
           paused_at && paused_at <= Time.now
         end
