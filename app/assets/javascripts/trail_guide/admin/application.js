@@ -14,4 +14,7 @@
 
 $(function () {
   $('[data-toggle="tooltip"]').tooltip()
+  $('.datepicker').datetimepicker({
+    icons: { time: 'fa fa-clock' }
+  })
 })
