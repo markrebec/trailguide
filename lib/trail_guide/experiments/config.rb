@@ -10,9 +10,10 @@ module TrailGuide
       ].freeze
 
       CALLBACK_KEYS = [
-        :on_start, :on_stop, :on_pause, :on_resume, :on_winner, :on_reset,
-        :on_delete, :on_choose, :on_use, :on_convert, :on_redis_failover,
-        :allow_participation, :allow_conversion, :rollout_winner
+        :on_start, :on_schedule, :on_stop, :on_pause, :on_resume, :on_winner,
+        :on_reset, :on_delete, :on_choose, :on_use, :on_convert,
+        :on_redis_failover, :allow_participation, :allow_conversion,
+        :rollout_winner
       ].freeze
 
       def default_config
@@ -157,6 +158,11 @@ module TrailGuide
       def on_start(meth=nil, &block)
         self[:on_start] ||= []
         self[:on_start] << (meth || block)
+      end
+
+      def on_schedule(meth=nil, &block)
+        self[:on_schedule] ||= []
+        self[:on_schedule] << (meth || block)
       end
 
       def on_stop(meth=nil, &block)

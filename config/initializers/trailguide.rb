@@ -208,6 +208,18 @@ TrailGuide::Experiment.configure do |config|
   #
   # config.on_start = -> (experiment, context) { ... }
 
+  # callback on experiment schedule manually via UI/console, can be used for logging,
+  # tracking, etc.
+  #
+  # experiments can only be scheduled if config.start_manually is true
+  #
+  # context may or may not be present depending on how you're triggering the
+  # action - if you're using the admin, this will be the admin controller
+  # context, if you're in a console you have the option to pass a context to
+  # `experiment.schedule!` or not
+  #
+  # config.on_schedule = -> (experiment, start_at, context) { ... }
+
   # callback on experiment stop manually via UI/console, can be used for
   # logging, tracking, etc.
   #
