@@ -42,3 +42,12 @@
   </div>
   <span class="navbar-brand"><small class="text-muted"><%= TrailGuide::Admin.configuration.subtitle %></small></span>
 </nav>
+
+<% flash.each do |key, message| %>
+  <div class="alert alert-<%= key %> alert-dismissable">
+    <%= message %>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+<% end %>
