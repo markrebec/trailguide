@@ -19,9 +19,13 @@
   height: 30px;
 }
 
-main {
-  padding-top: 80px;
+body {
+  padding-top: 60px;
   padding-bottom: 40px;
+}
+
+main {
+  padding-top: 40px;
 }
 
 .footer {
