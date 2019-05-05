@@ -95,6 +95,10 @@ module TrailGuide
       self.class.new(to_a.select(&:started?))
     end
 
+    def scheduled
+      self.class.new(to_a.select(&:scheduled?))
+    end
+
     def running
       self.class.new(to_a.select(&:running?))
     end

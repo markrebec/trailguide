@@ -11,33 +11,48 @@
       <span>experiments</span>
     <% end %>
 
-    <span>/</span>
+    <% if TrailGuide.catalog.running.count > 0 %>
+      <span>/</span>
 
-    <%= link_to trail_guide_admin.scoped_experiments_path(scope: :running), class: "text-dark" do %>
-      <strong class="total">
-        <%= TrailGuide.catalog.running.count %>
-      </strong>
-      <span>running</span>
+      <%= link_to trail_guide_admin.scoped_experiments_path(scope: :running), class: "text-dark" do %>
+        <strong class="total">
+          <%= TrailGuide.catalog.running.count %>
+        </strong>
+        <span>running</span>
+      <% end %>
     <% end %>
 
-    <span>/</span>
+    <% if TrailGuide.catalog.paused.count > 0 %>
+      <span>/</span>
 
-    <% if TrailGuide.catalog.any? { |exp| exp.configuration.can_resume? } %>
       <%= link_to trail_guide_admin.scoped_experiments_path(scope: :paused), class: "text-dark" do %>
         <strong class="total">
           <%= TrailGuide.catalog.paused.count %>
         </strong>
         <span>paused</span>
       <% end %>
-
-      <span>/</span>
     <% end %>
 
-    <%= link_to trail_guide_admin.scoped_experiments_path(scope: :stopped), class: "text-dark" do %>
-      <strong class="total">
-        <%= TrailGuide.catalog.stopped.count %>
-      </strong>
-      <span>stopped</span>
+    <% if TrailGuide.catalog.scheduled.count > 0 %>
+      <span>/</span>
+
+      <%= link_to trail_guide_admin.scoped_experiments_path(scope: :scheduled), class: "text-dark" do %>
+        <strong class="total">
+          <%= TrailGuide.catalog.scheduled.count %>
+        </strong>
+        <span>scheduled</span>
+      <% end %>
+    <% end %>
+
+    <% if TrailGuide.catalog.stopped.count > 0 %>
+      <span>/</span>
+
+      <%= link_to trail_guide_admin.scoped_experiments_path(scope: :stopped), class: "text-dark" do %>
+        <strong class="total">
+          <%= TrailGuide.catalog.stopped.count %>
+        </strong>
+        <span>stopped</span>
+      <% end %>
     <% end %>
   </div>
   <span class="navbar-brand"><small class="text-muted"><%= TrailGuide::Admin.configuration.subtitle %></small></span>
