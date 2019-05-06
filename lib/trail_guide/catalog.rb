@@ -92,19 +92,19 @@ module TrailGuide
     end
 
     def started
-      self.class.new(to_a.select(&:started?))
+      self.class.new(to_a.select { |e| e.started? && !e.winner? })
     end
 
     def scheduled
-      self.class.new(to_a.select(&:scheduled?))
+      self.class.new(to_a.select { |e| e.scheduled? && !e.winner? })
     end
 
     def running
-      self.class.new(to_a.select(&:running?))
+      self.class.new(to_a.select { |e| e.running? && !e.winner? })
     end
 
     def paused
-      self.class.new(to_a.select(&:paused?))
+      self.class.new(to_a.select { |e| e.paused? && !e.winner? })
     end
 
     def stopped

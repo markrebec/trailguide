@@ -95,3 +95,10 @@ experiment :multi_goal_example do |config|
 
   config.target_sample_size = 100
 end
+
+experiment :long_description do |config|
+  config.summary = "Example experiment with a really long description to test formatting/UI. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus vulputate eros quis ultricies tincidunt. Aliquam magna nunc, semper vitae enim non, aliquet congue velit. Sed placerat dolor in mauris blandit placerat. Suspendisse et est leo. Aliquam erat volutpat. Fusce ac nibh nulla. Morbi commodo efficitur scelerisque. Aenean pellentesque ante vitae elit sodales ultricies. Suspendisse lacinia nisi sed suscipit scelerisque."
+
+  variant :alpha
+  variant :bravo
+end
