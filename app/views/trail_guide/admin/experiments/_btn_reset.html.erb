@@ -1,0 +1,5 @@
+<% if experiment.started? || experiment.scheduled? || experiment.winner? %>
+  <%= link_to trail_guide_admin.reset_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-dark',method: :put, data: {toggle: :tooltip}, title: "stop this experiment if it's running and reset all data" do %>
+    <span class="fas fa-ban text-danger"></span>
+  <% end %>
+<% end %>

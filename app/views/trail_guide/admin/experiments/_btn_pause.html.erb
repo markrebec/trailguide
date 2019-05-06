@@ -1,5 +1,5 @@
 <% if experiment.running? && experiment.configuration.can_resume? %>
   <%= link_to trail_guide_admin.pause_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-warning', method: :put, data: {toggle: :tooltip}, title: 'pause this experiment - you will have the option to resume or reset' do %>
-    <span class="fas fa-pause" />
+    <span class="fas fa-pause"></span>
   <% end %>
 <% end %>

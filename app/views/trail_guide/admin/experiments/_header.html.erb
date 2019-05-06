@@ -7,11 +7,16 @@
   </div>
 
   <div class="col-sm-12 col-md-6 col-lg-4 text-right">
-    <%= render partial: 'btn_start', locals: { experiment: experiment } %>
-    <%= render partial: 'btn_peek', locals: { experiment: experiment } %>
-    <%= render partial: 'btn_pause', locals: { experiment: experiment } %>
-    <%= render partial: 'btn_resume', locals: { experiment: experiment } %>
-    <%= render partial: 'btn_stop', locals: { experiment: experiment } %>
+    <div class="btn-group">
+      <%= render partial: 'btn_schedule', locals: { experiment: experiment } %>
+      <%= render partial: 'btn_start', locals: { experiment: experiment } %>
+      <%= render partial: 'btn_peek', locals: { experiment: experiment } %>
+      <%= render partial: 'btn_pause', locals: { experiment: experiment } %>
+      <%= render partial: 'btn_resume', locals: { experiment: experiment } %>
+      <%= render partial: 'btn_stop', locals: { experiment: experiment } %>
+      <%= render partial: 'btn_restart', locals: { experiment: experiment } %>
+      <%= render partial: 'btn_reset', locals: { experiment: experiment } %>
+    </div>
 
     <p>
       <% if experiment.started? %>

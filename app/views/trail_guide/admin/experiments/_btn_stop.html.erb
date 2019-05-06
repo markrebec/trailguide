@@ -1,13 +1,5 @@
-<% if experiment.running? || experiment.paused? %>
+<% if experiment.running? || (experiment.paused? && !experiment.stopped?) %>
   <%= link_to trail_guide_admin.stop_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-danger', method: :put, data: {toggle: :tooltip}, title: 'stop this experiment - once stopped you will need to reset before restarting' do %>
-    <span class="fas fa-stop" />
-  <% end %>
-<% elsif experiment.stopped? %>
-  <%= link_to trail_guide_admin.restart_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-danger',method: :put, data: {toggle: :tooltip}, title: 'restart this experiment - will reset all data and restart the experiment' do %>
-    <span class="fas fa-redo fa-flip-horizontal" />
-  <% end %>
-
-  <%= link_to trail_guide_admin.reset_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-outline-danger',method: :put, data: {toggle: :tooltip}, title: "stop this experiment if it's running and reset all data" do %>
-    <span class="fas fa-ban" />
+    <span class="fas fa-stop"></span>
   <% end %>
 <% end %>
