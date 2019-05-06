@@ -7,7 +7,9 @@
           Combined Experiment
         </h5>
         <p>This experiment is part of a combined experiment and can only be managed via it's parent. Use the button below to view the parent experiment.</p>
-        <%= link_to experiment.parent.experiment_name.to_s.humanize.titleize, trail_guide_admin.experiment_path(experiment.parent.experiment_name), class: 'btn btn-dark' %>
+        <div class="text-right">
+          <%= link_to experiment.parent.experiment_name.to_s.humanize.titleize, trail_guide_admin.experiment_path(experiment.parent.experiment_name), class: 'btn btn-dark' %>
+        </div>
       </div>
     <% end %>
 
@@ -56,6 +58,38 @@
         <% end %>
       </p>
     </div>
+
+    <% if experiment_peekable?(experiment) %>
+      <% if experiment_peeking?(experiment) %>
+        <div class="alert alert-primary">
+          <h5>
+            <span class="fas fa-eye-slash"></span>
+            Peeking at Results
+          </h5>
+          <p>You are currently peeking at this experiment's results. Use the button below to stop peeking.</p>
+          <div class="text-right">
+            <%= link_to trail_guide_admin.experiment_path(experiment.experiment_name), class: 'btn btn-outline-primary', method: :put do %>
+              <span class="fas fa-eye-slash"></span>
+              Stop Peeking
+            <% end %>
+          </div>
+        </div>
+      <% else %>
+        <div class="alert alert-primary">
+          <h5>
+            <span class="fas fa-eye"></span>
+            Target Sample Size
+          </h5>
+          <p>This experiment has been configured with a <code>target_sample_size</code> of <code><%= experiment.configuration.target_sample_size %></code>, which prevents variant metrics from being displayed until the experiment has ended. You may peek at the current results by clicking the button below.</p>
+          <div class="text-right">
+            <%= link_to peek_url(experiment), class: 'btn btn-primary', method: :put do %>
+              <span class="fas fa-eye"></span>
+              Peek
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
   </div>
 </div>
 
