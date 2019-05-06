@@ -1,9 +1,9 @@
 <thead class="thead-light">
   <tr>
     <th scope="col">
-      <% if experiment <= TrailGuide::CombinedExperiment %>
+      <% if experiment <= TrailGuide::CombinedExperiment && (!@experiment || @experiment.combined?) %>
         <h5 id="<%= experiment.experiment_name %>">
-          <%= link_to experiment.experiment_name.to_s.humanize.titleize, trail_guide_admin.experiment_path(experiment.parent.experiment_name, anchor: experiment.experiment_name), class: "text-dark" %>
+          <%= link_to experiment.experiment_name.to_s.humanize.titleize, trail_guide_admin.experiment_path(experiment.experiment_name), class: "text-dark" %>
         </h5>
       <% else %>
         &nbsp;

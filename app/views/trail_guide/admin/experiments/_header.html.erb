@@ -1,8 +1,19 @@
 <div class="row">
   <div class="col-12">
-    <div class="alert alert-<%= experiment_color(experiment) %> alert-dismissable">
+    <% if experiment <= TrailGuide::CombinedExperiment %>
+      <div class="alert alert-dark">
+        <h5>
+          <span class="fas fa-object-group"></span>
+          Combined Experiment
+        </h5>
+        <p>This experiment is part of a combined experiment and can only be managed via it's parent. Use the button below to view the parent experiment.</p>
+        <%= link_to experiment.parent.experiment_name.to_s.humanize.titleize, trail_guide_admin.experiment_path(experiment.parent.experiment_name), class: 'btn btn-dark' %>
+      </div>
+    <% end %>
+
+    <div class="alert alert-<%= experiment_color(experiment) %>">
       <h5 class="text-<%= experiment_color(experiment) %>">
-        <span class="fa <%= experiment_icon(experiment) %> text-<%= experiment_color(experiment) %>"></span>
+        <span class="fas <%= experiment_icon(experiment) %> text-<%= experiment_color(experiment) %>"></span>
         &nbsp;
         <% if experiment.winner? %>
           Winner Promoted
@@ -56,16 +67,18 @@
   </div>
 
   <div class="col-4 col-lg-2 text-right">
-    <div class="btn-group">
-      <%= render partial: 'btn_schedule', locals: { experiment: experiment } %>
-      <%= render partial: 'btn_start', locals: { experiment: experiment } %>
-      <%= render partial: 'btn_peek', locals: { experiment: experiment } %>
-      <%= render partial: 'btn_pause', locals: { experiment: experiment } %>
-      <%= render partial: 'btn_resume', locals: { experiment: experiment } %>
-      <%= render partial: 'btn_stop', locals: { experiment: experiment } %>
-      <%= render partial: 'btn_restart', locals: { experiment: experiment } %>
-      <%= render partial: 'btn_reset', locals: { experiment: experiment } %>
-    </div>
+    <% unless experiment <= TrailGuide::CombinedExperiment %>
+      <div class="btn-group">
+        <%= render partial: 'btn_schedule', locals: { experiment: experiment } %>
+        <%= render partial: 'btn_start', locals: { experiment: experiment } %>
+        <%= render partial: 'btn_peek', locals: { experiment: experiment } %>
+        <%= render partial: 'btn_pause', locals: { experiment: experiment } %>
+        <%= render partial: 'btn_resume', locals: { experiment: experiment } %>
+        <%= render partial: 'btn_stop', locals: { experiment: experiment } %>
+        <%= render partial: 'btn_restart', locals: { experiment: experiment } %>
+        <%= render partial: 'btn_reset', locals: { experiment: experiment } %>
+      </div>
+    <% end %>
   </div>
 </div>
 
