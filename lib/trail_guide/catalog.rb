@@ -108,11 +108,15 @@ module TrailGuide
     end
 
     def stopped
-      self.class.new(to_a.select(&:stopped?))
+      self.class.new(to_a.select { |e| e.stopped? && !e.winner? })
     end
 
     def ended
       self.class.new(to_a.select(&:winner?))
+    end
+
+    def unstarted
+      self.class.new(to_a.select { |e| !e.started? && !e.scheduled? && !e.winner? })
     end
 
     def not_running
@@ -121,22 +125,48 @@ module TrailGuide
 
     def by_started
       scoped = to_a.sort do |a,b|
-        if a.running? && !b.running?
-          1
-        elsif !a.running? && b.running?
+        if !(a.started? || a.scheduled? || a.winner?) && !(b.started? || b.scheduled? || b.winner?)
+          a.experiment_name.to_s <=> b.experiment_name.to_s
+        elsif !(a.started? || a.scheduled? || a.winner?)
           -1
+        elsif !(b.started? || b.scheduled? || b.winner?)
+          1
         else
-          if a.started? && !b.started?
+          if a.winner? && !b.winner?
             1
-          elsif !a.started? && b.started?
+          elsif !a.winner? && b.winner?
             -1
-          elsif a.started? && b.started?
+          elsif a.winner? && b.winner?
+            a.experiment_name.to_s <=> b.experiment_name.to_s
+          elsif a.running? && !b.running?
+            -1
+          elsif !a.running? && b.running?
+            1
+          elsif a.running? && b.running?
             a.started_at <=> b.started_at
+          elsif a.paused? && !b.paused?
+            -1
+          elsif !a.paused? && b.paused?
+            1
+          elsif a.paused? && b.paused?
+            a.paused_at <=> b.paused_at
+          elsif a.scheduled? && !b.scheduled?
+            -1
+          elsif !a.scheduled? && b.scheduled?
+            1
+          elsif a.scheduled? && b.scheduled?
+            a.started_at <=> b.started_at
+          elsif a.stopped? && !b.stopped?
+            -1
+          elsif !a.stopped? && b.stopped?
+            1
+          elsif a.stopped? && b.stopped?
+            a.stopped_at <=> b.stopped_at
           else
-            b.experiment_name.to_s <=> a.experiment_name.to_s
+            a.experiment_name.to_s <=> b.experiment_name.to_s
           end
         end
-      end.reverse
+      end
 
       self.class.new(scoped)
     end

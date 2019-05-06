@@ -137,7 +137,11 @@ module TrailGuide
         end
 
         def winner?
-          TrailGuide.redis.hexists(storage_key, 'winner')
+          if combined?
+            combined.all? { |combo| TrailGuide.catalog.find(combo).winner? }
+          else
+            TrailGuide.redis.hexists(storage_key, 'winner')
+          end
         end
 
         def persisted?
