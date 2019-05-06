@@ -6,22 +6,56 @@
       </h4>
       <p style="margin: 0; padding: 0;"><%= experiment.configuration.summary %></p>
     </div>
-    <div class="col-12 col-md-6 col-lg-4 text-center text-md-right experiment-icons">
-      <% if experiment.winner? %>
-        <span class="fas fa-flag-checkered fa-2x"></span>
-      <% elsif experiment.started? %>
-        <% if experiment.stopped? %>
-          <span class="fas fa-stop fa-2x"></span>
-        <% elsif experiment.paused? %>
-          <span class="fas fa-pause fa-2x"></span>
-        <% else %>
-          <span class="fas fa-play fa-2x"></span>
-        <% end %>
-      <% elsif experiment.scheduled? %>
-        <span class="fas fa-clock fa-2x"></span>
-      <% else %>
-        <span class="fas fa-flask fa-2x"></span>
-      <% end %>
+    <div class="col-12 col-md-6 col-lg-4 text-center text-md-right">
+      <div class="row align-items-center">
+        <div class="col-4 experiment-text">
+          <% if experiment.combined? %>
+            <span><%= number_with_delimiter experiment.participants %></span>
+            <% if experiment.configuration.target_sample_size %>
+              <span class="text-muted">/ <%= number_with_delimiter experiment.configuration.target_sample_size %></span>
+            <% end %>
+          <% else %>
+            <span><%= number_with_delimiter experiment.participants %></span>
+            <% if experiment.configuration.target_sample_size %>
+              <span class="text-muted">/ <%= number_with_delimiter experiment.configuration.target_sample_size %></span>
+            <% end %>
+          <% end %>
+        </div>
+
+        <div class="col-4 experiment-text">
+          <% if experiment.combined? %>
+            <% if experiment.goals.empty? %>
+              <span><%= experiment_metric experiment, experiment.combined_experiments.sum(&:converted) %></span>
+            <% else %>
+              <span><%= experiment_metric experiment, experiment.goals.sum { |goal| experiment.combined_experiments.sum { |e| e.converted(goal) } } %></span>
+            <% end %>
+          <% else %>
+            <% if experiment.goals.empty? %>
+              <span><%= experiment_metric experiment, experiment.converted %></span>
+            <% else %>
+              <span><%= experiment_metric experiment, experiment.goals.sum { |goal| experiment.converted(goal) } %></span>
+            <% end %>
+          <% end %>
+        </div>
+
+        <div class="col-4">
+          <% if experiment.winner? %>
+            <span class="fas fa-flag-checkered fa-2x"></span>
+          <% elsif experiment.started? %>
+            <% if experiment.stopped? %>
+              <span class="fas fa-stop fa-2x"></span>
+            <% elsif experiment.paused? %>
+              <span class="fas fa-pause fa-2x"></span>
+            <% else %>
+              <span class="fas fa-play fa-2x"></span>
+            <% end %>
+          <% elsif experiment.scheduled? %>
+            <span class="fas fa-clock fa-2x"></span>
+          <% else %>
+            <span class="fas fa-flask fa-2x"></span>
+          <% end %>
+        </div>
+      </div>
     </div>
   </div>
 </button>

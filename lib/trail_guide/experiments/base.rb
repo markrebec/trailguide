@@ -35,6 +35,10 @@ module TrailGuide
           end
         end
 
+        def combined_experiments
+          combined.map { |combo| TrailGuide.catalog.find(combo) }
+        end
+
         def run_callbacks(hook, *args)
           return unless callbacks[hook]
           return args[0] if hook == :rollout_winner

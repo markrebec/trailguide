@@ -78,7 +78,20 @@ experiment :button_color do |config|
   variant :blue
   variant :white, control: true
 
+  config.goals = [:first, :second]
   config.combined = [:login_button_color, :signup_button_color]
+
+  config.target_sample_size = 100
+end
+
+experiment :multi_goal_example do |config|
+  config.summary = "example experiment with multiple goals"
+
+  variant :green
+  variant :blue
+  variant :white, control: true
+
+  config.goals = [:first, :second]
 
   config.target_sample_size = 100
 end
