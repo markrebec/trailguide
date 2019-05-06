@@ -1,8 +1,6 @@
 module TrailGuide
   module Admin
     class ExperimentsController < ::TrailGuide::Admin::ApplicationController
-      DATE_FORMAT = "%m/%d/%Y %I:%M %p %Z"
-
       before_action except: [:index] do
         (redirect_to :back rescue redirect_to trail_guide_admin.experiments_path) and return unless experiment.present?
       end
@@ -98,12 +96,12 @@ module TrailGuide
           start_at = exp_params[:start_at]
           stop_at = exp_params[:stop_at]
 
-          exp_params[:start_at] = DateTime.strptime(exp_params[:start_at], DATE_FORMAT) rescue raise(ArgumentError, "Invalid start date")
-          raise ArgumentError, "Invalid start date" unless exp_params[:start_at].strftime(DATE_FORMAT) == start_at
+          exp_params[:start_at] = DateTime.strptime(exp_params[:start_at], TrailGuide::SCHEDULE_DATE_FORMAT) rescue raise(ArgumentError, "Invalid start date")
+          raise ArgumentError, "Invalid start date" unless exp_params[:start_at].strftime(TrailGuide::SCHEDULE_DATE_FORMAT) == start_at
 
-          exp_params[:stop_at] = (DateTime.strptime(exp_params[:stop_at], DATE_FORMAT) rescue nil)
+          exp_params[:stop_at] = (DateTime.strptime(exp_params[:stop_at], TrailGuide::SCHEDULE_DATE_FORMAT) rescue nil)
           if exp_params[:stop_at]
-            raise ArgumentError, "Invalid stop date" unless exp_params[:stop_at].strftime(DATE_FORMAT) == stop_at
+            raise ArgumentError, "Invalid stop date" unless exp_params[:stop_at].strftime(TrailGuide::SCHEDULE_DATE_FORMAT) == stop_at
 
             raise ArgumentError, "Experiments cannot be scheduled to stop before they start" if exp_params[:stop_at] <= exp_params[:start_at]
           end

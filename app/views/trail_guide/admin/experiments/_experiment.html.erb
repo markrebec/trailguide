@@ -1,49 +1,27 @@
-<div class="experiment row justify-content-center">
-  <div class="col-sm-12 col-md-10 col-lg-8">
-    <div class="row">
-      <div class="col-sm-12 col-md-6 col-lg-8">
-        <h4 id="<%= experiment.experiment_name %>">
-          <%= link_to experiment.experiment_name.to_s.humanize.titleize, trail_guide_admin.experiment_path(experiment.experiment_name), class: "text-dark" %>
-        </h4>
-      </div>
-      <div class="col-sm-12 col-md-6 col-lg-4 text-right">
-      </div>
+<button href="<%= trail_guide_admin.experiment_path(experiment.experiment_name) %>" class="experiment btn btn-outline-<%= experiment_color(experiment) %> rounded-lg text-left">
+  <div class="row align-items-center">
+    <div class="col-12 col-md-6 col-lg-8 experiment-text">
+      <h4 id="<%= experiment.experiment_name %>">
+        <%= experiment.experiment_name.to_s.humanize.titleize %>
+      </h4>
+      <p style="margin: 0; padding: 0;"><%= experiment.configuration.summary %></p>
     </div>
-
-    <div class="row">
-      <div class="col-sm-12 col-md-6 col-lg-8">
-        <p><%= experiment.configuration.summary %></p>
-      </div>
-      <div class="col-sm-12 col-md-6 col-lg-4 text-right">
-        <% if experiment.started? %>
-          <% if experiment.stopped? %>
-            <small class="text-muted">
-              <%= experiment.started_at.strftime('%b %e %Y @ %l:%M %p') %>
-            </small>
-            <span class="text-muted">&mdash;</span>
-            <small class="text-muted"><%= experiment.stopped_at.strftime('%b %e %Y @ %l:%M %p') %></small>
-            <small class="text-danger"><span class="fa fa-stop"></span></small>
-          <% elsif experiment.paused? %>
-            <small class="text-muted">
-              <%= experiment.paused_at.strftime('%b %e %Y @ %l:%M %p') %>
-            </small>
-            <small class="text-warning"><span class="fa fa-pause"></span></small>
-          <% else %>
-            <small class="text-muted">
-              <%= experiment.started_at.strftime('%b %e %Y @ %l:%M %p') %>
-            </small>
-            <small class="text-success"><span class="fa fa-play"></span></small>
-          <% end %>
-        <% elsif experiment.scheduled? %>
-          <small class="text-muted">
-            <%= experiment.started_at.strftime('%b %e %Y @ %l:%M %p') %>
-          </small>
-          <small class="text-muted"><span class="fa fa-clock"></span></small>
+    <div class="col-12 col-md-6 col-lg-4 text-center text-md-right experiment-icons">
+      <% if experiment.winner? %>
+        <span class="fas fa-flag-checkered fa-2x"></span>
+      <% elsif experiment.started? %>
+        <% if experiment.stopped? %>
+          <span class="fas fa-stop fa-2x"></span>
+        <% elsif experiment.paused? %>
+          <span class="fas fa-pause fa-2x"></span>
         <% else %>
-          <small class="text-muted">not running</small>
-          <small class="text-muted"><span class="fa fa-ban"></span></small>
+          <span class="fas fa-play fa-2x"></span>
         <% end %>
-      </div>
+      <% elsif experiment.scheduled? %>
+        <span class="fas fa-clock fa-2x"></span>
+      <% else %>
+        <span class="fas fa-flask fa-2x"></span>
+      <% end %>
     </div>
   </div>
-</div>
+</button>

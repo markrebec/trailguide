@@ -18,6 +18,8 @@ module TrailGuide
   include Canfig::Module
   @@configuration = TrailGuide::Config.new
 
+  SCHEDULE_DATE_FORMAT = "%m/%d/%Y %I:%M %p %Z"
+
   class << self
     delegate :logger, :redis, to: :configuration
   end

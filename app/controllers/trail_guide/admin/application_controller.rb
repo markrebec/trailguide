@@ -47,6 +47,25 @@ module TrailGuide
         trail_guide_admin.experiment_url(experiment.experiment_name, *args, opts.merge({TrailGuide::Admin.configuration.peek_parameter => experiment.experiment_name}))
       end
       helper_method :peek_url
+
+      def experiment_color(experiment)
+        if experiment.winner?
+          'primary'
+        elsif experiment.started?
+          if experiment.stopped?
+            'danger'
+          elsif experiment.paused?
+            'warning'
+          else
+            'success'
+          end
+        elsif experiment.scheduled?
+          'info'
+        else
+          'secondary'
+        end
+      end
+      helper_method :experiment_color
     end
   end
 end

@@ -15,7 +15,7 @@
             <label for="start-experiment-at-<%= experiment.experiment_name %>" class="col-sm-3 col-form-label"><strong>Start</strong></label>
             <div class="col-sm-9">
               <div class="input-group date datepicker" id="start-experiment-at-<%= experiment.experiment_name %>" data-target-input="nearest">
-                <input type="text" name="experiment[start_at]" value="<%= (experiment.started_at ? Time.at(experiment.started_at).strftime(TrailGuide::Admin::ExperimentsController::DATE_FORMAT) : nil) %>" class="form-control datetimepicker-input" data-target="#start-experiment-at-<%= experiment.experiment_name %>"/>
+                <input type="text" name="experiment[start_at]" value="<%= (experiment.started_at ? Time.at(experiment.started_at).strftime(TrailGuide::SCHEDULE_DATE_FORMAT) : nil) %>" class="form-control datetimepicker-input" data-target="#start-experiment-at-<%= experiment.experiment_name %>"/>
                 <div class="input-group-append" data-target="#start-experiment-at-<%= experiment.experiment_name %>" data-toggle="datetimepicker">
                   <div class="input-group-text"><i class="fa fa-calendar"></i></div>
                 </div>
@@ -27,7 +27,7 @@
             <label for="stop-experiment-at-<%= experiment.experiment_name %>" class="col-sm-3 col-form-label"><strong>Stop</strong></label>
             <div class="col-sm-9">
               <div class="input-group date datepicker" id="stop-experiment-at-<%= experiment.experiment_name %>" data-target-input="nearest">
-                <input type="text" name="experiment[stop_at]" value="<%= (experiment.stopped_at ? Time.at(experiment.stopped_at).strftime(TrailGuide::Admin::ExperimentsController::DATE_FORMAT) : nil) %>" class="form-control datetimepicker-input" data-target="#stop-experiment-at-<%= experiment.experiment_name %>"/>
+                <input type="text" name="experiment[stop_at]" value="<%= (experiment.stopped_at ? Time.at(experiment.stopped_at).strftime(TrailGuide::SCHEDULE_DATE_FORMAT) : nil) %>" class="form-control datetimepicker-input" data-target="#stop-experiment-at-<%= experiment.experiment_name %>"/>
                 <div class="input-group-append" data-target="#stop-experiment-at-<%= experiment.experiment_name %>" data-toggle="datetimepicker">
                   <div class="input-group-text"><i class="fa fa-calendar"></i></div>
                 </div>

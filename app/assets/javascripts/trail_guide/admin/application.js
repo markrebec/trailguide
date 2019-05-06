@@ -24,4 +24,8 @@ $(function () {
     keepOpen: true,
     allowInputToggle: true,
   })
+
+  $('button[href]').on('click', function(evt) {
+    window.location.href = $(evt.currentTarget).attr('href')
+  });
 })
