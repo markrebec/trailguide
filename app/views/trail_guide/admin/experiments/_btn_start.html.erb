@@ -1,5 +1,5 @@
 <% if !experiment.started? %>
-  <%= link_to trail_guide_admin.start_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-success',method: :put, data: {toggle: :tooltip}, title: 'start this experiment now' do %>
+  <%= link_to trail_guide_admin.start_experiment_path(experiment.experiment_name), class: 'btn btn-success',method: :put, data: {toggle: :tooltip}, title: 'start this experiment now' do %>
     <span class="fas fa-play"></span>
   <% end %>
 <% end %>

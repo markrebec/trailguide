@@ -48,6 +48,25 @@ module TrailGuide
       end
       helper_method :peek_url
 
+      def experiment_icon(experiment)
+        if experiment.winner?
+          'fa-flag-checkered'
+        elsif experiment.started?
+          if experiment.stopped?
+            'fa-stop'
+          elsif experiment.paused?
+            'fa-pause'
+          else
+            'fa-play'
+          end
+        elsif experiment.scheduled?
+          'fa-clock'
+        else
+          'fa-flask'
+        end
+      end
+      helper_method :experiment_icon
+
       def experiment_color(experiment)
         if experiment.winner?
           'primary'

@@ -1,5 +1,5 @@
 <% if !experiment.started? %>
-  <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#start-experiment-modal-<%= experiment.experiment_name %>" data-tooltip="tooltip" title="schedule this experiment to start in the future">
+  <button type="button" class="btn btn-info" data-toggle="modal" data-target="#start-experiment-modal-<%= experiment.experiment_name %>" data-tooltip="tooltip" title="schedule this experiment to start in the future">
     <span class="fas fa-clock"></span>
   </button>
   <%= render partial: 'start_modal', locals: { experiment: experiment } %>

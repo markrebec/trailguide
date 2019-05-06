@@ -1,5 +1,5 @@
 <% if experiment.stopped? %>
-  <%= link_to trail_guide_admin.restart_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-danger',method: :put, data: {toggle: :tooltip}, title: 'restart this experiment - will reset all data and restart the experiment' do %>
+  <%= link_to trail_guide_admin.restart_experiment_path(experiment.experiment_name), class: 'btn btn-danger',method: :put, data: {toggle: :tooltip}, title: 'restart this experiment - will reset all data and restart the experiment' do %>
     <span class="fas fa-redo fa-flip-horizontal"></span>
   <% end %>
 <% end %>

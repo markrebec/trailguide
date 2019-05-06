@@ -1,5 +1,6 @@
 experiment :basic_experiment do |config|
   config.summary = "simple A/B test showing off some basic configuration"
+  config.track_winner_conversions = true
 
   config.metric = :example_metric
 

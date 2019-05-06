@@ -1,12 +1,61 @@
 <div class="row">
-  <div class="col-sm-12 col-md-6 col-lg-8">
-    <h4 id="<%= experiment.experiment_name %>">
-      <%= link_to experiment.experiment_name.to_s.humanize.titleize, trail_guide_admin.experiment_path(experiment.experiment_name), class: "text-dark" %>
-    </h4>
-    <p><%= experiment.configuration.summary %></p>
+  <div class="col-12">
+    <div class="alert alert-<%= experiment_color(experiment) %> alert-dismissable">
+      <h5 class="text-<%= experiment_color(experiment) %>">
+        <span class="fa <%= experiment_icon(experiment) %> text-<%= experiment_color(experiment) %>"></span>
+        &nbsp;
+        <% if experiment.winner? %>
+          Winner Promoted
+        <% elsif experiment.started? %>
+          <% if experiment.stopped? %>
+            Stopped
+          <% elsif experiment.paused? %>
+            Paused
+          <% else %>
+            Running
+          <% end %>
+        <% elsif experiment.scheduled? %>
+          Scheduled
+        <% else %>
+          Not Started
+        <% end %>
+      </h5>
+
+      <p>
+        <% if experiment.winner? %>
+          A winning variant has been selected for this experiment and will be returned to all participants.
+          <% if experiment.started? && experiment.configuration.track_winner_conversions %>
+            As long as your experiment is still running you will be able to continue tracking conversions against the winner. You can stop your experiment to stop tracking conversions.
+          <% end %>
+        <% elsif experiment.started? %>
+          <% if experiment.stopped? %>
+            This experiment has been stopped. The control variant will be returned to all participants until it is restarted or a winner is selected.
+          <% elsif experiment.paused? %>
+            This experiment has been paused. The control variant will be returned to all participants until it is resumed, restarted or a winner is selected.
+          <% else %>
+            This experiment is currently running. Participants will be enrolled and served a variant based on the configured alrogithm.
+          <% end %>
+        <% elsif experiment.scheduled? %>
+          This experiment has been scheduled to start on <strong><%= experiment.started_at.strftime(TrailGuide::Admin::DISPLAY_DATE_FORMAT) %></strong>
+          <% if experiment.stopped_at.present? %>
+            and stop on <strong><%= experiment.stopped_at.strftime(TrailGuide::Admin::DISPLAY_DATE_FORMAT) %></strong>
+          <% end %>
+        <% else %>
+          This experiment has not been started. Use the controls to start or schedule your experiment.
+        <% end %>
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="row align-items-center">
+  <div class="col-8 col-lg-10">
+    <h1 id="<%= experiment.experiment_name %>">
+      <%= experiment.experiment_name.to_s.humanize.titleize %>
+    </h1>
   </div>
 
-  <div class="col-sm-12 col-md-6 col-lg-4 text-right">
+  <div class="col-4 col-lg-2 text-right">
     <div class="btn-group">
       <%= render partial: 'btn_schedule', locals: { experiment: experiment } %>
       <%= render partial: 'btn_start', locals: { experiment: experiment } %>
@@ -17,36 +66,39 @@
       <%= render partial: 'btn_restart', locals: { experiment: experiment } %>
       <%= render partial: 'btn_reset', locals: { experiment: experiment } %>
     </div>
+  </div>
+</div>
 
-    <p>
+<div class="row">
+  <div class="col-12">
+    <h5>
       <% if experiment.started? %>
         <% if experiment.stopped? %>
-          <small class="text-muted">
+          <span class="text-muted">
             <%= experiment.started_at.strftime('%b %e %Y @ %l:%M %p') %>
-          </small>
+          </span>
           <span class="text-muted">&mdash;</span>
-          <small class="text-muted"><%= experiment.stopped_at.strftime('%b %e %Y @ %l:%M %p') %></small>
-          <small class="text-danger"><span class="fa fa-stop"></span></small>
+          <span class="text-muted"><%= experiment.stopped_at.strftime('%b %e %Y @ %l:%M %p') %></span>
         <% elsif experiment.paused? %>
-          <small class="text-muted">
+          <span class="text-muted">
             <%= experiment.paused_at.strftime('%b %e %Y @ %l:%M %p') %>
-          </small>
-          <small class="text-warning"><span class="fa fa-pause"></span></small>
+          </span>
         <% else %>
-          <small class="text-muted">
+          <span class="text-muted">
             <%= experiment.started_at.strftime('%b %e %Y @ %l:%M %p') %>
-          </small>
-          <small class="text-success"><span class="fa fa-play"></span></small>
+          </span>
         <% end %>
       <% elsif experiment.scheduled? %>
-        <small class="text-muted">
+        <span class="text-muted">
           <%= experiment.started_at.strftime('%b %e %Y @ %l:%M %p') %>
-        </small>
-        <small class="text-muted"><span class="fa fa-clock"></span></small>
-      <% else %>
-        <small class="text-muted">not running</small>
-        <small class="text-muted"><span class="fa fa-flask"></span></small>
+        </span>
       <% end %>
-    <p>
+    </h5>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-12">
+    <p><%= experiment.configuration.summary %></p>
   </div>
 </div>
