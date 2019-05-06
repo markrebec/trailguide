@@ -10,10 +10,6 @@
 
 <div class="experiments">
   <% @experiments.each do |experiment| %>
-    <% if experiment.combined? %>
-      <%= render 'combined_experiment', combined_experiment: experiment %>
-    <% else %>
-      <%= render 'experiment', experiment: experiment %>
-    <% end %>
+    <%= render 'experiment', experiment: experiment %>
   <% end %>
 </div>

@@ -1,0 +1,25 @@
+<thead class="thead-light">
+  <tr>
+    <th scope="col">
+      <% if experiment <= TrailGuide::CombinedExperiment %>
+        <h5 id="<%= experiment.experiment_name %>">
+          <%= link_to experiment.experiment_name.to_s.humanize.titleize, trail_guide_admin.experiment_path(experiment.parent.experiment_name, anchor: experiment.experiment_name), class: "text-dark" %>
+        </h5>
+      <% else %>
+        &nbsp;
+      <% end %>
+    </th>
+
+    <th scope="col">Participants</th>
+
+    <% if experiment.goals.empty? %>
+      <th scope="col">Converted</th>
+    <% else %>
+      <% experiment.goals.each do |goal| %>
+        <th scope="col"><%= goal.to_s.humanize.titleize %></th>
+      <% end %>
+    <% end %>
+
+    <th>&nbsp;</th>
+  </tr>
+</thead>

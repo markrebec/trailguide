@@ -8,10 +8,63 @@
   </div>
 <% end %>
 
-<div class="experiments">
-  <% if @experiment.combined? %>
-    <%= render 'combined_experiment', combined_experiment: @experiment %>
-  <% else %>
-    <%= render 'experiment', experiment: @experiment %>
-  <% end %>
+<div class="experiment row justify-content-center">
+  <div class="col-sm-12 col-md-10 col-lg-8">
+    <%= render partial: "header", locals: { experiment: @experiment } %>
+
+    <% if @experiment.combined? %>
+      <table class="table table-hover">
+        <% combined_experiments = @experiment.combined.map { |e| TrailGuide.catalog.find(e) } %>
+        <% combined_experiments.each do |experiment| %>
+          <%= render partial: 'thead', locals: { experiment: experiment } %>
+          <%= render partial: 'tbody', locals: { experiment: experiment } %>
+        <% end %>
+
+        <tfoot class="thead-light">
+          <tr>
+            <th scope="row">&nbsp;</th>
+            <th>
+              <span><%= number_with_delimiter @experiment.participants %></span>
+              <% if @experiment.configuration.target_sample_size %>
+                <span class="text-muted">/ <%= number_with_delimiter @experiment.configuration.target_sample_size %></span>
+              <% end %>
+            </th>
+            <% if @experiment.goals.empty? %>
+              <th><%= experiment_metric @experiment, combined_experiments.sum(&:converted) %></th>
+            <% else %>
+              <% @experiment.goals.each do |goal| %>
+                <th><%= experiment_metric @experiment, combined_experiments.sum { |e| e.converted(goal) } %></th>
+              <% end %>
+            <% end %>
+            <th>&nbsp;</th>
+          </tr>
+        </tfoot>
+      </table>
+    <% else %>
+      <table class="table table-hover">
+        <%= render partial: 'thead', locals: { experiment: @experiment } %>
+        <%= render partial: 'tbody', locals: { experiment: @experiment } %>
+
+        <tfoot class="thead-light">
+          <tr>
+            <th scope="row">&nbsp;</th>
+            <th>
+              <span><%= number_with_delimiter @experiment.participants %></span>
+              <% if @experiment.configuration.target_sample_size %>
+                <span class="text-muted">/ <%= number_with_delimiter @experiment.configuration.target_sample_size %></span>
+              <% end %>
+            </th>
+            <% if @experiment.goals.empty? %>
+              <th><%= experiment_metric @experiment, @experiment.converted %></th>
+            <% else %>
+              <% @experiment.goals.each do |goal| %>
+                <th><%= experiment_metric @experiment, @experiment.converted(goal) %></th>
+              <% end %>
+            <% end %>
+            <th>&nbsp;</th>
+          </tr>
+        </tfoot>
+      </table>
+    <% end %>
+  </div>
 </div>

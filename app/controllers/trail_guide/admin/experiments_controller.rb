@@ -18,43 +18,43 @@ module TrailGuide
 
       def start
         experiment.start!(self)
-        redirect_to trail_guide_admin.experiment_path(experiment.experiment_name)
+        redirect_to_experiment experiment
       end
 
       def schedule
         experiment.schedule!(schedule_params[:start_at], schedule_params[:stop_at], self)
-        redirect_to trail_guide_admin.experiment_path(experiment.experiment_name)
+        redirect_to_experiment experiment
       rescue => e
         flash[:danger] = e.message
-        redirect_to trail_guide_admin.experiment_path(experiment.experiment_name)
+        redirect_to_experiment experiment
       end
 
       def pause
         experiment.pause!(self)
-        redirect_to trail_guide_admin.experiment_path(experiment.experiment_name)
+        redirect_to_experiment experiment
       end
 
       def stop
         experiment.stop!(self)
-        redirect_to trail_guide_admin.experiment_path(experiment.experiment_name)
+        redirect_to_experiment experiment
       end
 
       def reset
         experiment.stop!(self)
         experiment.reset!(self)
-        redirect_to trail_guide_admin.experiment_path(experiment.experiment_name)
+        redirect_to_experiment experiment
       end
 
       def resume
         experiment.resume!(self)
-        redirect_to trail_guide_admin.experiment_path(experiment.experiment_name)
+        redirect_to_experiment experiment
       end
 
       def restart
         experiment.stop!(self)
         experiment.reset!(self)
         experiment.start!(self)
-        redirect_to trail_guide_admin.experiment_path(experiment.experiment_name)
+        redirect_to_experiment experiment
       end
 
       def join
@@ -62,22 +62,22 @@ module TrailGuide
         variant = experiment.variants.find { |var| var == params[:variant] }
         variant.increment_participation!
         participant.participating!(variant)
-        redirect_to trail_guide_admin.experiment_path(experiment.experiment_name)
+        redirect_to_experiment experiment
       end
 
       def leave
         participant.exit!(experiment)
-        redirect_to trail_guide_admin.experiment_path(experiment.experiment_name)
+        redirect_to_experiment experiment
       end
 
       def winner
         experiment.declare_winner!(params[:variant], self)
-        redirect_to trail_guide_admin.experiment_path(experiment.experiment_name)
+        redirect_to_experiment experiment
       end
 
       def clear
         experiment.clear_winner!
-        redirect_to trail_guide_admin.experiment_path(experiment.experiment_name)
+        redirect_to_experiment experiment
       end
 
       private
@@ -116,6 +116,14 @@ module TrailGuide
         @participant ||= TrailGuide::Participant.new(self)
       end
       helper_method :participant
+
+      def redirect_to_experiment(experiment)
+        if experiment <= TrailGuide::CombinedExperiment
+          redirect_to trail_guide_admin.experiment_path(experiment.parent.experiment_name, anchor: experiment.experiment_name)
+        else
+          redirect_to trail_guide_admin.experiment_path(experiment.experiment_name)
+        end
+      end
     end
   end
 end
