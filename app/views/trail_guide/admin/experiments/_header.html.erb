@@ -36,7 +36,7 @@
         <% if experiment.winner? %>
           A winning variant has been selected for this experiment and will be returned to all participants.
           <% if experiment.started? && experiment.configuration.track_winner_conversions %>
-            As long as your experiment is still running you will be able to continue tracking conversions against the winner. You can stop your experiment to stop tracking conversions.
+            This experiment is configured with <code>track_winner_conversions</code>, so as long as your experiment is still running you will be able to continue tracking conversions against the winner. You can stop your experiment to stop tracking conversions.
           <% end %>
         <% elsif experiment.started? %>
           <% if experiment.stopped? %>
