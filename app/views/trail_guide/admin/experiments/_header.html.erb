@@ -7,62 +7,11 @@
   </div>
 
   <div class="col-sm-12 col-md-6 col-lg-4 text-right">
-    <% if experiment.running? %>
-      <% if experiment_peekable?(experiment) %>
-        <% if experiment_peeking?(experiment) %>
-          <%= link_to trail_guide_admin.experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-outline-primary', method: :put, data: {toggle: :tooltip}, title: "hide this experiment's metrics" do %>
-            <span class="fas fa-eye-slash" />
-          <% end %>
-        <% else %>
-          <%= link_to peek_url(experiment), class: 'btn btn-sm btn-primary', method: :put, data: {toggle: :tooltip}, title: "peek at this experiment's metrics" do %>
-            <span class="fas fa-eye" />
-          <% end %>
-        <% end %>
-      <% end %>
-
-      <% if experiment.configuration.can_resume? %>
-        <%= link_to trail_guide_admin.pause_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-warning', method: :put, data: {toggle: :tooltip}, title: 'pause this experiment - you will have the option to resume or reset' do %>
-          <span class="fas fa-pause" />
-        <% end %>
-      <% end %>
-
-      <%= link_to trail_guide_admin.stop_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-danger', method: :put, data: {toggle: :tooltip}, title: 'stop this experiment - once stopped you will need to reset before restarting' do %>
-        <span class="fas fa-stop" />
-      <% end %>
-
-      <%= link_to trail_guide_admin.restart_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-danger',method: :put, data: {toggle: :tooltip}, title: 'restart this experiment - will reset all data and restart the experiment' do %>
-        <span class="fas fa-redo fa-flip-horizontal" />
-      <% end %>
-    <% elsif experiment.paused? %>
-      <% if experiment.configuration.can_resume? %>
-        <%= link_to trail_guide_admin.resume_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-success',method: :put, data: {toggle: :tooltip}, title: 'resume this experiment to start bucketing users and serving variants again' do %>
-          <span class="fas fa-redo" />
-        <% end %>
-        <%= link_to trail_guide_admin.stop_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-danger', method: :put, data: {toggle: :tooltip}, title: 'stop this experiment - once stopped you will need to reset before restarting' do %>
-          <span class="fas fa-stop" />
-        <% end %>
-      <% end %>
-      <%= link_to trail_guide_admin.restart_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-danger',method: :put, data: {toggle: :tooltip}, title: 'restart this experiment - will reset all data and restart the experiment' do %>
-        <span class="fas fa-redo fa-flip-horizontal" />
-      <% end %>
-    <% elsif experiment.stopped? %>
-      <%= link_to trail_guide_admin.restart_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-danger',method: :put, data: {toggle: :tooltip}, title: 'restart this experiment - will reset all data and restart the experiment' do %>
-        <span class="fas fa-redo fa-flip-horizontal" />
-      <% end %>
-    <% elsif !experiment.started? %>
-      <%= render partial: 'start_modal', locals: { experiment: experiment } %>
-      <div class="btn-group" role="group">
-        <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#start-experiment-modal-<%= experiment.experiment_name %>" data-tooltip="tooltip" title="schedule this experiment to start in the future">
-          <span class="fas fa-clock" />
-        </button>
-        <%= link_to trail_guide_admin.start_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-success',method: :put, data: {toggle: :tooltip}, title: 'start this experiment now' do %>
-          <span class="fas fa-play" />
-        <% end %>
-      </div>
-    <% end %>
-    <%= link_to trail_guide_admin.reset_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-outline-danger',method: :put, data: {toggle: :tooltip}, title: "stop this experiment if it's running and reset all data" do %>
-      <span class="fas fa-ban" />
-    <% end %>
+    <%= render partial: 'btn_start', locals: { experiment: experiment } %>
+    <%= render partial: 'btn_peek', locals: { experiment: experiment } %>
+    <%= render partial: 'btn_pause', locals: { experiment: experiment } %>
+    <%= render partial: 'btn_resume', locals: { experiment: experiment } %>
+    <%= render partial: 'btn_stop', locals: { experiment: experiment } %>
 
     <p>
       <% if experiment.started? %>

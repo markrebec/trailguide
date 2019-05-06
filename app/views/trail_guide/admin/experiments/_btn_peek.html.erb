@@ -1,0 +1,11 @@
+<% if experiment.running? && experiment_peekable?(experiment) %>
+  <% if experiment_peeking?(experiment) %>
+    <%= link_to trail_guide_admin.experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-outline-primary', method: :put, data: {toggle: :tooltip}, title: "hide this experiment's metrics" do %>
+      <span class="fas fa-eye-slash" />
+    <% end %>
+  <% else %>
+    <%= link_to peek_url(experiment), class: 'btn btn-sm btn-primary', method: :put, data: {toggle: :tooltip}, title: "peek at this experiment's metrics" do %>
+      <span class="fas fa-eye" />
+    <% end %>
+  <% end %>
+<% end %>

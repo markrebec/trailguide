@@ -1,0 +1,5 @@
+<% if experiment.paused? && experiment.configuration.can_resume? %>
+  <%= link_to trail_guide_admin.resume_experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-success',method: :put, data: {toggle: :tooltip}, title: 'resume this experiment to start bucketing users and serving variants again' do %>
+    <span class="fas fa-redo" />
+  <% end %>
+<% end %>
