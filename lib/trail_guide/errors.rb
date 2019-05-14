@@ -9,4 +9,9 @@ module TrailGuide
       super("Could not find any experiments matching '#{key}'")
     end
   end
+
+  module Calculators
+    class NoBetaDistributionCalculator < LoadError; end
+    class NoZScoreCalculator < LoadError; end
+  end
 end
