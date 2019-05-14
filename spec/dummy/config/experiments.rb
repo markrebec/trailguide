@@ -90,10 +90,13 @@ end
 
 experiment :multi_goal_example do |config|
   config.summary = "example experiment with multiple goals"
+  config.algorithm = :distributed
 
   variant :green
   variant :blue
   variant :white, control: true
+  variant :red
+  variant :black
 
   config.groups = [:first, :second]
   config.goals = [:first, :second]
