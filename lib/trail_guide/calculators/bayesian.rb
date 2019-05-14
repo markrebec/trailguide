@@ -8,10 +8,10 @@ module TrailGuide
       def pdf(variant, z)
         x = variant.conversions
         n = variant.participants
-        if defined?(Distribution)
-          Distribution::Beta.pdf(z, x+1, n-x+1)
-        elsif defined?(Rubystats)
+        if defined?(Rubystats)
           Rubystats::BetaDistribution.new(x+1, n-x+1).pdf(z)
+        elsif defined?(Distribution)
+          Distribution::Beta.pdf(z, x+1, n-x+1)
         else
           raise NoBetaDistributionCalculator, "Unable to calculate beta distribution: could not find the 'distribution' or 'rubystats' gems. Please add either the 'distribution' or 'rubystats' gems to your gemfile and make sure to require them in your application."
         end
@@ -20,10 +20,10 @@ module TrailGuide
       def cdf(variant, z)
         x = variant.conversions
         n = variant.participants
-        if defined?(Distribution)
-          Distribution::Beta.cdf(z, x+1, n-x+1)
-        elsif defined?(Rubystats)
+        if defined?(Rubystats)
           Rubystats::BetaDistribution.new(x+1, n-x+1).cdf(z)
+        elsif defined?(Distribution)
+          Distribution::Beta.cdf(z, x+1, n-x+1)
         else
           raise NoBetaDistributionCalculator, "Unable to calculate beta distribution: could not find the 'distribution' or 'rubystats' gems. Please add either the 'distribution' or 'rubystats' gems to your gemfile and make sure to require them in your application."
         end
