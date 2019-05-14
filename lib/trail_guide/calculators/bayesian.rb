@@ -1,6 +1,7 @@
 module TrailGuide
   module Calculators
     class Bayesian < Calculator
+      # TODO allow selecting beta library
       def initialize(*args, **opts)
         super(*args, **opts)
       end
