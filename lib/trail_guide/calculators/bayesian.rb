@@ -48,7 +48,7 @@ module TrailGuide
           expvar = experiment.variants.find { |var| var.name == variant.name }
           vprob = variant_probability(variant)
           variant.probability = vprob
-          variant.significance = TrailGuide::Calculators::SIGNIFICANT_PROBABILITIES.find { |pct| vprob >= pct } || 0
+          variant.significance = TrailGuide::Calculators::SIGNIFICANT_PROBABILITIES.reverse.find { |pct| vprob >= pct } || 0
 
           if worst && variant.measure > worst.measure
             variant.difference = (variant.measure - worst.measure) / worst.measure * 100
