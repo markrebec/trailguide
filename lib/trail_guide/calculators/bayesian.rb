@@ -1,6 +1,10 @@
 module TrailGuide
   module Calculators
     class Bayesian < Calculator
+      def self.enabled?
+        !!(defined?(::Integration) && (defined?(::Rubystats) || defined?(::Distribution)))
+      end
+
       attr_reader :beta
 
       def initialize(*args, beta: nil, **opts)
