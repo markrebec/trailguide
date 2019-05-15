@@ -6,7 +6,7 @@ module TrailGuide
     def initialize(context, adapter: nil)
       @context = context
       @adapter = adapter.new(context) if adapter.present?
-      cleanup_inactive_experiments! if TrailGuide.configuration.cleanup_participant_experiments
+      cleanup_inactive_experiments! if TrailGuide.configuration.cleanup_participant_experiments == true
     end
 
     def adapter
@@ -120,8 +120,7 @@ module TrailGuide
         next unless experiment
 
         if !experiment.started?
-          # cleanup inactive experiments while we're shuffling through them
-          adapter.delete(key)
+          adapter.delete(key) if TrailGuide.configuration.cleanup_participant_experiments == :inline
           next
         else
           next unless !experiment.combined? && experiment.running? && participating?(experiment, include_control)

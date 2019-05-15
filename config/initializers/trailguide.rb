@@ -56,11 +56,13 @@ TrailGuide.configure do |config|
   # a couple milliseconds to participant initialization, but isn't strictly
   # necessary, since expired enrollment will never affect future experiment
   # participation - it might be good practice if you're using redis to store
-  # participant data without expiration
+  # participant data without expiration, or to avoid overflowing a client cookie
   #
-  # true      will clean up any old/inactive experiment keys for each
-  #           participant the first time they're encountered during a script
+  # true      will explicitly clean up any old/inactive experiment keys for each
+  #           participant the first time they're initialized during a script
   #           execution (web request, etc.)
+  # :inline   will only clean up any old/inactive experiment keys that are
+  #           encountered when referencing a participant's active experiments
   # false     will skip the cleanup process entirely
   config.cleanup_participant_experiments = true
 
