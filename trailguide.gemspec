@@ -21,6 +21,13 @@ Gem::Specification.new do |spec|
   spec.add_dependency "redis"
   spec.add_dependency "simple-random", ">= 0.9.3"
 
+  # TODO sort all this out once calculations are done
+  spec.add_development_dependency "gsl", ">= 2.1.0"
+  spec.add_development_dependency "integration", ">= 0.1.4"
+  spec.add_development_dependency "distribution", ">= 0.7.3"
+  spec.add_development_dependency "rubystats", ">= 0.3.0"
+  spec.add_development_dependency "abanalyzer"
+
   spec.add_development_dependency "sqlite3", "~> 1.3.6"
   spec.add_development_dependency "redis-namespace"
   spec.add_development_dependency "rspec-rails"
