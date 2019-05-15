@@ -1,5 +1,5 @@
 <tbody>
-  <% experiment.variants.each do |variant| %>
+  <% experiment.variants.sort_by(&:measure).reverse.each do |variant| %>
     <tr>
       <td class="text-left btn-col">
         <%= render partial: 'btn_join', locals: { experiment: experiment, variant: variant } %>
