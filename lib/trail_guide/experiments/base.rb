@@ -106,19 +106,23 @@ module TrailGuide
         end
 
         def started?
-          started_at && started_at <= Time.now
+          time = started_at
+          time && time <= Time.now
         end
 
         def scheduled?
-          started_at && started_at > Time.now
+          time = started_at
+          time && time > Time.now
         end
 
         def paused?
-          paused_at && paused_at <= Time.now
+          time = paused_at
+          time && time <= Time.now
         end
 
         def stopped?
-          stopped_at && stopped_at <= Time.now
+          time = stopped_at
+          time && time <= Time.now
         end
 
         def running?
