@@ -1,32 +1,55 @@
 module TrailGuide
   module Calculators
     class Bayesian < Calculator
-      # TODO allow selecting beta library
-      def initialize(*args, **opts)
+      attr_reader :beta
+
+      def initialize(*args, beta: nil, **opts)
+        raise NoIntegrationLibrary if !defined?(::Integration)
+
+        if beta.nil?
+          # prefer rubystats if not specified
+          if defined?(::Rubystats)
+            beta = :rubystats
+          elsif defined?(::Distribution)
+            beta = :distribution
+          else
+            raise NoBetaDistributionLibrary
+          end
+        end
+
+        case beta.to_sym
+        when :distribution
+          raise NoBetaDistributionLibrary, beta unless defined?(::Distribution)
+          TrailGuide.logger.debug "Using Distribution::Beta to calculate beta distributions"
+          TrailGuide.logger.debug "GSL detected, Distribution::Beta will use GSL for better performance" if defined?(::GSL)
+        when :rubystats
+          raise NoBetaDistributionLibrary, beta unless defined?(::Rubystats)
+          TrailGuide.logger.debug "Using Rubystats::BetaDistribution to calculate beta distributions"
+        else
+          raise UnknownBetaDistributionLibrary, beta
+        end
+
         super(*args, **opts)
+        @beta = beta.to_sym
       end
 
       def pdf(variant, z)
         x = variant.conversions
         n = variant.participants
-        if defined?(Rubystats)
-          Rubystats::BetaDistribution.new(x+1, n-x+1).pdf(z)
-        elsif defined?(Distribution)
+        if beta == :distribution
           Distribution::Beta.pdf(z, x+1, n-x+1)
         else
-          raise NoBetaDistributionCalculator, "Unable to calculate beta distribution: could not find the 'distribution' or 'rubystats' gems. Please add either the 'distribution' or 'rubystats' gems to your gemfile and make sure to require them in your application."
+          Rubystats::BetaDistribution.new(x+1, n-x+1).pdf(z)
         end
       end
 
       def cdf(variant, z)
         x = variant.conversions
         n = variant.participants
-        if defined?(Rubystats)
-          Rubystats::BetaDistribution.new(x+1, n-x+1).cdf(z)
-        elsif defined?(Distribution)
+        if beta == :distribution
           Distribution::Beta.cdf(z, x+1, n-x+1)
         else
-          raise NoBetaDistributionCalculator, "Unable to calculate beta distribution: could not find the 'distribution' or 'rubystats' gems. Please add either the 'distribution' or 'rubystats' gems to your gemfile and make sure to require them in your application."
+          Rubystats::BetaDistribution.new(x+1, n-x+1).cdf(z)
         end
       end
 
@@ -39,8 +62,6 @@ module TrailGuide
           end
           vpdf
         end * 100.0
-      rescue NameError => e
-        raise NoZScoreCalculator, "Unable to calculate z-score: could not find the 'integration' gem. Please add the 'integration' gem to your gemfile and make sure to require it in your application."
       end
 
       def calculate!
