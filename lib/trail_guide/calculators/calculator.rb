@@ -21,8 +21,8 @@ module TrailGuide
           measure = converts.to_f / participants.to_f
 
           Struct.new(:name, :control, :participants, :conversions, :measure,
-                     :z_score, :difference, :probability, :significance)
-            .new(variant.name, variant.control?, participants, converts, measure, 0, 0, 0, nil)
+                     :difference, :probability, :significance, :z_score)
+            .new(variant.name, variant.control?, participants, converts, measure, 0, 0, nil, nil)
         end.sort_by { |v| v.measure }
       end
 
