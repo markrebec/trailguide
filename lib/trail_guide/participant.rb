@@ -117,8 +117,16 @@ module TrailGuide
       return false if adapter.keys.empty?
       adapter.keys.map { |key| key.to_s.split(":").first.to_sym }.uniq.map do |key|
         experiment = TrailGuide.catalog.find(key)
-        next unless experiment && !experiment.combined? && experiment.running? && participating?(experiment, include_control)
-        [ experiment.experiment_name, adapter[experiment.storage_key] ]
+        next unless experiment
+
+        if !experiment.started?
+          # cleanup inactive experiments while we're shuffling through them
+          adapter.delete(key)
+          next
+        else
+          next unless !experiment.combined? && experiment.running? && participating?(experiment, include_control)
+          [ experiment.experiment_name, adapter[experiment.storage_key] ]
+        end
       end.compact.to_h
     end
 
