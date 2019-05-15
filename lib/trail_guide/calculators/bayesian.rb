@@ -34,8 +34,8 @@ module TrailGuide
       end
 
       def pdf(variant, z)
-        x = variant.conversions
-        n = variant.participants
+        x = variant.subset
+        n = variant.superset
         if beta == :distribution
           Distribution::Beta.pdf(z, x+1, n-x+1)
         else
@@ -44,8 +44,8 @@ module TrailGuide
       end
 
       def cdf(variant, z)
-        x = variant.conversions
-        n = variant.participants
+        x = variant.subset
+        n = variant.superset
         if beta == :distribution
           Distribution::Beta.cdf(z, x+1, n-x+1)
         else

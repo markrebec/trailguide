@@ -33,10 +33,10 @@ module TrailGuide
 
       def calculate!
         pc = base.measure
-        nc = base.participants
+        nc = base.superset
         variants.each do |var|
           p = var.measure
-          n = var.participants
+          n = var.superset
           z_score = (p - pc) / ((p * (1-p)/n) + (pc * (1-pc)/nc)).abs ** 0.5
 
           var.z_score = z_score

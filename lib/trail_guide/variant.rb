@@ -87,6 +87,12 @@ module TrailGuide
       participants - converted
     end
 
+    def measure(goal=nil, against=nil)
+      superset = against ? converted(against) : participants
+      converts = converted(goal)
+      converts.to_f / superset.to_f
+    end
+
     def increment_participation!
       TrailGuide.redis.hincrby(storage_key, 'participants', 1)
     end

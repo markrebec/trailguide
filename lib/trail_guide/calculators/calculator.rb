@@ -6,23 +6,23 @@ module TrailGuide
     class Calculator
       attr_reader :experiment, :goal, :probability, :choice
 
-      def initialize(experiment, probability=TrailGuide::Calculators::DEFAULT_PROBABILITY, base: :default, goal: nil, participants: nil)
+      def initialize(experiment, probability=TrailGuide::Calculators::DEFAULT_PROBABILITY, base: :default, goal: nil, against: nil)
         @experiment = experiment
         @probability = probability
         @base_type = base
         @goal = goal
-        @participants = participants
+        @against = against
       end
 
       def variants
         @variants ||= experiment.variants.map do |variant|
-          participants = @participants ? variant.converted(@participants) : variant.participants
+          superset = @against ? variant.converted(@against) : variant.participants
           converts = variant.converted(goal)
-          measure = converts.to_f / participants.to_f
+          measure = converts.to_f / superset.to_f
 
-          Struct.new(:name, :control, :participants, :conversions, :measure,
+          Struct.new(:name, :control, :superset, :subset, :measure,
                      :difference, :probability, :significance, :z_score)
-            .new(variant.name, variant.control?, participants, converts, measure, 0, 0, nil, nil)
+            .new(variant.name, variant.control?, superset, converts, measure, 0, 0, nil, nil)
         end.sort_by { |v| v.measure }
       end
 
