@@ -263,7 +263,10 @@ module TrailGuide
 
         if winner?
           variant = winner
-          variant.increment_participation! if track_winner_conversions?
+          if track_winner_conversions?
+            variant.increment_participation!
+            participant.participating!(variant)
+          end
           return variant
         end
 

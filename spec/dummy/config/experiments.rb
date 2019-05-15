@@ -102,4 +102,7 @@ experiment :long_description do |config|
 
   variant :alpha
   variant :bravo
+  variant :charlie
+
+  config.track_winner_conversions = true
 end
