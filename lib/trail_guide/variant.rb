@@ -90,6 +90,7 @@ module TrailGuide
     def measure(goal=nil, against=nil)
       superset = against ? converted(against) : participants
       converts = converted(goal)
+      return 0 if superset.zero? || converts.zero?
       converts.to_f / superset.to_f
     end
 
