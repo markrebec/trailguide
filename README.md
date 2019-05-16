@@ -770,24 +770,24 @@ When you define one or more named goals for an experiment, you must pass one of 
 trailguide.convert(:button_color, :signed_up)
 ```
 
-## Metrics
+## Groups
 
-If you have multiple experiments that share a relevant conversion point, you can configure them with a shared metric. This allows you to reference and convert multiple experiments at once using that shared metric, and only experiments in which participants have been enrolled will be converted.
+If you have multiple experiments that share a relevant conversion point, you can configure them with a shared group. This allows you to reference and convert multiple experiments at once using that shared group, and only experiments in which participants have been enrolled will be converted.
 
-Shared metrics can only be used for conversion, not for enrollment, since experiments don't share assignments.
+Shared groups can only be used for conversion, not for enrollment, since experiments don't share assignments.
 
-For example if you have multiple experiments where performing a search is considered to be a successful conversion, you can configure them all with the same shared metric then use that metric in your calls to `trailguide.convert`.
+For example if you have multiple experiments where performing a search is considered to be a successful conversion, you can configure them all with the same shared group then use that group in your calls to `trailguide.convert`.
 
 ```ruby
 experiment :first_search_experiment do |config|
-  config.metric = :perform_search
+  config.group = :perform_search
 
   variant :a
   variant :b
 end
 
 experiment :second_search_experiment do |config|
-  config.metric = :perform_search
+  config.groups = [:perform_search, :other_group]
 
   variant :one
   variant :two
@@ -795,7 +795,9 @@ experiment :second_search_experiment do |config|
 end
 
 experiment :third_search_experiment do |config|
-  config.metric = :perform_search
+  group :other_group
+  group :perform_search
+  groups :yet_another_group, :one_more
 
   variant :red
   variant :blue
@@ -809,7 +811,7 @@ class SearchController < ApplicationController
 end
 ```
 
-Since experiments with defined goals require a goal to be passed in when converting, any experiments that are sharing a metric must define the same goals.
+Since experiments with defined goals require a goal to be passed in when converting, any experiments that are sharing a group must define the same goals. If you have multiple experiments that are all sharing the same conversion goals, you may even want to assign your groups and goals the same names.
 
 ## Combined Experiments
 
