@@ -8,7 +8,7 @@ module TrailGuide
         delegate :metric, :algorithm, :control, :goals, :callbacks, :combined,
           :combined?, :allow_multiple_conversions?, :allow_multiple_goals?,
           :track_winner_conversions?, :start_manually?, :reset_manually?,
-          to: :configuration
+          :enable_calibration?, to: :configuration
         alias_method :funnels, :goals
 
         def register!
@@ -221,9 +221,14 @@ module TrailGuide
 
       attr_reader :participant
       delegate :configuration, :experiment_name, :variants, :control, :goals,
-        :storage_key, :running?, :started?, :started_at, :start!,
-        :start_manually?, :reset_manually?, :winner?, :allow_multiple_conversions?,
-        :allow_multiple_goals?, :track_winner_conversions?, :callbacks, to: :class
+        :storage_key, :stopped?, :running?, :started?, :started_at, :start!,
+        :winner, :winner?, :scheduled?, :start_manually?, :reset_manually?,
+        :allow_multiple_conversions?, :allow_multiple_goals?, :enable_calibration?,
+        :track_winner_conversions?, :callbacks, to: :class
+
+      # TODO maybe actually define + memoize some of these for the trial instance
+      # instead of delegating them directly to the class - especially the redis
+      # stuff to cut down on requests
 
       def initialize(participant)
         @participant = TrailGuide::Experiments::Participant.new(self, participant)
@@ -233,7 +238,7 @@ module TrailGuide
         @algorithm ||= self.class.algorithm.new(self)
       end
 
-      def winner
+      def winning_variant
         run_callbacks(:rollout_winner, self.class.winner)
       end
 
@@ -262,17 +267,25 @@ module TrailGuide
         end
 
         if winner?
-          variant = winner
-          if track_winner_conversions?
+          variant = winning_variant
+          if track_winner_conversions? && running?
             variant.increment_participation!
             participant.participating!(variant)
           end
           return variant
         end
 
-        return control if excluded
-        return control if !started? && configuration.start_manually
-        start! unless started?
+        return control if excluded || stopped?
+
+        if !started? && start_manually?
+          if enable_calibration?
+            control.increment_participation!
+            participant.participating!(control)
+          end
+          return control
+        end
+
+        start! unless started? || scheduled?
         return control unless running?
 
         if participant.participating?
@@ -300,8 +313,20 @@ module TrailGuide
       end
 
       def convert!(checkpoint=nil, metadata: nil)
-        return false if !running? || (winner? && !track_winner_conversions?)
-        return false unless participant.participating?
+        if !started?
+          return false unless enable_calibration?
+          variant = participant.variant
+          return false unless variant.present? && variant == control
+        else
+          return false unless running?
+          variant = participant.variant
+          return false unless variant.present?
+
+          if winner?
+            return false unless track_winner_conversions? && variant == winner
+          end
+        end
+
         raise InvalidGoalError, "Invalid goal checkpoint `#{checkpoint}` for `#{experiment_name}`." unless checkpoint.present? || goals.empty?
         raise InvalidGoalError, "Invalid goal checkpoint `#{checkpoint}` for `#{experiment_name}`." unless checkpoint.nil? || goals.any? { |goal| goal == checkpoint.to_s.underscore.to_sym }
         # TODO eventually allow progressing through funnel checkpoints towards goals
@@ -312,7 +337,6 @@ module TrailGuide
         end
         return false unless allow_conversion?(checkpoint, metadata)
 
-        variant = participant.variant
         # TODO eventually only reset if we're at the final goal in a funnel
         participant.converted!(variant, checkpoint, reset: !reset_manually?)
         variant.increment_conversion!(checkpoint)

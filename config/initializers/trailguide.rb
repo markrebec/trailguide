@@ -169,6 +169,21 @@ TrailGuide::Experiment.configure do |config|
   # false   prevents converting to multiple goals for a single participant
   config.allow_multiple_goals = false
 
+  # whether or not to enable calibration before an experiment is started - the
+  # participants and conversions will be tracked for your control group while
+  # an experiment remains unstarted, which can be useful for gathering a
+  # baseline conversion rate if you don't already have one
+  #
+  # control is always returned for unstarted experiments by default, and this
+  # configuration only affects whether or not to track metrics
+  #
+  # this setting only applies when start_manually is also true
+  #
+  # true  metrics for participation and conversion will be tracked for the
+  #       control group until the experiment is started
+  # false metrics will not be tracked while the experiment remains unstarted
+  config.enable_calibration = false
+
   # whether or not to skip the request filtering for this experiment - can be
   # useful when defining content-based experiments with custom algorithms which
   # bucket participants strictly based on additional content metadata and you
@@ -322,6 +337,10 @@ TrailGuide::Experiment.configure do |config|
   # example you could use a custom algorithm or even something like the flipper
   # gem to do a "feature rollout" from your control variant to your winner for
   # all users
+  #
+  # be aware that when using this alongside track_winner_conversions, whatever
+  # variant is returned from this callback chain is what will be tracked for
+  # participation and conversion as long as the experiment is still running
   #
   # must return an experiment variant
   #

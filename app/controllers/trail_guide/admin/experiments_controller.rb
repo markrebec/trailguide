@@ -15,6 +15,7 @@ module TrailGuide
       end
 
       def start
+        experiment.reset!(self) if experiment.enable_calibration?
         experiment.start!(self)
         redirect_to_experiment experiment
       end

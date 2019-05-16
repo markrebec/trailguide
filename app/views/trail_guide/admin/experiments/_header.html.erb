@@ -37,8 +37,8 @@
       <p>
         <% if experiment.winner? %>
           A winning variant has been selected for this experiment and will be returned to all participants.
-          <% if experiment.started? && experiment.configuration.track_winner_conversions %>
-            This experiment is configured with <code>track_winner_conversions</code>, so as long as your experiment is still running you will be able to continue tracking conversions against the winner. You can stop your experiment to stop tracking conversions.
+          <% if experiment.running? && experiment.configuration.track_winner_conversions %>
+            This experiment is configured with <code>track_winner_conversions: true</code>, so as long as your experiment is still running you will be able to continue tracking conversions against the winner. You can stop your experiment to stop tracking conversions.
           <% end %>
         <% elsif experiment.started? %>
           <% if experiment.stopped? %>
@@ -53,8 +53,19 @@
           <% if experiment.stopped_at.present? %>
             and stop on <strong><%= experiment.stopped_at.strftime(TrailGuide::Admin::DISPLAY_DATE_FORMAT) %></strong>
           <% end %>
+          <% if experiment.enable_calibration? %>
+            <br /><br />
+            In the meantime, this experiment is configured with <code>enable_calibration: true</code> and will track participation and conversion against your control variant to help determine a baseline conversion rate.
+          <% end %>
         <% else %>
-          This experiment has not been started. Use the controls to start or schedule your experiment.
+          This experiment is not running, and the control variant will be returned to all participants until it is started. You may use the controls below to start or schedule your experiment.
+          <% if !experiment.start_manually? %>
+            <br /><br />
+            This experiment is configured with <code>start_manually: false</code> and will start automatically the first time a participant encounters it.
+          <% elsif experiment.enable_calibration? %>
+            <br /><br />
+            In the meantime, this experiment is configured with <code>enable_calibration: true</code> and will track participation and conversion against your control variant to help determine a baseline conversion rate.
+          <% end %>
         <% end %>
       </p>
     </div>

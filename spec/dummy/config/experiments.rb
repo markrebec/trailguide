@@ -104,5 +104,6 @@ experiment :long_description do |config|
   variant :bravo
   variant :charlie
 
+  config.enable_calibration = true
   config.track_winner_conversions = true
 end

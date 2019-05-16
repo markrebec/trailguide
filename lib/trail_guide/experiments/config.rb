@@ -6,7 +6,7 @@ module TrailGuide
         :start_manually, :reset_manually, :store_override, :track_override,
         :combined, :allow_multiple_conversions, :allow_multiple_goals,
         :track_winner_conversions, :skip_request_filter, :target_sample_size,
-        :can_resume
+        :can_resume, :enable_calibration
       ].freeze
 
       CALLBACK_KEYS = [
@@ -76,6 +76,10 @@ module TrailGuide
 
       def can_resume?
         !!can_resume
+      end
+
+      def enable_calibration?
+        !!enable_calibration
       end
 
       def name
