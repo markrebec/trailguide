@@ -2,7 +2,7 @@ experiment :basic_experiment do |config|
   config.summary = "simple A/B test showing off some basic configuration"
   config.track_winner_conversions = true
 
-  config.metric = :example_metric
+  config.group = :example_group
 
   variant :option_one, control: true
   variant :option_two
@@ -17,6 +17,8 @@ end
 
 experiment :non_resumable_experiment do |config|
   config.summary = "experiment that cannot be paused or resumed"
+
+  config.groups = [:example_group, :other_group, :basic_experiment]
 
   variant :control
   variant :alternative

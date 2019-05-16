@@ -42,6 +42,7 @@ module TrailGuide
             # TODO also map goals once they're real classes
             config.control                    = options[:control] if options[:control]
             config.metric                     = options[:metric] if options[:metric]
+            config.groups                     = options[:groups] if options[:groups]
             config.algorithm                  = options[:algorithm] if options[:algorithm]
             config.goals                      = options[:goals] if options[:goals]
             config.combined                   = options[:combined] if options[:combined]
@@ -178,6 +179,7 @@ module TrailGuide
         experiment = experiments.find do |exp|
           exp.experiment_name == name.to_s.underscore.to_sym ||
             exp.metric == name.to_s.underscore.to_sym ||
+            exp.groups.include?(name.to_s.underscore.to_sym) ||
             exp.name == name.to_s.classify
         end
         return experiment if experiment.present?
@@ -200,6 +202,7 @@ module TrailGuide
         selected = experiments.select do |exp|
           exp.experiment_name == name.to_s.underscore.to_sym ||
             exp.metric == name.to_s.underscore.to_sym ||
+            exp.groups.include?(name.to_s.underscore.to_sym) ||
             exp.name == name.to_s.classify ||
             (exp.combined? && exp.combined.any? { |combo| combo.to_s.underscore.to_sym == name.to_s.underscore.to_sym })
         end.map do |exp|

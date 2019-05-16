@@ -5,7 +5,7 @@ module TrailGuide
   module Experiments
     class Base
       class << self
-        delegate :metric, :algorithm, :control, :goals, :callbacks, :combined,
+        delegate :metric, :groups, :algorithm, :control, :goals, :callbacks, :combined,
           :combined?, :allow_multiple_conversions?, :allow_multiple_goals?,
           :track_winner_conversions?, :start_manually?, :reset_manually?,
           :enable_calibration?, to: :configuration
@@ -199,9 +199,12 @@ module TrailGuide
         end
 
         def as_json(opts={})
+          # TODO add more configuration & metadata, and start actually using
+          # this more
           { experiment_name => {
             configuration: {
               metric: metric,
+              groups: groups,
               algorithm: algorithm.name,
               variants: variants.as_json,
               goals: goals.as_json,
