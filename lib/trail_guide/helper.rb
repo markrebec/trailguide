@@ -209,9 +209,18 @@ module TrailGuide
       end
 
       def convert!(checkpoint=nil, **opts, &block)
-        raise TooManyExperimentsError, "Conversion may only occur for individual experiments, but the metric `#{metric}` includes a combined experiment." if experiments.any?(&:combined?)
-        checkpoints = experiments.map { |experiment| experiment.convert!(checkpoint, **opts) }
+        checkpoints = experiments.map do |experiment|
+          if experiment.combined?
+            experiment.combined_experiments.map do |combo|
+              combo.convert!(checkpoint, **opts)
+            end
+          else
+            experiment.convert!(checkpoint, **opts)
+          end
+        end.flatten
+
         return false unless checkpoints.any?
+
         if block_given?
           yield checkpoints, opts[:metadata]
         else
