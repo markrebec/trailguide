@@ -298,7 +298,7 @@ module TrailGuide
           return variant
         end
 
-        return control unless TrailGuide.configuration.allow_multiple_experiments == true || !participant.participating_in_active_experiments?(TrailGuide.configuration.allow_multiple_experiments == false)
+        return control unless is_a?(TrailGuide::CombinedExperiment) || TrailGuide.configuration.allow_multiple_experiments == true || !participant.participating_in_active_experiments?(TrailGuide.configuration.allow_multiple_experiments == false)
         return control unless allow_participation?(metadata)
 
         variant = algorithm_choose!(metadata: metadata)
