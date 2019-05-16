@@ -1,10 +1,10 @@
 module TrailGuide
   module Helper
-    def trailguide(metric=nil, **opts, &block)
+    def trailguide(key=nil, **opts, &block)
       @trailguide_proxy ||= HelperProxy.new(self)
       @trailguide_proxy = HelperProxy.new(self) if @trailguide_proxy.context != self
-      return @trailguide_proxy if metric.nil?
-      @trailguide_proxy.choose!(metric, **opts, &block)
+      return @trailguide_proxy if key.nil?
+      @trailguide_proxy.choose!(key, **opts, &block)
     end
 
     def trailguide_participant
@@ -70,42 +70,42 @@ module TrailGuide
         @participant = participant
       end
 
-      def new(metric)
-        MetricProxy.new(context, metric, participant: participant)
+      def new(key)
+        ExperimentProxy.new(context, key, participant: participant)
       end
 
-      def choose!(metric, **opts, &block)
-        new(metric).choose!(**opts, &block)
+      def choose!(key, **opts, &block)
+        new(key).choose!(**opts, &block)
       end
       alias_method :enroll!, :choose!
 
-      def choose(metric, **opts, &block)
-        new(metric).choose(**opts, &block)
+      def choose(key, **opts, &block)
+        new(key).choose(**opts, &block)
       end
       alias_method :enroll, :choose
 
-      def run!(metric, **opts)
-        new(metric).run!(**opts)
+      def run!(key, **opts)
+        new(key).run!(**opts)
       end
 
-      def run(metric, **opts)
-        new(metric).run(**opts)
+      def run(key, **opts)
+        new(key).run(**opts)
       end
 
-      def render!(metric, **opts)
-        new(metric).render!(**opts)
+      def render!(key, **opts)
+        new(key).render!(**opts)
       end
 
-      def render(metric, **opts)
-        new(metric).render(**opts)
+      def render(key, **opts)
+        new(key).render(**opts)
       end
 
-      def convert!(metric, checkpoint=nil, **opts, &block)
-        new(metric).convert!(checkpoint, **opts, &block)
+      def convert!(key, checkpoint=nil, **opts, &block)
+        new(key).convert!(checkpoint, **opts, &block)
       end
 
-      def convert(metric, checkpoint=nil, **opts, &block)
-        new(metric).convert(checkpoint, **opts, &block)
+      def convert(key, checkpoint=nil, **opts, &block)
+        new(key).convert(checkpoint, **opts, &block)
       end
 
       def participant
@@ -121,18 +121,18 @@ module TrailGuide
       end
     end
 
-    class MetricProxy < HelperProxy
-      attr_reader :metric
+    class ExperimentProxy < HelperProxy
+      attr_reader :key
 
-      def initialize(context, metric, **opts)
+      def initialize(context, key, **opts)
         super(context, **opts)
-        @metric = metric
-        raise NoExperimentsError, "Could not find any experiments matching `#{metric}`." if experiments.empty?
+        @key = key
+        raise NoExperimentsError, "Could not find any experiments matching `#{key}`." if experiments.empty?
       end
 
       def choose!(**opts, &block)
-        raise TooManyExperimentsError, "Selecting a variant requires a single experiment, but the metric `#{metric}` matches more than one experiment." if experiments.length > 1
-        raise TooManyExperimentsError, "Selecting a variant requires a single experiment, but the metric `#{metric}` refers to a combined experiment." if experiment.combined?
+        raise TooManyExperimentsError, "Selecting a variant requires a single experiment, but `#{key}` matches more than one experiment." if experiments.length > 1
+        raise TooManyExperimentsError, "Selecting a variant requires a single experiment, but `#{key}` refers to a combined experiment." if experiment.combined?
         opts = {override: override_variant, excluded: exclude_visitor?}.merge(opts)
         variant = experiment.choose!(**opts)
         if block_given?
@@ -159,13 +159,13 @@ module TrailGuide
           unless context.respond_to?(varmeth, true)
             if context_type == :controller
               raise NoVariantMethodError,
-                "Undefined local method `#{varmeth}`. You must define a controller method matching the variant `#{variant.name}` in your experiment `#{metric}`. In this case it looks like you need to define #{context.class.name}##{varmeth}(metadata={})"
+                "Undefined local method `#{varmeth}`. You must define a controller method matching the variant `#{variant.name}` in your experiment `#{key}`. In this case it looks like you need to define #{context.class.name}##{varmeth}(metadata={})"
             elsif context_type == :template
               raise NoVariantMethodError,
-                "Undefined local method `#{varmeth}`. You must define a helper method matching the variant `#{variant.name}` in your experiment `#{metric}`. In this case it looks like you need to define ApplicationHelper##{varmeth}(metadata={})"
+                "Undefined local method `#{varmeth}`. You must define a helper method matching the variant `#{variant.name}` in your experiment `#{key}`. In this case it looks like you need to define ApplicationHelper##{varmeth}(metadata={})"
             else
               raise NoVariantMethodError,
-                "Undefined local method `#{varmeth}`. You must define a method matching the variant `#{variant.name}` in your experiment `#{metric}`. In this case it looks like you need to define #{context.class.name}##{varmeth}(metadata={})"
+                "Undefined local method `#{varmeth}`. You must define a method matching the variant `#{variant.name}` in your experiment `#{key}`. In this case it looks like you need to define #{context.class.name}##{varmeth}(metadata={})"
             end
           end
 
@@ -236,7 +236,7 @@ module TrailGuide
       end
 
       def experiments
-        @experiments ||= TrailGuide.catalog.select(metric).map do |experiment|
+        @experiments ||= TrailGuide.catalog.select(key).map do |experiment|
           experiment.new(participant)
         end
       end

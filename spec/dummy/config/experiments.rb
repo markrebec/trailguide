@@ -18,7 +18,7 @@ end
 experiment :non_resumable_experiment do |config|
   config.summary = "experiment that cannot be paused or resumed"
 
-  config.groups = [:example_group, :other_group, :basic_experiment]
+  config.groups = [:example_group, :other_group]
 
   variant :control
   variant :alternative
