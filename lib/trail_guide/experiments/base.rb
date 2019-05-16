@@ -129,6 +129,10 @@ module TrailGuide
           started? && !paused? && !stopped?
         end
 
+        def calibrating?
+          enable_calibration? && start_manually? && !started?
+        end
+
         def declare_winner!(variant, context=nil)
           variant = variants.find { |var| var == variant } unless variant.is_a?(Variant)
           run_callbacks(:on_winner, variant, context)
@@ -222,9 +226,9 @@ module TrailGuide
       attr_reader :participant
       delegate :configuration, :experiment_name, :variants, :control, :goals,
         :storage_key, :stopped?, :running?, :started?, :started_at, :start!,
-        :winner, :winner?, :scheduled?, :start_manually?, :reset_manually?,
-        :allow_multiple_conversions?, :allow_multiple_goals?, :enable_calibration?,
-        :track_winner_conversions?, :callbacks, to: :class
+        :winner, :winner?, :scheduled?, :calibrating?, :start_manually?,
+        :reset_manually?, :allow_multiple_conversions?, :allow_multiple_goals?,
+        :enable_calibration?, :track_winner_conversions?, :callbacks, to: :class
 
       # TODO maybe actually define + memoize some of these for the trial instance
       # instead of delegating them directly to the class - especially the redis
