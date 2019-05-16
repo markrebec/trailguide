@@ -132,6 +132,7 @@ module TrailGuide
 
       def choose!(**opts, &block)
         raise TooManyExperimentsError, "Selecting a variant requires a single experiment, but the metric `#{metric}` matches more than one experiment." if experiments.length > 1
+        raise TooManyExperimentsError, "Selecting a variant requires a single experiment, but the metric `#{metric}` refers to a combined experiment." if experiment.combined?
         opts = {override: override_variant, excluded: exclude_visitor?}.merge(opts)
         variant = experiment.choose!(**opts)
         if block_given?
@@ -208,6 +209,7 @@ module TrailGuide
       end
 
       def convert!(checkpoint=nil, **opts, &block)
+        raise TooManyExperimentsError, "Conversion may only occur for individual experiments, but the metric `#{metric}` includes a combined experiment." if experiments.any?(&:combined?)
         checkpoints = experiments.map { |experiment| experiment.convert!(checkpoint, **opts) }
         return false unless checkpoints.any?
         if block_given?

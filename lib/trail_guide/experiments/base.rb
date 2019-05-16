@@ -228,7 +228,8 @@ module TrailGuide
         :storage_key, :stopped?, :running?, :started?, :started_at, :start!,
         :winner, :winner?, :scheduled?, :calibrating?, :start_manually?,
         :reset_manually?, :allow_multiple_conversions?, :allow_multiple_goals?,
-        :enable_calibration?, :track_winner_conversions?, :callbacks, to: :class
+        :enable_calibration?, :track_winner_conversions?, :combined?,
+        :callbacks, to: :class
 
       # TODO maybe actually define + memoize some of these for the trial instance
       # instead of delegating them directly to the class - especially the redis
