@@ -328,6 +328,7 @@ module TrailGuide
 
         raise InvalidGoalError, "Invalid goal checkpoint `#{checkpoint}` for `#{experiment_name}`." unless checkpoint.present? || goals.empty?
         raise InvalidGoalError, "Invalid goal checkpoint `#{checkpoint}` for `#{experiment_name}`." unless checkpoint.nil? || goals.any? { |goal| goal == checkpoint.to_s.underscore.to_sym }
+
         # TODO eventually allow progressing through funnel checkpoints towards goals
         if participant.converted?(checkpoint)
           return false unless allow_multiple_conversions?
@@ -336,6 +337,9 @@ module TrailGuide
         end
         return false unless allow_conversion?(checkpoint, metadata)
 
+        # TODO only reset if !reset_manually? AND they've converted all goals if
+        # allow_multiple_goals? is set
+        # TODO what should happen when allow_multiple_conversions? and !reset_manually?
         # TODO eventually only reset if we're at the final goal in a funnel
         participant.converted!(variant, checkpoint, reset: !reset_manually?)
         variant.increment_conversion!(checkpoint)
