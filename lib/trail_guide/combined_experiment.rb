@@ -45,7 +45,6 @@ module TrailGuide
     end
 
     delegate :parent, to: :class
-    delegate :running?, :started?, :started_at, :start!, to: :parent
 
     # use the parent experiment as the algorithm and map to the matching variant
     def algorithm_choose!(metadata: nil)

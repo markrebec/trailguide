@@ -7,6 +7,7 @@ TrailGuide.configure do |config|
   )
 
   config.adapter = :multi
+  config.allow_multiple_experiments = true
 end
 
 TrailGuide::Experiment.configure do |config|

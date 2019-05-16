@@ -225,15 +225,9 @@ module TrailGuide
 
       attr_reader :participant
       delegate :configuration, :experiment_name, :variants, :control, :goals,
-        :storage_key, :stopped?, :running?, :started?, :started_at, :start!,
-        :winner, :winner?, :scheduled?, :calibrating?, :start_manually?,
-        :reset_manually?, :allow_multiple_conversions?, :allow_multiple_goals?,
-        :enable_calibration?, :track_winner_conversions?, :combined?,
-        :callbacks, to: :class
-
-      # TODO maybe actually define + memoize some of these for the trial instance
-      # instead of delegating them directly to the class - especially the redis
-      # stuff to cut down on requests
+        :storage_key, :combined?, :start_manually?, :reset_manually?,
+        :allow_multiple_conversions?, :allow_multiple_goals?,
+        :enable_calibration?, :track_winner_conversions?, :callbacks, to: :class
 
       def initialize(participant)
         @participant = TrailGuide::Experiments::Participant.new(self, participant)
@@ -383,6 +377,62 @@ module TrailGuide
           end
         end
       end
+
+      ### MEMOIZATOIN ###
+      # This is a lot of seemingly unnecessary duplication, but it really helps
+      # to cut down on the number of redis requests while still being
+      # thread-safe by memoizing these methods/values here at the instance level
+
+      def start!
+        @started_at = nil
+        self.class.start!
+      end
+
+      def started_at
+        @started_at ||= self.class.started_at
+      end
+
+      def paused_at
+        @paused_at ||= self.class.paused_at
+      end
+
+      def stopped_at
+        @stopped_at ||= self.class.stopped_at
+      end
+
+      def winner
+        @winner ||= self.class.winner
+      end
+
+      def scheduled?
+        started_at && started_at > Time.now
+      end
+
+      def started?
+        started_at && started_at <= Time.now
+      end
+
+      def paused?
+        paused_at && paused_at <= Time.now
+      end
+
+      def stopped?
+        stopped_at && stopped_at <= Time.now
+      end
+
+      def running?
+        started? && !paused? && !stopped?
+      end
+
+      def calibrating?
+        enable_calibration? && start_manually? && !started?
+      end
+
+      def winner?
+        return @has_winner unless @has_winner.nil?
+        @has_winner = self.class.winner?
+      end
+
     end
   end
 end
