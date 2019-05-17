@@ -811,9 +811,19 @@ class SearchController < ApplicationController
 end
 ```
 
-Since grouping is only useful when converting, and experiments with defined goals require a goal to be passed in when converting, any experiments that are sharing a group must define the same goals in order to be converted together.
+### "Deprecated" Groups
 
-If you're grouping your experiments, that probably means you have multiple experiments that are all being used in the same area of your app and are likely sharing the same conversion goals. You can assign your groups and goals the same names to make converting easier by referencing a single key:
+Sometimes in the real world, you might accidentally remove all the experiments that were sharing a given goal, but miss one of the conversion calls that used one of it's groups. Maybe you forgot to search through your code for references to the group, or maybe you just didn't know you were removing the last experiment in that group. Ideally you'd be testing your code thoroughly, and you'd catch the problem before hitting production, but trailguide has a built-in safe guard just in case.
+
+Instead of raising a `TrailGuide::NoExperimentsError` when no experiments match your arguments like `trailguide.choose` and related methods do, the `trailguide.convert` method will write a warning to your logs and return `false` as if no conversion happened.
+
+It's still a good idea to be thorough when removing experiments from your codebase entirely, but nobody's perfect and it always helps to have a safety net.
+
+### Groups with Goals
+
+Since grouping is only useful when converting, and experiments with defined goals require a goal to be passed in when converting, **any experiments that are sharing a group must define the same goals in order to be converted together.** Not all goals need to overlap, but you will only be able to convert goals that are shared when referencing a group.
+
+If you're grouping your experiments, that probably means you have multiple experiments that are all being used in the same area of your app and therefore are likely sharing the same (or similar) conversion goals. You can assign your groups and goals the same names to make converting easier by referencing a single key:
 
 ```ruby
 experiment :first_search_experiment do |config|
