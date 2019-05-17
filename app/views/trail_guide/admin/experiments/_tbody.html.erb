@@ -19,13 +19,13 @@
         <% end %>
       </th>
 
-      <td><%= experiment_metric @experiment, variant.participants %></td>
+      <td><%= experiment_metric experiment, variant.participants %></td>
 
       <% if experiment.goals.empty? %>
-        <td><%= experiment_metric @experiment, variant.converted %></td>
+        <td><%= experiment_metric experiment, variant.converted %></td>
       <% else %>
         <% experiment.goals.each do |goal| %>
-          <td><%= experiment_metric @experiment, variant.converted(goal) %></td>
+          <td><%= experiment_metric experiment, variant.converted(goal) %></td>
         <% end %>
       <% end %>
 
