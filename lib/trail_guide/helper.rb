@@ -127,10 +127,10 @@ module TrailGuide
       def initialize(context, key, **opts)
         super(context, **opts)
         @key = key
-        raise NoExperimentsError, "Could not find any experiments matching `#{key}`." if experiments.empty?
       end
 
       def choose!(**opts, &block)
+        raise NoExperimentsError, "Could not find any experiments matching `#{key}`." if experiments.empty?
         raise TooManyExperimentsError, "Selecting a variant requires a single experiment, but `#{key}` matches more than one experiment." if experiments.length > 1
         raise TooManyExperimentsError, "Selecting a variant requires a single experiment, but `#{key}` refers to a combined experiment." if experiment.combined?
         opts = {override: override_variant, excluded: exclude_visitor?}.merge(opts)
@@ -145,6 +145,8 @@ module TrailGuide
 
       def choose(**opts, &block)
         choose!(**opts, &block)
+      rescue NoExperimentsError => e
+        raise e
       rescue => e
         TrailGuide.logger.error e
         experiment.control
@@ -182,6 +184,8 @@ module TrailGuide
 
       def run(methods: nil, **opts)
         run!(methods: methods, **opts)
+      rescue NoExperimentsError => e
+        raise e
       rescue => e
         TrailGuide.logger.error e
         false
@@ -203,12 +207,15 @@ module TrailGuide
 
       def render(prefix: nil, templates: nil, locals: {}, **opts)
         render!(prefix: prefix, templates: templates, locals: locals, **opts)
+      rescue NoExperimentsError => e
+        raise e
       rescue => e
         TrailGuide.logger.error e
         false
       end
 
       def convert!(checkpoint=nil, **opts, &block)
+        raise NoExperimentsError, "Could not find any experiments matching `#{key}`." if experiments.empty?
         checkpoints = experiments.map do |experiment|
           if experiment.combined?
             experiment.combined_experiments.map do |combo|
@@ -226,6 +233,9 @@ module TrailGuide
         else
           checkpoints
         end
+      rescue NoExperimentsError => e
+        TrailGuide.logger.warn "#{e.class.name}: #{e.message}"
+        false
       end
 
       def convert(checkpoint=nil, **opts, &block)
