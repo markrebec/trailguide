@@ -2,7 +2,7 @@ module TrailGuide
   module Experiments
     class Config < Canfig::Config
       DEFAULT_KEYS = [
-        :name, :summary, :preview_url, :algorithm, :metric, :alias, :groups, :variants, :goals,
+        :name, :summary, :preview_url, :algorithm, :groups, :variants, :goals,
         :start_manually, :reset_manually, :store_override, :track_override,
         :combined, :allow_multiple_conversions, :allow_multiple_goals,
         :track_winner_conversions, :skip_request_filter, :target_sample_size,
@@ -84,10 +84,6 @@ module TrailGuide
 
       def name
         @name ||= (self[:name] || experiment.name).try(:to_s).try(:underscore).try(:to_sym)
-      end
-
-      def metric
-        @metric ||= (self[:metric] || name).try(:to_s).try(:underscore).try(:to_sym)
       end
 
       # TODO should add validations when setting these to make sure they're not
