@@ -811,7 +811,54 @@ class SearchController < ApplicationController
 end
 ```
 
-Since experiments with defined goals require a goal to be passed in when converting, any experiments that are sharing a group must define the same goals. If you have multiple experiments that are all sharing the same conversion goals, you may even want to assign your groups and goals the same names.
+Since grouping is only useful when converting, and experiments with defined goals require a goal to be passed in when converting, any experiments that are sharing a group must define the same goals in order to be converted together.
+
+If you're grouping your experiments, that probably means you have multiple experiments that are all being used in the same area of your app and are likely sharing the same conversion goals. You can assign your groups and goals the same names to make converting easier by referencing a single key:
+
+```ruby
+experiment :first_search_experiment do |config|
+  variant :alpha
+  variant :bravo
+
+  config.groups = [:click_search, :click_banner, :search_experiments]
+  config.goals  = [:click_search, :click_banner, :custom_goal]
+end
+
+experiment :second_search_experiment do |config|
+  variant :one
+  variant :two
+  variant :three
+
+  config.groups = [:click_search, :click_banner, :search_experiments]
+  config.goals  = [:click_search, :click_banner, :some_other_goal]
+end
+
+experiment :third_search_experiment do |config|
+  variant :red
+  variant :blue
+
+  config.groups = [:click_search, :click_banner, :search_experiments]
+  config.goals  = [:click_search, :click_banner]
+end
+
+# then to convert all three experiments for the click_search group, against the
+# click_search goal
+trailguide.convert(:click_search)
+
+# the above is the equivalent of calling their group name (in this case not
+matching the goal name) and the goal name
+trailguide.convert(:search_experiments, :click_search)
+
+# or the equivalent of converting each of the three experiments individually
+# for that goal
+trailguide.convert(:first_search_experiment, :click_search)
+trailguide.convert(:second_search_experiment, :click_search)
+trailguide.convert(:third_search_experiment, :click_search)
+
+# and you can still convert the individual experiments with goals that are not
+# shared by their group
+trailguide.convert(:first_search_experiment, :custom_goal)
+```
 
 ## Combined Experiments
 

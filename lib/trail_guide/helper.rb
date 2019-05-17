@@ -126,7 +126,7 @@ module TrailGuide
 
       def initialize(context, key, **opts)
         super(context, **opts)
-        @key = key
+        @key = key.to_s.underscore.to_sym
       end
 
       def choose!(**opts, &block)
@@ -217,12 +217,13 @@ module TrailGuide
       def convert!(checkpoint=nil, **opts, &block)
         raise NoExperimentsError, "Could not find any experiments matching `#{key}`." if experiments.empty?
         checkpoints = experiments.map do |experiment|
+          ckpt = checkpoint || experiment.goals.find { |g| g == key }
           if experiment.combined?
             experiment.combined_experiments.map do |combo|
-              combo.convert!(checkpoint, **opts)
+              combo.convert!(ckpt, **opts)
             end
           else
-            experiment.convert!(checkpoint, **opts)
+            experiment.convert!(ckpt, **opts)
           end
         end.flatten
 
