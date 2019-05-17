@@ -813,7 +813,7 @@ end
 
 ### "Deprecated" Groups
 
-Sometimes in the real world, you might accidentally remove all the experiments that were sharing a given goal, but miss one of the conversion calls that used one of it's groups. Maybe you forgot to search through your code for references to the group, or maybe you just didn't know you were removing the last experiment in that group. Ideally you'd be testing your code thoroughly, and you'd catch the problem before hitting production, but trailguide has a built-in safe guard just in case.
+Sometimes in the real world, you might accidentally remove all the experiments that were sharing a given group, but miss one of the conversion calls that used one of it's groups. Maybe you forgot to search through your code for references to the group, or maybe you just didn't know you were removing the last experiment in that group. Ideally you'd be testing your code thoroughly, and you'd catch the problem before hitting production, but trailguide has a built-in safe guard just in case.
 
 Instead of raising a `TrailGuide::NoExperimentsError` when no experiments match your arguments like `trailguide.choose` and related methods do, the `trailguide.convert` method will write a warning to your logs and return `false` as if no conversion happened.
 
@@ -856,7 +856,7 @@ end
 trailguide.convert(:click_search)
 
 # the above is the equivalent of calling their group name (in this case not
-matching the goal name) and the goal name
+# matching the goal name) and the goal name
 trailguide.convert(:search_experiments, :click_search)
 
 # or the equivalent of converting each of the three experiments individually
