@@ -384,6 +384,12 @@ module TrailGuide
         end
       end
 
+      def combined_experiments
+        @combined_experiments ||= self.class.combined_experiments.map do |combo|
+          combo.new(participant.participant)
+        end
+      end
+
       ### MEMOIZATOIN ###
       # This is a lot of seemingly unnecessary duplication, but it really helps
       # to cut down on the number of redis requests while still being
