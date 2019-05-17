@@ -11,6 +11,7 @@ TrailGuide::Admin::Engine.routes.draw do
       match :resume,   via: [:put, :post, :get]
       match :restart,  via: [:put, :post, :get]
 
+      match :enroll,   via: [:put, :post, :get], path: 'enroll'
       match :join,     via: [:put, :post, :get], path: 'join/:variant'
       match :leave,    via: [:put, :post, :get]
 

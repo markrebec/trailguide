@@ -56,6 +56,12 @@ module TrailGuide
         redirect_to_experiment experiment
       end
 
+      def enroll
+        variant = enroll_experiment(experiment)
+        flash[:info] = "Enrolled in variant: #{variant.to_s}"
+        redirect_to_experiment experiment
+      end
+
       def join
         if experiment <= TrailGuide::CombinedExperiment
           experiment.parent.combined_experiments.each do |expmt|
@@ -71,6 +77,11 @@ module TrailGuide
       def leave
         if experiment <= TrailGuide::CombinedExperiment
           experiment.parent.combined_experiments.each do |expmt|
+            leave_experiment(expmt)
+          end
+        elsif experiment.combined?
+          leave_experiment(experiment)
+          experiment.combined_experiments.each do |expmt|
             leave_experiment(expmt)
           end
         else
@@ -120,6 +131,11 @@ module TrailGuide
 
           exp_params
         end
+      end
+
+      def enroll_experiment(expmt)
+        participant.exit!(expmt)
+        expmt.new(participant).choose!
       end
 
       def join_experiment(expmt)
