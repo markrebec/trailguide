@@ -86,6 +86,36 @@
         <% end %>
       </div>
     </div>
+
+    <div class="btn-group">
+      <%= link_to trail_guide_admin.groups_path, class: "btn btn-outline-light text-dark" do %>
+        <span class="fas fa-object-group"></span>
+        &nbsp;
+        <strong class="total">
+          <%= TrailGuide.catalog.groups.count %>
+        </strong>
+        <span><%= "group".pluralize(TrailGuide.catalog.groups.count) %></span>
+      <% end %>
+
+      <button type="button" class="btn btn-outline-light text-dark dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <span class="sr-only">Toggle Dropdown</span>
+      </button>
+
+      <div class="dropdown-menu">
+
+        <% TrailGuide.catalog.groups.each do |group| %>
+          <%= link_to trail_guide_admin.group_path(group), class: "dropdown-item text-secondary" do %>
+            <span class="fas fa-flask"></span>
+            <small>&times;</small>
+            <strong class="total">
+              <%= TrailGuide.catalog.select(group).count %>
+            </strong>
+            &nbsp;
+            <span><%= group.to_s.humanize.titleize %></span>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
   </div>
   <span class="navbar-brand d-none d-md-inline-block"><small class="text-muted"><%= TrailGuide::Admin.configuration.subtitle %></small></span>
 </nav>

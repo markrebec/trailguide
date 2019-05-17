@@ -1,4 +1,6 @@
 TrailGuide::Admin::Engine.routes.draw do
+  resources :groups, only: [:index, :show]
+
   resources :experiments, path: '/', only: [:index, :show] do
     member do
       match :start,    via: [:put, :post, :get]
