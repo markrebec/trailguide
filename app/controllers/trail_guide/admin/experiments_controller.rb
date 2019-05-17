@@ -57,15 +57,26 @@ module TrailGuide
       end
 
       def join
-        participant.exit!(experiment)
-        variant = experiment.variants.find { |var| var == params[:variant] }
-        variant.increment_participation!
-        participant.participating!(variant)
+        if experiment <= TrailGuide::CombinedExperiment
+          experiment.parent.combined_experiments.each do |expmt|
+            join_experiment(expmt)
+          end
+        else
+          join_experiment(experiment)
+        end
+
         redirect_to_experiment experiment
       end
 
       def leave
-        participant.exit!(experiment)
+        if experiment <= TrailGuide::CombinedExperiment
+          experiment.parent.combined_experiments.each do |expmt|
+            leave_experiment(expmt)
+          end
+        else
+          leave_experiment(experiment)
+        end
+
         redirect_to_experiment experiment
       end
 
@@ -109,6 +120,17 @@ module TrailGuide
 
           exp_params
         end
+      end
+
+      def join_experiment(expmt)
+        participant.exit!(expmt)
+        variant = expmt.variants.find { |var| var == params[:variant] }
+        variant.increment_participation!
+        participant.participating!(variant)
+      end
+
+      def leave_experiment(expmt)
+        participant.exit!(expmt)
       end
 
       def participant
