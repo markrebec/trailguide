@@ -79,6 +79,10 @@ module TrailGuide
       experiments.each(&block)
     end
 
+    def groups
+      experiments.map(&:groups).flatten.uniq
+    end
+
     def all
       exploded = experiments.map do |exp|
         if exp.combined?
