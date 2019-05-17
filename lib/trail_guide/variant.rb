@@ -16,10 +16,17 @@ module TrailGuide
 
     def ==(other)
       if other.is_a?(self.class)
+        # TODO eventually remove the experiment requirement here once we start
+        # taking advantage of === below
         return name == other.name && experiment == other.experiment
       elsif other.is_a?(String) || other.is_a?(Symbol)
         return name == other.to_s.underscore.to_sym
       end
+    end
+
+    def ===(other)
+      return false unless other.is_a?(self.class)
+      return name == other.name && experiment == other.experiment
     end
 
     # TODO maybe track the control on the experiment itself, rather than as a
