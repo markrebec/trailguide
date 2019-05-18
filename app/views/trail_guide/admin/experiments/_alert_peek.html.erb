@@ -1,0 +1,19 @@
+<% if experiment_peekable?(experiment) %>
+  <% if experiment_peeking?(experiment) %>
+    <div class="alert alert-primary">
+      <h6>
+        <span class="fas fa-eye"></span>
+        Peeking at Results
+      </h6>
+      <p><small>You are currently peeking at this experiment's results. Use the <span class="fas fa-eye-slash"></span> button to stop peeking.</small></p>
+    </div>
+  <% else %>
+    <div class="alert alert-primary">
+      <h6>
+        <span class="fas fa-eye-slash"></span>
+        Target Sample Size
+      </h6>
+      <p><small>This experiment has been configured with <code>target_sample_size: <%= experiment.configuration.target_sample_size %></code>, which prevents variant metrics from being displayed until the experiment has ended. You may peek at the current results by clicking the <span class="fas fa-eye"></span> button.</small></p>
+    </div>
+  <% end %>
+<% end %>

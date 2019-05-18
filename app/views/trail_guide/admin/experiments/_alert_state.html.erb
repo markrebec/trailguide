@@ -1,0 +1,56 @@
+<div class="alert alert-<%= experiment_color(experiment) %>">
+  <h6 class="text-<%= experiment_color(experiment) %>">
+    <span class="fas <%= experiment_icon(experiment) %> text-<%= experiment_color(experiment) %>"></span>
+    &nbsp;
+    <% if experiment.winner? %>
+      Winner Promoted
+    <% elsif experiment.started? %>
+      <% if experiment.stopped? %>
+        Stopped
+      <% elsif experiment.paused? %>
+        Paused
+      <% else %>
+        Running
+      <% end %>
+    <% elsif experiment.scheduled? %>
+      Scheduled
+    <% else %>
+      Not Started
+    <% end %>
+  </h6>
+
+  <p><small>
+    <% if experiment.winner? %>
+      A winning variant has been selected for this experiment and will be returned to all participants.
+      <% if experiment.running? && experiment.configuration.track_winner_conversions %>
+        This experiment is configured with <code>track_winner_conversions: true</code>, so as long as your experiment is still running you will be able to continue tracking conversions against the winner. You can stop your experiment to stop tracking conversions.
+      <% end %>
+    <% elsif experiment.started? %>
+      <% if experiment.stopped? %>
+        This experiment has been stopped. The control variant will be returned to all participants until it is restarted or a winner is selected.
+      <% elsif experiment.paused? %>
+        This experiment has been paused. The control variant will be returned to all participants until it is resumed, restarted or a winner is selected.
+      <% else %>
+        This experiment is currently running. Participants will be enrolled and served a variant based on the configured alrogithm.
+      <% end %>
+    <% elsif experiment.scheduled? %>
+      This experiment has been scheduled to start on <strong><%= experiment.started_at.strftime(TrailGuide::Admin::DISPLAY_DATE_FORMAT) %></strong>
+      <% if experiment.stopped_at.present? %>
+        and stop on <strong><%= experiment.stopped_at.strftime(TrailGuide::Admin::DISPLAY_DATE_FORMAT) %></strong>
+      <% end %>
+      <% if experiment.enable_calibration? %>
+        <br /><br />
+        In the meantime, this experiment is configured with <code>enable_calibration: true</code> and will track participation and conversion against your control variant to help determine a baseline conversion rate.
+      <% end %>
+    <% else %>
+      This experiment is not running, and the control variant will be returned to all participants until it is started. You may use the controls below to start or schedule your experiment.
+      <% if !experiment.start_manually? %>
+        <br /><br />
+        This experiment is configured with <code>start_manually: false</code> and will start automatically the first time a participant encounters it.
+      <% elsif experiment.enable_calibration? %>
+        <br /><br />
+        In the meantime, this experiment is configured with <code>enable_calibration: true</code> and will track participation and conversion against your control variant to help determine a baseline conversion rate.
+      <% end %>
+    <% end %>
+  </small></p>
+</div>

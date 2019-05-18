@@ -1,97 +1,3 @@
-<div class="row">
-  <div class="col-12">
-    <% if experiment <= TrailGuide::CombinedExperiment %>
-      <div class="alert alert-dark">
-        <h5>
-          <span class="fas fa-object-group"></span>
-          Combined Experiment
-        </h5>
-        <p>This experiment is part of a combined experiment and can only be managed via it's parent. Use the button below to view the parent experiment.</p>
-        <div class="text-right">
-          <%= link_to experiment.parent.experiment_name.to_s.humanize.titleize, trail_guide_admin.experiment_path(experiment.parent.experiment_name), class: 'btn btn-dark' %>
-        </div>
-      </div>
-    <% end %>
-
-    <div class="alert alert-<%= experiment_color(experiment) %>">
-      <h5 class="text-<%= experiment_color(experiment) %>">
-        <span class="fas <%= experiment_icon(experiment) %> text-<%= experiment_color(experiment) %>"></span>
-        &nbsp;
-        <% if experiment.winner? %>
-          Winner Promoted
-        <% elsif experiment.started? %>
-          <% if experiment.stopped? %>
-            Stopped
-          <% elsif experiment.paused? %>
-            Paused
-          <% else %>
-            Running
-          <% end %>
-        <% elsif experiment.scheduled? %>
-          Scheduled
-        <% else %>
-          Not Started
-        <% end %>
-      </h5>
-
-      <p>
-        <% if experiment.winner? %>
-          A winning variant has been selected for this experiment and will be returned to all participants.
-          <% if experiment.running? && experiment.configuration.track_winner_conversions %>
-            This experiment is configured with <code>track_winner_conversions: true</code>, so as long as your experiment is still running you will be able to continue tracking conversions against the winner. You can stop your experiment to stop tracking conversions.
-          <% end %>
-        <% elsif experiment.started? %>
-          <% if experiment.stopped? %>
-            This experiment has been stopped. The control variant will be returned to all participants until it is restarted or a winner is selected.
-          <% elsif experiment.paused? %>
-            This experiment has been paused. The control variant will be returned to all participants until it is resumed, restarted or a winner is selected.
-          <% else %>
-            This experiment is currently running. Participants will be enrolled and served a variant based on the configured alrogithm.
-          <% end %>
-        <% elsif experiment.scheduled? %>
-          This experiment has been scheduled to start on <strong><%= experiment.started_at.strftime(TrailGuide::Admin::DISPLAY_DATE_FORMAT) %></strong>
-          <% if experiment.stopped_at.present? %>
-            and stop on <strong><%= experiment.stopped_at.strftime(TrailGuide::Admin::DISPLAY_DATE_FORMAT) %></strong>
-          <% end %>
-          <% if experiment.enable_calibration? %>
-            <br /><br />
-            In the meantime, this experiment is configured with <code>enable_calibration: true</code> and will track participation and conversion against your control variant to help determine a baseline conversion rate.
-          <% end %>
-        <% else %>
-          This experiment is not running, and the control variant will be returned to all participants until it is started. You may use the controls below to start or schedule your experiment.
-          <% if !experiment.start_manually? %>
-            <br /><br />
-            This experiment is configured with <code>start_manually: false</code> and will start automatically the first time a participant encounters it.
-          <% elsif experiment.enable_calibration? %>
-            <br /><br />
-            In the meantime, this experiment is configured with <code>enable_calibration: true</code> and will track participation and conversion against your control variant to help determine a baseline conversion rate.
-          <% end %>
-        <% end %>
-      </p>
-    </div>
-
-    <% if experiment_peekable?(experiment) %>
-      <% if experiment_peeking?(experiment) %>
-        <div class="alert alert-primary">
-          <h5>
-            <span class="fas fa-eye"></span>
-            Peeking at Results
-          </h5>
-          <p>You are currently peeking at this experiment's results. Use the <span class="fas fa-eye-slash"></span> button to stop peeking.</p>
-        </div>
-      <% else %>
-        <div class="alert alert-primary">
-          <h5>
-            <span class="fas fa-eye-slash"></span>
-            Target Sample Size
-          </h5>
-          <p>This experiment has been configured with <code>target_sample_size: <%= experiment.configuration.target_sample_size %></code>, which prevents variant metrics from being displayed until the experiment has ended. You may peek at the current results by clicking the <span class="fas fa-eye"></span> button.</p>
-        </div>
-      <% end %>
-    <% end %>
-  </div>
-</div>
-
 <div class="row align-items-center">
   <div class="col-8 col-lg-10">
     <h1 id="<%= experiment.experiment_name %>">
@@ -145,5 +51,21 @@
 <div class="row">
   <div class="col-12">
     <p><%= experiment.configuration.summary %></p>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-12">
+    <% if experiment <= TrailGuide::CombinedExperiment %>
+      <div class="alert alert-dark">
+        <h6>
+          <span class="fas fa-link"></span>
+          Combined Experiment
+        </h6>
+        <p><small>This experiment is part of a combined experiment, and some features must be managed via it's parent experiment <strong><%= link_to experiment.parent.experiment_name.to_s.humanize.titleize, trail_guide_admin.experiment_path(experiment.parent.experiment_name), class: 'text-dark' %></strong></small></p>
+      </div>
+    <% end %>
+
+    <%= render partial: 'alert_state', locals: {experiment: experiment} %>
   </div>
 </div>
