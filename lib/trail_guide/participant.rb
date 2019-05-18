@@ -36,7 +36,7 @@ module TrailGuide
     end
 
     def variant(experiment)
-      return nil unless experiment.enable_calibration? || experiment.started?
+      return nil unless experiment.calibrating? || experiment.started?
       return nil unless adapter.key?(experiment.storage_key)
       varname = adapter[experiment.storage_key]
       variant = experiment.variants.find { |var| var == varname }
@@ -44,7 +44,7 @@ module TrailGuide
 
       chosen_at = Time.at(adapter[variant.storage_key].to_i)
       started_at = experiment.started_at
-      return variant if (variant.control? && experiment.enable_calibration?) || (started_at && chosen_at >= started_at)
+      return variant if (variant.control? && experiment.calibrating?) || (started_at && chosen_at >= started_at)
     end
 
     def participating?(experiment, include_control=true)
@@ -55,7 +55,7 @@ module TrailGuide
     end
 
     def converted?(experiment, checkpoint=nil)
-      return false unless experiment.started? || (experiment.enable_calibration? && variant(experiment).try(:control?))
+      return false unless experiment.started? || (experiment.calibrating? && variant(experiment).try(:control?))
       if experiment.goals.empty?
         raise InvalidGoalError, "You provided the checkpoint `#{checkpoint}` but the experiment `#{experiment.experiment_name}` does not have any goals defined." unless checkpoint.nil?
         storage_key = "#{experiment.storage_key}:converted"
