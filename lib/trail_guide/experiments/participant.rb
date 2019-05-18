@@ -20,6 +20,13 @@ module TrailGuide
         @variant ||= participant.variant(experiment)
       end
 
+      def exit!
+        @participating = nil
+        @converted = nil
+        @variant = nil
+        participant.exit!(experiment)
+      end
+
       def method_missing(meth, *args, &block)
         return participant.send(meth, *args, &block) if participant.respond_to?(meth, true)
         super
