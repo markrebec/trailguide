@@ -13,6 +13,7 @@ TrailGuide::Admin::Engine.routes.draw do
 
       match :enroll,   via: [:put, :post, :get], path: 'enroll'
       match :join,     via: [:put, :post, :get], path: 'join/:variant'
+      match :convert,  via: [:put, :post, :get], path: 'convert/:goal'
       match :leave,    via: [:put, :post, :get]
 
       match :winner,   via: [:put, :post, :get], path: 'winner/:variant'

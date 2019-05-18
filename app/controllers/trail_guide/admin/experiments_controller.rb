@@ -6,7 +6,7 @@ module TrailGuide
       end
 
       before_action :experiments, only: [:index]
-      before_action :experiment,  only: [:show]
+      before_action :experiment,  except: [:index]
 
       def index
       end
@@ -59,6 +59,16 @@ module TrailGuide
       def enroll
         variant = enroll_experiment(experiment)
         flash[:info] = "You were enrolled in the <strong>#{variant.to_s.humanize.titleize}</strong> variant"
+        redirect_to_experiment experiment
+      end
+
+      def convert
+        variant = convert_experiment(experiment, params[:goal])
+        if variant
+          flash[:info] = "You successfully converted the goal <strong>#{params[:goal].to_s.humanize.titleize}</strong> in the <strong>#{variant.to_s.humanize.titleize}</strong> variant"
+        else
+          flash[:info] = "You did not convert the goal <strong>#{params[:goal].to_s.humanize.titleize}</strong>"
+        end
         redirect_to_experiment experiment
       end
 
@@ -127,6 +137,11 @@ module TrailGuide
           end
           variant
         end
+      end
+
+      def convert_experiment(experiment, checkpoint=nil)
+        return false if experiment.combined?
+        experiment.new(participant).convert!(checkpoint)
       end
 
       def join_experiment(experiment)
