@@ -281,7 +281,8 @@ module TrailGuide
 
         if !started? && start_manually?
           if enable_calibration?
-            control.increment_participation!
+            control.increment_participation! unless participant.variant == control
+            participant.exit! if participant.participating? && participant.variant != control
             participant.participating!(control)
           end
           return control
