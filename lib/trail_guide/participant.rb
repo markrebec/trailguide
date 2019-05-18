@@ -123,7 +123,7 @@ module TrailGuide
         experiment = TrailGuide.catalog.find(key)
         next unless experiment
 
-        if !experiment.started?
+        if !experiment.started? && !experiment.calibrating?
           inactive << key
           next
         else
@@ -139,6 +139,16 @@ module TrailGuide
       end
 
       return active
+    end
+
+    def calibrating_experiments
+      return false if adapter.keys.empty?
+
+      adapter.keys.map { |key| key.to_s.split(":").first.to_sym }.uniq.map do |key|
+        experiment = TrailGuide.catalog.find(key)
+        next unless experiment && experiment.calibrating?
+        [ experiment.experiment_name, adapter[experiment.storage_key] ]
+      end.compact.to_h
     end
 
     def participating_in_active_experiments?(include_control=true)
@@ -157,7 +167,7 @@ module TrailGuide
       adapter.keys.each do |key|
         experiment_name = key.to_s.split(":").first.to_sym
         experiment = TrailGuide.catalog.find(experiment_name)
-        if !experiment || !experiment.started?
+        if !experiment || (!experiment.started? && !experiment.calibrating?)
           adapter.delete(key)
         end
       end
