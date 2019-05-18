@@ -1,0 +1,44 @@
+<% unless TrailGuide.configuration.ignore_orphaned_groups? || TrailGuide.catalog.orphans.empty? %>
+  <div class="row justify-content-center">
+    <div class="col-sm-12 col-md-10 col-lg-8">
+      <div class="alert alert-warning alert-dismissable">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+
+        <h5>
+          <span class="fas fa-ghost"></span>
+          &nbsp;
+          Orphaned Groups
+        </h5>
+
+        <br />
+        <p>TrailGuide has detected <strong><%= TrailGuide.catalog.orphans.values.sum(&:count) %></strong> calls to <code>trailguide.convert</code> against <strong><%= TrailGuide.catalog.orphans.count %></strong> unknown group <%= "name".pluralize(TrailGuide.catalog.orphans.count) %>.</p>
+        
+        <p><small>This usually means that the last experiment that belonged to a given group was removed without realizing it, and references to the group were overlooked. <strong>Don't worry, your users won't notice a thing</strong>, and you can find all the logged references below. You can find <%= link_to "more info here.", "https://github.com/markrebec/trailguide#orphaned-groups", target: :blank %></small></p>
+
+        <div class="accordion bg-transparent border-0" id="orphans">
+          <% TrailGuide.catalog.orphans.each do |orphan,traces| %>
+            <div class="card">
+                <button class="btn btn-outline-light text-left btn-block" type="button" data-toggle="collapse" data-target="#orphan-<%= orphan %>" aria-expanded="true" aria-controls="collapseOne">
+                  <strong><code><%= orphan %></code></strong>
+                </button>
+
+              <div id="orphan-<%= orphan %>" class="collapse" aria-labelledby="orphan-btn-<%= orphan %>" data-parent="#orphans">
+                <div class="card-body">
+                  <ul style="list-style: none;">
+                    <% traces.each do |trace| %>
+                      <li><code><%= trace %></code></li>
+                    <% end %>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+
+        <p><small>These warnings will expire after 15 minutes of inactivity, and they will disappear automatically once you remove the references listed above and are no longer being reactivated. If you prefer to clear these warnings immediately after cleaning up, you can run <code>TrailGuide.catalog.adopted(:group_name)</code> from a console, rake task, or background job.</small></p>
+      </div>
+    </div>
+  </div>
+<% end %>
