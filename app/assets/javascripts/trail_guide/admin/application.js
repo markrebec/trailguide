@@ -27,5 +27,7 @@ $(function () {
 
   $('button[href]').on('click', function(evt) {
     window.location.href = $(evt.currentTarget).attr('href')
-  });
+  })
+
+  $('.toast').toast('show')
 })

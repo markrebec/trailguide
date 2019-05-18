@@ -28,6 +28,14 @@ main {
   padding-top: 40px;
 }
 
+.toasts {
+  position: fixed;
+  top: 65px;
+  right: 10px;
+  z-index: 900;
+  max-width: 250px;
+}
+
 .footer {
   position: fixed;
   bottom: 0;

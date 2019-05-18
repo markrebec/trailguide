@@ -58,7 +58,7 @@ module TrailGuide
 
       def enroll
         variant = enroll_experiment(experiment)
-        flash[:info] = "Enrolled in variant: #{variant.to_s}"
+        flash[:info] = "You were enrolled in the <strong>#{variant.to_s.humanize.titleize}</strong> variant"
         redirect_to_experiment experiment
       end
 

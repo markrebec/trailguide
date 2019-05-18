@@ -122,11 +122,20 @@
   <span class="navbar-brand d-none d-md-inline-block"><small class="text-muted"><%= TrailGuide::Admin.configuration.subtitle %></small></span>
 </nav>
 
-<% flash.each do |key, message| %>
-  <div class="alert alert-<%= key %> alert-dismissable">
-    <%= message %>
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-      <span aria-hidden="true">&times;</span>
-    </button>
-  </div>
-<% end %>
+<div class="toasts">
+  <% flash.each do |key, message| %>
+    <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-autohide="true" data-delay="5000">
+      <div class="toast-header">
+        <%= image_tag "trail_guide/trailguide.png", class: "rounded mr-2", style: "width: 25px; height: 25px;" %>
+        <strong class="mr-auto">TrailGuide</strong>
+        <small class="text-muted">just now</small>
+        <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="toast-body">
+        <%= raw message %>
+      </div>
+    </div>
+  <% end %>
+</div>
