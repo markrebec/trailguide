@@ -1,7 +1,29 @@
 <% if experiment.running? || experiment.calibrating? %>
   <% if participant.participating?(experiment) %>
-    <%= link_to trail_guide_admin.convert_experiment_path(experiment.experiment_name, goal), class: "btn btn-sm btn-link", method: :put, data: {toggle: :tooltip}, title: 'attempt to convert this metric' do %>
-      <span class="fas fa-fill-drip"></span>
+    <% if participant.converted?(experiment, goal) %>
+      <% if experiment.allow_multiple_conversions? %>
+        <%= link_to trail_guide_admin.convert_experiment_path(experiment.experiment_name, goal || "converted"), class: "btn btn-sm btn-link", method: :put, data: {toggle: :tooltip}, title: 'convert this metric' do %>
+          <span class="fas fa-fill-drip"></span>
+        <% end %>
+      <% else %>
+        <span data-toggle="tooltip" title="you may not convert this metric because this experiment does not allow multiple conversions">
+          <%= link_to "#", class: "btn btn-sm btn-link disabled", method: :put do %>
+            <span class="fas fa-fill-drip"></span>
+          <% end %>
+        </span>
+      <% end %>
+    <% elsif participant.converted?(experiment) %>
+      <% if experiment.allow_multiple_goals? %>
+        <%= link_to trail_guide_admin.convert_experiment_path(experiment.experiment_name, goal || "converted"), class: "btn btn-sm btn-link", method: :put, data: {toggle: :tooltip}, title: 'convert this metric' do %>
+          <span class="fas fa-fill-drip"></span>
+        <% end %>
+      <% else %>
+        <span data-toggle="tooltip" title="you may not convert this metric because this experiment does not allow multiple goals to be converted">
+          <%= link_to "#", class: "btn btn-sm btn-link disabled", method: :put do %>
+            <span class="fas fa-fill-drip"></span>
+          <% end %>
+        </span>
+      <% end %>
     <% end %>
   <% end %>
 <% end %>

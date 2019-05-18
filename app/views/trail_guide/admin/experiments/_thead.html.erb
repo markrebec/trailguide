@@ -15,7 +15,7 @@
     <% if experiment.goals.empty? %>
       <th scope="col">
         Converted
-        <%= render partial: 'btn_convert', locals: { experiment: experiment, goal: :converted } %>
+        <%= render partial: 'btn_convert', locals: { experiment: experiment, goal: nil } %>
       </th>
     <% else %>
       <% experiment.goals.each do |goal| %>
