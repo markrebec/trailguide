@@ -86,19 +86,16 @@ module TrailGuide
         @name ||= (self[:name] || experiment.name).try(:to_s).try(:underscore).try(:to_sym)
       end
 
-      # TODO should add validations when setting these to make sure they're not
-      # overlapping with an existing experiment name (same for experiments
-      # themselves when defining them)
       def groups(*grps)
-        @groups ||= []
+        self[:groups] ||= []
         unless grps.empty?
-          @groups = @groups.concat([grps].flatten.map { |g| g.to_s.underscore.to_sym })
+          self[:groups] = self[:groups].concat([grps].flatten.map { |g| g.to_s.underscore.to_sym })
         end
-        @groups
+        self[:groups]
       end
 
       def groups=(*grps)
-        @groups = [grps].flatten.map { |g| g.to_s.underscore.to_sym }
+        self[:groups] = [grps].flatten.map { |g| g.to_s.underscore.to_sym }
       end
 
       def group(grp=nil)
@@ -147,11 +144,19 @@ module TrailGuide
       end
 
       def goal(name)
-        goals << name.to_s.underscore.to_sym
+        goals << Metrics::Goal.new(experiment, name)
       end
       alias_method :funnel, :goal
 
-      def goals
+      def goals=(*names)
+        self[:goals] = [names].flatten.map { |g| Metrics::Goal.new(experiment, g) }
+      end
+
+      def goals(*names)
+        self[:goals] ||= []
+        unless names.empty?
+          self[:goals] = self[:goals].concat([names].flatten.map { |g| Metrics::Goal.new(experiment, g) })
+        end
         self[:goals]
       end
       alias_method :funnels, :goals

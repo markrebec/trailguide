@@ -35,15 +35,22 @@ module TrailGuide
             end
           end
 
+          expgoals = options[:goals]
+          # TODO is it worth parsing these out for complex funnels, etc.? or is
+          # it better to just force use of the DSL?
+
           DSL.experiment(name) do |config|
             expvars.each do |expvar|
               variant *expvar
             end
-            # TODO also map goals once they're real classes
+
+            expgoals.each do |expgoal|
+              goal expgoal
+            end
+
             config.control                    = options[:control] if options[:control]
             config.groups                     = options[:groups] if options[:groups]
             config.algorithm                  = options[:algorithm] if options[:algorithm]
-            config.goals                      = options[:goals] if options[:goals]
             config.combined                   = options[:combined] if options[:combined]
             config.reset_manually             = options[:reset_manually] if options.key?(:reset_manually)
             config.start_manually             = options[:start_manually] if options.key?(:start_manually)
@@ -51,6 +58,7 @@ module TrailGuide
             config.track_override             = options[:track_override] if options.key?(:track_override)
             config.allow_multiple_conversions = options[:allow_multiple_conversions] if options.key?(:allow_multiple_conversions)
             config.allow_multiple_goals       = options[:allow_multiple_goals] if options.key?(:allow_multiple_goals)
+            # TODO need to remember to update this with all the new config vars
           end
         end
       end
@@ -61,8 +69,8 @@ module TrailGuide
           name: name.to_s.underscore.to_sym,
           parent: combined,
           combined: [],
-          variants: combined.configuration.variants.map { |var| var.dup(experiment) }
-          # TODO also map goals once they're separate classes
+          variants: combined.configuration.variants.map { |var| var.dup(experiment) },
+          goals: combined.configuration.goals.map { |goal| goal.dup(experiment) }
         })
         experiment
       end

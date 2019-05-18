@@ -64,17 +64,16 @@ module TrailGuide
         converted_at = Time.at(adapter[storage_key].to_i)
         converted_at >= experiment.started_at
       elsif !checkpoint.nil?
-        raise InvalidGoalError, "Invalid goal checkpoint `#{checkpoint}` for experiment `#{experiment.experiment_name}`." unless experiment.goals.any? { |goal| goal == checkpoint.to_s.underscore.to_sym }
-        storage_key = "#{experiment.storage_key}:#{checkpoint.to_s.underscore}"
-        return false unless adapter.key?(storage_key)
+        goal = experiment.goals.find { |g| g == checkpoint }
+        raise InvalidGoalError, "Invalid goal checkpoint `#{checkpoint}` for experiment `#{experiment.experiment_name}`." if goal.nil?
+        return false unless adapter.key?(goal.storage_key)
 
-        converted_at = Time.at(adapter[storage_key].to_i)
+        converted_at = Time.at(adapter[goal.storage_key].to_i)
         converted_at >= experiment.started_at
       else
         experiment.goals.each do |goal|
-          storage_key = "#{experiment.storage_key}:#{goal.to_s}"
-          next unless adapter.key?(storage_key)
-          converted_at = Time.at(adapter[storage_key].to_i)
+          next unless adapter.key?(goal.storage_key)
+          converted_at = Time.at(adapter[goal.storage_key].to_i)
           return true if converted_at >= experiment.started_at
         end
         return false
@@ -87,16 +86,18 @@ module TrailGuide
     end
 
     def converted!(variant, checkpoint=nil, reset: false)
-      checkpoint ||= :converted
-      storage_key = "#{variant.experiment.storage_key}:#{checkpoint.to_s.underscore}"
+      if checkpoint.nil?
+        storage_key = "#{variant.experiment.storage_key}:converted"
+      else
+        storage_key = variant.experiment.goals.find { |g| g == checkpoint }.storage_key
+      end
 
       if reset
         adapter.delete(variant.experiment.storage_key)
         adapter.delete(variant.storage_key)
         adapter.delete(storage_key)
         variant.experiment.goals.each do |goal|
-          goal_key = "#{variant.experiment.storage_key}:#{goal.to_s}"
-          adapter.delete(goal_key)
+          adapter.delete(goal.storage_key)
         end
       else
         adapter[storage_key] = Time.now.to_i
@@ -109,7 +110,7 @@ module TrailGuide
       adapter.delete(experiment.storage_key)
       adapter.delete(chosen.storage_key)
       experiment.goals.each do |goal|
-        adapter.delete("#{experiment.storage_key}:#{goal.to_s}")
+        adapter.delete(goal.storage_key)
       end
       return true
     end

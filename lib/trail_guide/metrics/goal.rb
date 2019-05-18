@@ -17,7 +17,13 @@ module TrailGuide
         if other.is_a?(self.class)
           return name == other.name
         elsif other.is_a?(String) || other.is_a?(Symbol)
-          return name == other.to_s.underscore.to_sym
+          other = other.to_s.underscore
+          return name == other.to_sym || to_s == other
+        elsif other.is_a?(Array)
+          return to_s == other.flatten.map { |o| o.to_s.underscore }.join('/')
+        elsif other.is_a?(Hash)
+          # TODO "flatten" it out and compare it to_s
+          return false
         end
       end
 
@@ -37,7 +43,7 @@ module TrailGuide
       end
 
       def storage_key
-        to_s
+        "#{experiment.experiment_name}:#{name}"
       end
     end
   end

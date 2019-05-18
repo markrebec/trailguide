@@ -328,8 +328,13 @@ module TrailGuide
           end
         end
 
-        raise InvalidGoalError, "Invalid goal checkpoint `#{checkpoint}` for `#{experiment_name}`." unless checkpoint.present? || goals.empty?
-        raise InvalidGoalError, "Invalid goal checkpoint `#{checkpoint}` for `#{experiment_name}`." unless checkpoint.nil? || goals.any? { |goal| goal == checkpoint.to_s.underscore.to_sym }
+        if checkpoint.nil?
+          raise InvalidGoalError, "You must provide a valid goal checkpoint for `#{experiment_name}`." unless goals.empty?
+        else
+          goal = goals.find { |g| g == checkpoint }
+          raise InvalidGoalError, "Invalid goal checkpoint `#{checkpoint}` for `#{experiment_name}`." if goal.nil?
+          checkpoint = goal
+        end
 
         # TODO eventually allow progressing through funnel checkpoints towards goals
         if participant.converted?(checkpoint)

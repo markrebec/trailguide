@@ -73,11 +73,12 @@ module TrailGuide
         raise InvalidGoalError, "You provided the checkpoint `#{checkpoint}` but the experiment `#{experiment.experiment_name}` does not have any goals defined." unless checkpoint.nil?
         (TrailGuide.redis.hget(storage_key, 'converted') || 0).to_i
       elsif !checkpoint.nil?
-        raise InvalidGoalError, "Invalid goal checkpoint `#{checkpoint}` for experiment `#{experiment.experiment_name}`." unless experiment.goals.any? { |goal| goal == checkpoint.to_s.underscore.to_sym }
-        (TrailGuide.redis.hget(storage_key, checkpoint.to_s.underscore) || 0).to_i
+        goal = experiment.goals.find { |g| g == checkpoint }
+        raise InvalidGoalError, "Invalid goal checkpoint `#{checkpoint}` for experiment `#{experiment.experiment_name}`." if goal.nil?
+        (TrailGuide.redis.hget(storage_key, goal.to_s) || 0).to_i
       else
         experiment.goals.sum do |checkpoint|
-          (TrailGuide.redis.hget(storage_key, checkpoint.to_s.underscore) || 0).to_i
+          (TrailGuide.redis.hget(storage_key, goal.to_s) || 0).to_i
         end
       end
     end
@@ -91,8 +92,12 @@ module TrailGuide
     end
 
     def increment_conversion!(checkpoint=nil)
-      checkpoint ||= :converted
-      TrailGuide.redis.hincrby(storage_key, checkpoint.to_s.underscore, 1)
+      if checkpoint.nil?
+        checkpoint = 'converted'
+      else
+        checkpoint = experiment.goals.find { |g| g == checkpoint }.to_s
+      end
+      TrailGuide.redis.hincrby(storage_key, checkpoint, 1)
     end
 
     def as_json(opts={})
