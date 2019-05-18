@@ -8,7 +8,7 @@
           <%= variant.name.to_s.humanize.titleize %>
         <% end %>
 
-        <% if experiment.running? && !experiment.winner? && participant.variant(experiment) == variant %>
+        <% if (experiment.running? || experiment.calibrating?) && participant.variant(experiment) == variant %>
           <span class="fas fa-user text-secondary" data-toggle="tooltip" title="you are currently in this cohort"></span>
         <% end %>
         <% if experiment.winner? && variant == experiment.winner %>
@@ -30,12 +30,12 @@
       <% end %>
 
       <td class="text-right">
-        <% if experiment.running? && !experiment.winner? %>
+        <% if experiment.running? || experiment.calibrating? %>
           <% if participant.variant(experiment) == variant %>
             <%= link_to trail_guide_admin.leave_experiment_path(experiment.experiment_name), class: "btn btn-sm btn-outline-secondary", method: :put, data: {toggle: :tooltip}, title: 'leave this cohort' do %>
               <span class="fas fa-sign-out-alt fa-flip-horizontal" />
             <% end %>
-          <% else %>
+          <% elsif !experiment.calibrating? && !experiment.winner? %>
             <%= link_to trail_guide_admin.join_experiment_path(experiment.experiment_name, variant.name), class: "btn btn-sm btn-secondary", method: :put, data: {toggle: :tooltip}, title: 'join this cohort' do %>
               <span class="fas fa-sign-in-alt" />
             <% end %>
