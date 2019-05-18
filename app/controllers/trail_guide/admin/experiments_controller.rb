@@ -63,6 +63,7 @@ module TrailGuide
       end
 
       def convert
+        params[:goal] = nil if params[:goal] == 'converted'
         variant = convert_experiment(experiment, params[:goal])
         if variant
           flash[:info] = "You successfully converted the goal <strong>#{params[:goal].to_s.humanize.titleize}</strong> in the <strong>#{variant.to_s.humanize.titleize}</strong> variant"

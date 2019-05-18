@@ -1,0 +1,7 @@
+<% if experiment.running? || experiment.calibrating? %>
+  <% if participant.participating?(experiment) %>
+    <%= link_to trail_guide_admin.convert_experiment_path(experiment.experiment_name, goal), class: "btn btn-sm btn-link", method: :put, data: {toggle: :tooltip}, title: 'attempt to convert this metric' do %>
+      <span class="fas fa-fill-drip"></span>
+    <% end %>
+  <% end %>
+<% end %>

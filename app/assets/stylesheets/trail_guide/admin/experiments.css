@@ -23,6 +23,7 @@ div.experiment {
 
 div.experiment table th, .experiment table td {
   line-height: 31px;
+  vertical-align: middle;
 }
 
 div.experiment table th h5 {
