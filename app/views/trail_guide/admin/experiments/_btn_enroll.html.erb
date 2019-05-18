@@ -1,5 +1,5 @@
 <% if experiment_enrollable?(experiment) %>
-  <%= link_to trail_guide_admin.enroll_experiment_path(experiment.experiment_name), class: "btn btn-sm btn-secondary", method: :put, data: {toggle: :tooltip}, title: 'enroll yourself in this experiment using the configured algorithm' do %>
+  <%= link_to trail_guide_admin.enroll_experiment_path(experiment.experiment_name), class: "btn btn-secondary #{classname if defined?(classname)}", method: :put, data: {toggle: :tooltip}, title: 'enroll yourself in this experiment using the configured algorithm' do %>
     <span class="fas fa-dice" />
   <% end %>
 <% end %>

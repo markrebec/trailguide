@@ -63,31 +63,12 @@ module TrailGuide
       end
 
       def join
-        if experiment <= TrailGuide::CombinedExperiment
-          experiment.parent.combined_experiments.each do |expmt|
-            join_experiment(expmt)
-          end
-        else
-          join_experiment(experiment)
-        end
-
+        join_experiment(experiment)
         redirect_to_experiment experiment
       end
 
       def leave
-        if experiment <= TrailGuide::CombinedExperiment
-          experiment.parent.combined_experiments.each do |expmt|
-            leave_experiment(expmt)
-          end
-        elsif experiment.combined?
-          leave_experiment(experiment)
-          experiment.combined_experiments.each do |expmt|
-            leave_experiment(expmt)
-          end
-        else
-          leave_experiment(experiment)
-        end
-
+        leave_experiment(experiment)
         redirect_to_experiment experiment
       end
 
@@ -133,20 +114,55 @@ module TrailGuide
         end
       end
 
-      def enroll_experiment(expmt)
-        participant.exit!(expmt)
-        expmt.new(participant).choose!
+      def enroll_experiment(experiment)
+        if experiment.is_combined?
+          participant.exit!(experiment)
+          experiment.new(participant).choose!
+        else
+          leave_experiment(experiment)
+          experiment.new(participant).choose!
+        end
       end
 
-      def join_experiment(expmt)
-        participant.exit!(expmt)
-        variant = expmt.variants.find { |var| var == params[:variant] }
-        variant.increment_participation!
-        participant.participating!(variant)
+      def join_experiment(experiment)
+        leave_experiment(experiment)
+        if experiment.is_combined?
+          variant = experiment.parent.variants.find { |var| var == params[:variant] }
+          variant.increment_participation!
+          participant.participating!(variant)
+          experiment.parent.combined_experiments.each do |expmt|
+            variant = expmt.variants.find { |var| var == params[:variant] }
+            variant.increment_participation!
+            participant.participating!(variant)
+          end
+        else
+          variant = experiment.variants.find { |var| var == params[:variant] }
+          variant.increment_participation!
+          participant.participating!(variant)
+          if experiment.combined?
+            experiment.combined_experiments.each do |expmt|
+              variant = expmt.variants.find { |var| var == params[:variant] }
+              variant.increment_participation!
+              participant.participating!(variant)
+            end
+          end
+        end
       end
 
-      def leave_experiment(expmt)
-        participant.exit!(expmt)
+      def leave_experiment(experiment)
+        if experiment.is_combined?
+          participant.exit!(experiment.parent)
+          experiment.parent.combined_experiments.each do |expmt|
+            participant.exit!(expmt)
+          end
+        else
+          participant.exit!(experiment)
+          if experiment.combined?
+            experiment.combined_experiments.each do |expmt|
+              participant.exit!(expmt)
+            end
+          end
+        end
       end
 
       def participant
@@ -156,7 +172,7 @@ module TrailGuide
 
       def redirect_to_experiment(experiment)
         if experiment <= TrailGuide::CombinedExperiment
-          redirect_to trail_guide_admin.experiment_path(experiment.parent.experiment_name, anchor: experiment.experiment_name)
+          redirect_back fallback_location: trail_guide_admin.experiment_path(experiment.parent.experiment_name)
         else
           redirect_to trail_guide_admin.experiment_path(experiment.experiment_name)
         end
