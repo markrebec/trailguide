@@ -36,6 +36,11 @@ main {
   max-width: 250px;
 }
 
+.alert p:last-child {
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
 .footer {
   position: fixed;
   bottom: 0;
