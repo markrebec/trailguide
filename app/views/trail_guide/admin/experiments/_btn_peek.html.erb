@@ -1,11 +1,19 @@
-<% if experiment.running? && experiment_peekable?(experiment) %>
-  <% if experiment_peeking?(experiment) %>
-    <%= link_to trail_guide_admin.experiment_path(experiment.experiment_name), class: 'btn btn-outline-primary', method: :put, data: {toggle: :tooltip}, title: "hide this experiment's metrics" do %>
-      <span class="fas fa-eye-slash"></span>
+<% if experiment.started? && !experiment.stopped? %>
+  <% if experiment_peekable?(experiment) %>
+    <% if experiment_peeking?(experiment) %>
+      <%= link_to trail_guide_admin.experiment_path(experiment.experiment_name), class: 'btn btn-sm btn-outline-primary', method: :put, data: {toggle: :tooltip}, title: "hide this experiment's metrics" do %>
+        <span class="fas fa-eye-slash"></span>
+      <% end %>
+    <% else %>
+      <%= link_to peek_url(experiment), class: 'btn btn-sm btn-primary', method: :put, data: {toggle: :tooltip}, title: "peek at this experiment's metrics" do %>
+        <span class="fas fa-eye"></span>
+      <% end %>
     <% end %>
   <% else %>
-    <%= link_to peek_url(experiment), class: 'btn btn-primary', method: :put, data: {toggle: :tooltip}, title: "peek at this experiment's metrics" do %>
-      <span class="fas fa-eye"></span>
-    <% end %>
+    <span data-toggle="tooltip" title="this experiment is not peekable because it's metrics are already visible">
+      <%= link_to "#", class: 'btn btn-sm btn-primary disabled', method: :put do %>
+        <span class="fas fa-eye"></span>
+      <% end %>
+    </span>
   <% end %>
 <% end %>

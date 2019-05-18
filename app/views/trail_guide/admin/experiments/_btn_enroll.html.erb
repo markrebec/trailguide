@@ -1,0 +1,17 @@
+<% if experiment_enrollable?(experiment) %>
+  <% if participant.participating?(experiment) %>
+    <% if experiment <= TrailGuide::CombinedExperiment %>
+      <%= link_to trail_guide_admin.leave_experiment_path(experiment.parent.experiment_name), class: "btn btn-sm btn-outline-secondary", method: :put, data: {toggle: :tooltip}, title: 'leave your current cohort' do %>
+        <span class="fas fa-sign-out-alt fa-flip-horizontal" />
+      <% end %>
+    <% else %>
+      <%= link_to trail_guide_admin.leave_experiment_path(experiment.experiment_name), class: "btn btn-sm btn-outline-secondary", method: :put, data: {toggle: :tooltip}, title: 'leave your current cohort' do %>
+        <span class="fas fa-sign-out-alt fa-flip-horizontal" />
+      <% end %>
+    <% end %>
+  <% else %>
+    <%= link_to trail_guide_admin.enroll_experiment_path(experiment.experiment_name), class: "btn btn-sm btn-secondary", method: :put, data: {toggle: :tooltip}, title: 'enroll yourself in this experiment using the configured algorithm' do %>
+      <span class="fas fa-dice" />
+    <% end %>
+  <% end %>
+<% end %>

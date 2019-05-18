@@ -77,13 +77,7 @@
             <span class="fas fa-eye-slash"></span>
             Peeking at Results
           </h5>
-          <p>You are currently peeking at this experiment's results. Use the button below to stop peeking.</p>
-          <div class="text-right">
-            <%= link_to trail_guide_admin.experiment_path(experiment.experiment_name), class: 'btn btn-outline-primary', method: :put do %>
-              <span class="fas fa-eye-slash"></span>
-              Stop Peeking
-            <% end %>
-          </div>
+          <p>You are currently peeking at this experiment's results. Use the <span class="fas fa-eye-slash"></span> button to stop peeking.</p>
         </div>
       <% else %>
         <div class="alert alert-primary">
@@ -91,13 +85,7 @@
             <span class="fas fa-eye"></span>
             Target Sample Size
           </h5>
-          <p>This experiment has been configured with a <code>target_sample_size</code> of <code><%= experiment.configuration.target_sample_size %></code>, which prevents variant metrics from being displayed until the experiment has ended. You may peek at the current results by clicking the button below.</p>
-          <div class="text-right">
-            <%= link_to peek_url(experiment), class: 'btn btn-primary', method: :put do %>
-              <span class="fas fa-eye"></span>
-              Peek
-            <% end %>
-          </div>
+          <p>This experiment has been configured with <code>target_sample_size: <%= experiment.configuration.target_sample_size %></code>, which prevents variant metrics from being displayed until the experiment has ended. You may peek at the current results by clicking the <span class="fas fa-eye"></span> button.</p>
         </div>
       <% end %>
     <% end %>
@@ -116,7 +104,6 @@
       <div class="btn-group">
         <%= render partial: 'btn_schedule', locals: { experiment: experiment } %>
         <%= render partial: 'btn_start', locals: { experiment: experiment } %>
-        <%= render partial: 'btn_peek', locals: { experiment: experiment } %>
         <%= render partial: 'btn_pause', locals: { experiment: experiment } %>
         <%= render partial: 'btn_resume', locals: { experiment: experiment } %>
         <%= render partial: 'btn_stop', locals: { experiment: experiment } %>
