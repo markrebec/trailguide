@@ -55,26 +55,29 @@ module TrailGuide
     end
 
     def converted?(experiment, checkpoint=nil)
-      return false unless experiment.started? || (experiment.calibrating? && variant(experiment).try(:control?))
+      variant = variant(experiment)
+
+      return false unless experiment.started? || (experiment.calibrating? && variant.try(:control?))
+
       if experiment.goals.empty?
         raise InvalidGoalError, "You provided the checkpoint `#{checkpoint}` but the experiment `#{experiment.experiment_name}` does not have any goals defined." unless checkpoint.nil?
         storage_key = "#{experiment.storage_key}:converted"
         return false unless adapter.key?(storage_key)
 
         converted_at = Time.at(adapter[storage_key].to_i)
-        converted_at >= experiment.started_at
+        (experiment.calibrating? && variant.try(:control?)) || converted_at >= experiment.started_at
       elsif !checkpoint.nil?
         goal = experiment.goals.find { |g| g == checkpoint }
         raise InvalidGoalError, "Invalid goal checkpoint `#{checkpoint}` for experiment `#{experiment.experiment_name}`." if goal.nil?
         return false unless adapter.key?(goal.storage_key)
 
         converted_at = Time.at(adapter[goal.storage_key].to_i)
-        converted_at >= experiment.started_at
+        (experiment.calibrating? && variant.try(:control?)) || converted_at >= experiment.started_at
       else
         experiment.goals.each do |goal|
           next unless adapter.key?(goal.storage_key)
           converted_at = Time.at(adapter[goal.storage_key].to_i)
-          return true if converted_at >= experiment.started_at
+          return true if (experiment.calibrating? && variant.try(:control?)) || converted_at >= experiment.started_at
         end
         return false
       end
