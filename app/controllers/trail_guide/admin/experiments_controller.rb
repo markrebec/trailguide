@@ -120,7 +120,13 @@ module TrailGuide
           experiment.new(participant).choose!
         else
           leave_experiment(experiment)
-          experiment.new(participant).choose!
+          variant = experiment.new(participant).choose!
+          if experiment.combined?
+            experiment.combined_experiments.each do |expmt|
+              expmt.new(participant).choose!
+            end
+          end
+          variant
         end
       end
 

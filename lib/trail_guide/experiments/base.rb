@@ -35,6 +35,10 @@ module TrailGuide
           end
         end
 
+        def is_combined?
+          false
+        end
+
         def combined_experiments
           combined.map { |combo| TrailGuide.catalog.find(combo) }
         end
@@ -228,7 +232,7 @@ module TrailGuide
       attr_reader :participant
       delegate :configuration, :experiment_name, :variants, :control, :goals,
         :storage_key, :combined?, :start_manually?, :reset_manually?,
-        :allow_multiple_conversions?, :allow_multiple_goals?,
+        :allow_multiple_conversions?, :allow_multiple_goals?, :is_combined?,
         :enable_calibration?, :track_winner_conversions?, :callbacks, to: :class
 
       def initialize(participant)
@@ -260,7 +264,7 @@ module TrailGuide
 
         if override.present?
           variant = variants.find { |var| var == override } || control
-          if running?
+          if running? && !is_combined?
             variant.increment_participation! if configuration.track_override
             participant.participating!(variant) if configuration.store_override
           end
@@ -281,9 +285,18 @@ module TrailGuide
 
         if !started? && start_manually?
           if enable_calibration?
-            control.increment_participation! unless participant.variant == control
-            participant.exit! if participant.participating? && participant.variant != control
+            unless participant.variant == control
+              control.increment_participation!
+              parent.control.increment_participation! if is_combined?
+            end
+
+            if participant.participating? && participant.variant != control
+              participant.exit!
+              parent.participant.exit! if is_combined?
+            end
+
             participant.participating!(control)
+            parent.participant.participating!(parent.control) if is_combined?
           end
           return control
         end
@@ -297,7 +310,7 @@ module TrailGuide
           return variant
         end
 
-        return control unless is_a?(TrailGuide::CombinedExperiment) || TrailGuide.configuration.allow_multiple_experiments == true || !participant.participating_in_active_experiments?(TrailGuide.configuration.allow_multiple_experiments == false)
+        return control unless is_combined? || TrailGuide.configuration.allow_multiple_experiments == true || !participant.participating_in_active_experiments?(TrailGuide.configuration.allow_multiple_experiments == false)
         return control unless allow_participation?(metadata)
 
         variant = algorithm_choose!(metadata: metadata)

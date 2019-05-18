@@ -10,6 +10,10 @@ module TrailGuide
         @configuration ||= Experiments::CombinedConfig.new(self)
       end
 
+      def is_combined?
+        true
+      end
+
       # TODO if just I delegate on this inheriting class, will that override the 
       # defined methods on the base class? and will they interplay nicely? like
       # with `started?` calling `started_at`, etc.?
@@ -44,11 +48,13 @@ module TrailGuide
       end
     end
 
-    delegate :parent, to: :class
+    def parent
+      @parent ||= self.class.parent.new(participant.participant)
+    end
 
     # use the parent experiment as the algorithm and map to the matching variant
     def algorithm_choose!(metadata: nil)
-      variant = parent.new(participant.participant).choose!(metadata: metadata)
+      variant = parent.choose!(metadata: metadata)
       variants.find { |var| var == variant.name }
     end
   end
