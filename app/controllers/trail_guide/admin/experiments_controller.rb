@@ -116,7 +116,6 @@ module TrailGuide
 
       def enroll_experiment(experiment)
         if experiment.is_combined?
-          participant.exit!(experiment)
           experiment.new(participant).choose!
         else
           leave_experiment(experiment)
