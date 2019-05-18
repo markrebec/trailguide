@@ -116,18 +116,28 @@ module TrailGuide
 
     def active_experiments(include_control=true)
       return false if adapter.keys.empty?
-      adapter.keys.map { |key| key.to_s.split(":").first.to_sym }.uniq.map do |key|
+
+      inactive = []
+      active = adapter.keys.map { |key| key.to_s.split(":").first.to_sym }.uniq.map do |key|
         experiment = TrailGuide.catalog.find(key)
         next unless experiment
 
         if !experiment.started?
-          adapter.delete(key) if TrailGuide.configuration.cleanup_participant_experiments == :inline
+          inactive << key
           next
         else
           next unless !experiment.combined? && experiment.running? && participating?(experiment, include_control)
           [ experiment.experiment_name, adapter[experiment.storage_key] ]
         end
       end.compact.to_h
+
+      if TrailGuide.configuration.cleanup_participant_experiments == :inline && !inactive.empty?
+        adapter.keys.select do |key|
+          inactive.include?(key.to_s.split(":").first.to_sym)
+        end.each { |key| adapter.delete(key) }
+      end
+
+      return active
     end
 
     def participating_in_active_experiments?(include_control=true)
