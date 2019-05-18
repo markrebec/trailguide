@@ -98,6 +98,7 @@ experiment :multi_goal_example do |config|
   config.groups = [:first, :second]
   config.goals = [:first, :second]
 
+  config.enable_calibration = true
   config.target_sample_size = 100
 end
 
@@ -110,4 +111,5 @@ experiment :long_description do |config|
 
   config.enable_calibration = true
   config.track_winner_conversions = true
+  config.allow_multiple_conversions = true
 end
