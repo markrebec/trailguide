@@ -17,6 +17,17 @@ TrailGuide.configure do |config|
   # false     you'll need to include the helper module manually where you want
   config.include_helpers = true
 
+  # whether or not to ignore orphaned group/experiment conversion calls in the
+  # admin - this can be useful if you intentionally leave calls to
+  # `trailguide.convert(:group_name)` at key points in your application, but
+  # also periodically add/remove experiments using those groups
+  #
+  # true  will not track orphaned convert calls nor expose them in the admin
+  #       interface
+  # false will track orphaned convert calls, and notify you via the admin
+  #       interface so you can track them down and remove them as you'd like
+  config.ignore_orphaned_groups = false
+
   # request param for overriding/previewing variants - allows previewing
   # variants with request params
   # i.e. example.com/somepage/?experiment[my_experiment]=option_b

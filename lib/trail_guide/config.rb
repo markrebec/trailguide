@@ -4,7 +4,8 @@ module TrailGuide
       :logger, :redis, :disabled, :override_parameter,
       :allow_multiple_experiments, :adapter, :on_adapter_failover,
       :filtered_ip_addresses, :filtered_user_agents, :request_filter,
-      :include_helpers, :cleanup_participant_experiments, :unity_ttl
+      :include_helpers, :cleanup_participant_experiments, :unity_ttl,
+      :ignore_orphaned_groups
     ].freeze
 
     def initialize(*args, **opts, &block)
@@ -26,6 +27,10 @@ module TrailGuide
           Redis.new(url: self[:redis])
         end
       end
+    end
+
+    def ignore_orphaned_groups?
+      !!self[:ignore_orphaned_groups]
     end
 
     def filtered_user_agents

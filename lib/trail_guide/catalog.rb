@@ -231,6 +231,32 @@ module TrailGuide
       klass
     end
 
+    def deregister(key)
+      # TODO (mostly only useful for engine specs)
+    end
+
+    def orphaned(key, trace)
+      added = TrailGuide.redis.sadd("orphans:#{key}", trace)
+      TrailGuide.redis.expire("orphans:#{key}", 15.minutes.seconds)
+      added
+    rescue Errno::ECONNREFUSED, Redis::BaseError, SocketError => e
+      false
+    end
+
+    def orphans
+      TrailGuide.redis.keys("orphans:*").reduce({}) do |h,key|
+        h.merge({ key.split(':').last => TrailGuide.redis.smembers(key) })
+      end
+    rescue Errno::ECONNREFUSED, Redis::BaseError, SocketError => e
+      {}
+    end
+
+    def adopted(key)
+      TrailGuide.redis.del("orphans:#{key}")
+    rescue Errno::ECONNREFUSED, Redis::BaseError, SocketError => e
+      false
+    end
+
     def method_missing(meth, *args, &block)
       return experiments.send(meth, *args, &block) if experiments.respond_to?(meth, true)
       super

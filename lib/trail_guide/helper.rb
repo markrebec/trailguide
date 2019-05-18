@@ -130,7 +130,7 @@ module TrailGuide
       end
 
       def choose!(**opts, &block)
-        raise NoExperimentsError, "Could not find any experiments matching `#{key}`." if experiments.empty?
+        raise NoExperimentsError, key if experiments.empty?
         raise TooManyExperimentsError, "Selecting a variant requires a single experiment, but `#{key}` matches more than one experiment." if experiments.length > 1
         raise TooManyExperimentsError, "Selecting a variant requires a single experiment, but `#{key}` refers to a combined experiment." if experiment.combined?
         opts = {override: override_variant, excluded: exclude_visitor?}.merge(opts)
@@ -215,7 +215,7 @@ module TrailGuide
       end
 
       def convert!(checkpoint=nil, **opts, &block)
-        raise NoExperimentsError, "Could not find any experiments matching `#{key}`." if experiments.empty?
+        raise NoExperimentsError, key if experiments.empty?
         checkpoints = experiments.map do |experiment|
           ckpt = checkpoint || experiment.goals.find { |g| g == key }
           if experiment.combined?
@@ -235,7 +235,10 @@ module TrailGuide
           checkpoints
         end
       rescue NoExperimentsError => e
-        TrailGuide.logger.warn "#{e.class.name}: #{e.message}"
+        unless TrailGuide.configuration.ignore_orphaned_groups?
+          trace = e.backtrace.find { |t| !t.match?(Regexp.new(__FILE__)) }.to_s.split(Rails.root.to_s).last
+          TrailGuide.catalog.orphaned(key, trace)
+        end
         false
       end
 

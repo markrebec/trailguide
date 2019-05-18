@@ -811,13 +811,13 @@ class SearchController < ApplicationController
 end
 ```
 
-### "Deprecated" Groups
+### Orphaned Groups
 
 Sometimes in the real world, you might accidentally remove all the experiments that were sharing a given group, but miss one of the conversion calls that used one of it's groups. Maybe you forgot to search through your code for references to the group, or maybe you just didn't know you were removing the last experiment in that group. Ideally you'd be testing your code thoroughly, and you'd catch the problem before hitting production, but trailguide has a built-in safe guard just in case.
 
-Instead of raising a `TrailGuide::NoExperimentsError` when no experiments match your arguments like `trailguide.choose` and related methods do, the `trailguide.convert` method will write a warning to your logs and return `false` as if no conversion happened.
+Instead of raising a `TrailGuide::NoExperimentsError` when no experiments match your arguments like `trailguide.choose` and related methods do, the `trailguide.convert` method will log a warning and return `false` as if no conversion happened.
 
-It's still a good idea to be thorough when removing experiments from your codebase entirely, but nobody's perfect and it always helps to have a safety net.
+After a failed conversion for an orphaned group, the next time you visit the trailguide admin dashboard you'll see an alert with the details of any logged orphaned groups. If you wish to ignore orphaned groups entirely, perhaps so you can leave conversion calls in your application while you regularly rotate experiments into and out of those groups, you can set the `TrailGuide::Admin.configuration.ignore_orphans = true` config option in your initializer.
 
 ### Groups with Goals
 
