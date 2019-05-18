@@ -25,7 +25,7 @@ module TrailGuide
       def experiment_peekable?(experiment)
         return false unless TrailGuide::Admin.configuration.peek_parameter
         return false unless experiment.started? && !experiment.stopped? && !experiment.winner?
-        return true  if experiment.combined? && !experiment.combined_experiments.all?(:target_sample_size_reached?)
+        return true  if experiment.combined? && !experiment.combined_experiments.all?(&:target_sample_size_reached?)
         return false if experiment.target_sample_size_reached?
         return true
       end
@@ -45,7 +45,7 @@ module TrailGuide
         return true unless experiment.started? && !experiment.stopped? && !experiment.winner?
         return true if peek_param == experiment.experiment_name.to_s ||
           experiment <= TrailGuide::CombinedExperiment && peek_param == experiment.parent.experiment_name.to_s
-        return false if experiment.combined? && !experiment.combined_experiments.all?(:target_sample_size_reached?)
+        return false if experiment.combined? && !experiment.combined_experiments.all?(&:target_sample_size_reached?)
         return true if experiment.target_sample_size_reached?
         return false
       end
