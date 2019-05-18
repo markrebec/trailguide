@@ -817,7 +817,7 @@ Sometimes in the real world, you might accidentally remove all the experiments t
 
 Instead of raising a `TrailGuide::NoExperimentsError` when no experiments match your arguments like `trailguide.choose` and related methods do, the `trailguide.convert` method will log a warning and return `false` as if no conversion happened.
 
-After a failed conversion for an orphaned group, the next time you visit the trailguide admin dashboard you'll see an alert with the details of any logged orphaned groups. If you wish to ignore orphaned groups entirely, perhaps so you can leave conversion calls in your application while you regularly rotate experiments into and out of those groups, you can set the `TrailGuide::Admin.configuration.ignore_orphans = true` config option in your initializer.
+After a failed conversion for an orphaned group, the next time you visit the trailguide admin dashboard you'll see an alert with the details of any logged orphaned groups. If you wish to ignore orphaned groups entirely, perhaps so you can leave conversion calls in your application while you regularly rotate experiments into and out of those groups, you can set the `TrailGuide.configuration.ignore_orphaned_groups = true` config option in your initializer.
 
 ### Groups with Goals
 

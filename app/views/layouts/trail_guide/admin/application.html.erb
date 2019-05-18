@@ -44,7 +44,7 @@
               <br />
               <p>TrailGuide has detected <strong><%= TrailGuide.catalog.orphans.values.sum(&:count) %></strong> calls to <code>trailguide.convert</code> against <strong><%= TrailGuide.catalog.orphans.count %></strong> unknown group <%= "name".pluralize(TrailGuide.catalog.orphans.count) %>.</p>
               
-              <p><small>This usually means that the last experiment that belonged to a given group was removed without realizing it, and references to the group were overlooked. <strong>Don't worry, your users won't notice a thing</strong>, and you can find all the logged references below.</small></p>
+              <p><small>This usually means that the last experiment that belonged to a given group was removed without realizing it, and references to the group were overlooked. <strong>Don't worry, your users won't notice a thing</strong>, and you can find all the logged references below. You can find <%= link_to "more info here.", "https://github.com/markrebec/trailguide#orphaned-groups", target: :blank %></small></p>
 
               <div class="accordion bg-transparent border-0" id="orphans">
                 <% TrailGuide.catalog.orphans.each do |orphan,traces| %>
