@@ -17,11 +17,15 @@ module TrailGuide
       def start
         experiment.reset!(self) if experiment.enable_calibration?
         experiment.start!(self)
+
+        flash[:success] = "Experiment started"
         redirect_to_experiment experiment
       end
 
       def schedule
         experiment.schedule!(schedule_params[:start_at], schedule_params[:stop_at], self)
+
+        flash[:success] = "Experiment scheduled for <strong>#{experiment.started_at.strftime(TrailGuide::Admin::DISPLAY_DATE_FORMAT)}</strong>"
         redirect_to_experiment experiment
       rescue => e
         flash[:danger] = e.message
@@ -30,22 +34,30 @@ module TrailGuide
 
       def pause
         experiment.pause!(self)
+
+        flash[:success] = "Experiment paused"
         redirect_to_experiment experiment
       end
 
       def stop
         experiment.stop!(self)
+
+        flash[:success] = "Experiment stopped"
         redirect_to_experiment experiment
       end
 
       def reset
         experiment.stop!(self)
         experiment.reset!(self)
+
+        flash[:success] = "Experiment reset"
         redirect_to_experiment experiment
       end
 
       def resume
         experiment.resume!(self)
+
+        flash[:success] = "Experiment resumed"
         redirect_to_experiment experiment
       end
 
@@ -53,6 +65,8 @@ module TrailGuide
         experiment.stop!(self)
         experiment.reset!(self)
         experiment.start!(self)
+
+        flash[:success] = "Experiment restarted"
         redirect_to_experiment experiment
       end
 
@@ -75,21 +89,25 @@ module TrailGuide
 
       def join
         join_experiment(experiment)
+        flash[:success] = "You joined the <strong>#{params[:variant].to_s.humanize.titleize}</strong> cohort"
         redirect_to_experiment experiment
       end
 
       def leave
         leave_experiment(experiment)
+        flash[:success] = "You left the experiment"
         redirect_to_experiment experiment
       end
 
       def winner
         experiment.declare_winner!(params[:variant], self)
+        flash[:success] = "Declared <strong>#{params[:variant].to_s.humanize.titleize}</strong> as the winner"
         redirect_to_experiment experiment
       end
 
       def clear
         experiment.clear_winner!
+        flash[:success] = "Removed the winner"
         redirect_to_experiment experiment
       end
 
