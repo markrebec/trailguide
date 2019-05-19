@@ -118,9 +118,15 @@
         </div>
       </div>
     <% end %>
+
+    <button type="button" class="btn btn-light text-dark" data-toggle="modal" data-target="#calculator-modal" data-tooltip="tooltip" title="sample size calculator">
+      <span class="fas fa-calculator"></span>
+    </button>
   </div>
   <span class="navbar-brand d-none d-md-inline-block"><small class="text-muted"><%= TrailGuide::Admin.configuration.subtitle %></small></span>
 </nav>
+
+<%= render partial: 'layouts/trail_guide/admin/calculator' %>
 
 <div class="toasts">
   <% flash.each do |key, message| %>
