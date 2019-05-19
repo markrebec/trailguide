@@ -1,9 +1,17 @@
 <div class="footer container-fluid bg-light">
   <div class="row">
-    <div class="col-sm text-left">
+    <div class="col-sm-3 text-left">
       <%= link_to "TrailGuide v#{TrailGuide::Version::VERSION}", "https://github.com/markrebec/trailguide", target: :blank, class: "text-muted" %>
     </div>
-    <div class="col-sm text-right">
+    <div class="col-sm-6 text-center">
+      <strong><%= number_with_delimiter TrailGuide.catalog.sum(&:participants) %></strong>
+      <span class="fas fa-users" data-toggle="tooltip" title="participants"></span> generating
+      <strong><%= number_with_delimiter TrailGuide.catalog.all.sum(&:converted) %></strong>
+      <span class="fas fa-fill-drip" data-toggle="tooltip" title="conversions"></span> across
+      <strong><%= number_with_delimiter TrailGuide.catalog.count %></strong>
+      <span class="fas fa-flask" data-toggle="tooltip" title="experiments"></span>
+    </div>
+    <div class="col-sm-3 text-right">
       <small class="text-muted"><%= TrailGuide.redis._client.id %><%= "/#{TrailGuide.redis.namespace}" if TrailGuide.redis.respond_to?(:namespace) %></small>
     </div>
   </div>
