@@ -16,12 +16,6 @@ module TrailGuide
       end
       helper_method :preview_url
 
-      def experiment_enrollable?(experiment)
-        return true if experiment.running? || experiment.calibrating?
-        return false
-      end
-      helper_method :experiment_enrollable?
-
       def experiment_peekable?(experiment)
         return false unless TrailGuide::Admin.configuration.peek_parameter
         return false unless experiment.started? && !experiment.stopped? && !experiment.winner?
