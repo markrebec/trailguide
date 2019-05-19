@@ -112,6 +112,7 @@ module TrailGuide
       return true if chosen.nil?
       adapter.delete(experiment.storage_key)
       adapter.delete(chosen.storage_key)
+      adapter.delete("#{experiment.storage_key}:converted")
       experiment.goals.each do |goal|
         adapter.delete(goal.storage_key)
       end
