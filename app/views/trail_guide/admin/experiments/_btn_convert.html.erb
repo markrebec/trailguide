@@ -24,6 +24,10 @@
           <% end %>
         </span>
       <% end %>
+    <% else %>
+      <%= link_to trail_guide_admin.convert_experiment_path(experiment.experiment_name, goal || "converted"), class: "btn btn-sm btn-link", method: :put, data: {toggle: :tooltip}, title: 'convert this metric' do %>
+        <span class="fas fa-fill-drip"></span>
+      <% end %>
     <% end %>
   <% end %>
 <% end %>
