@@ -12,6 +12,7 @@
 
         <tfoot class="thead-light">
           <tr>
+            <th class="btn-col">&nbsp;</th>
             <th scope="row">&nbsp;</th>
             <th>
               <span><%= number_with_delimiter @experiment.participants %></span>
@@ -26,7 +27,7 @@
                 <th><%= experiment_metric @experiment, combined_experiments.sum { |e| e.converted(goal) } %></th>
               <% end %>
             <% end %>
-            <th>&nbsp;</th>
+            <th class="btn-col">&nbsp;</th>
           </tr>
         </tfoot>
       </table>
@@ -37,6 +38,7 @@
 
         <tfoot class="thead-light">
           <tr>
+            <th class="btn-col">&nbsp;</th>
             <th scope="row">&nbsp;</th>
             <th>
               <span><%= number_with_delimiter @experiment.participants %></span>
@@ -51,7 +53,7 @@
                 <th><%= experiment_metric @experiment, @experiment.converted(goal) %></th>
               <% end %>
             <% end %>
-            <th>&nbsp;</th>
+            <th class="btn-col">&nbsp;</th>
           </tr>
         </tfoot>
       </table>

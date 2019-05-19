@@ -1,6 +1,10 @@
 <thead class="thead-light">
   <tr>
-    <th scope="col">
+    <th class="text-left btn-col">
+      <%= render partial: 'btn_enroll', locals: { experiment: experiment, classname: "btn-sm" } %>
+    </th>
+
+    <th scope="col" class="text-left">
       <% if experiment <= TrailGuide::CombinedExperiment && (!@experiment || @experiment.combined?) %>
         <h5 id="<%= experiment.experiment_name %>">
           <%= link_to experiment.experiment_name.to_s.humanize.titleize, trail_guide_admin.experiment_path(experiment.experiment_name), class: "text-dark" %>
@@ -26,8 +30,7 @@
       <% end %>
     <% end %>
 
-    <th class="text-right">
-      <%= render partial: 'btn_enroll', locals: { experiment: experiment, classname: "btn-sm" } %>
+    <th class="text-right btn-col">
       <%= render partial: 'btn_peek', locals: { experiment: experiment, classname: "btn-sm" } %>
     </th>
   </tr>

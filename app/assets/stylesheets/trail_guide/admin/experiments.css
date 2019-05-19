@@ -27,6 +27,11 @@ div.experiment table th, .experiment table td {
   text-align: center;
 }
 
+div.experiment table th.btn-col, .experiment table td.btn-col {
+  width: 36px;
+  text-align: center;
+}
+
 div.experiment table th h5 {
   margin: 0;
   padding: 0;

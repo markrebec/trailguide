@@ -1,7 +1,21 @@
 <tbody>
   <% experiment.variants.each do |variant| %>
     <tr>
-      <th scope="row">
+      <td class="text-left btn-col">
+        <% if experiment.running? || experiment.calibrating? %>
+          <% if participant.variant(experiment) == variant %>
+            <%= link_to trail_guide_admin.leave_experiment_path(experiment.experiment_name), class: "btn btn-sm btn-outline-secondary", method: :put, data: {toggle: :tooltip}, title: 'leave this cohort' do %>
+              <span class="fas fa-sign-out-alt fa-flip-horizontal" />
+            <% end %>
+          <% elsif !experiment.calibrating? && !experiment.winner? %>
+            <%= link_to trail_guide_admin.join_experiment_path(experiment.experiment_name, variant.name), class: "btn btn-sm btn-secondary", method: :put, data: {toggle: :tooltip}, title: 'join this cohort' do %>
+              <span class="fas fa-sign-in-alt" />
+            <% end %>
+          <% end %>
+        <% end %>
+      </td>
+
+      <th scope="row" class="text-left">
         <% if experiment.configuration.preview_url? %>
           <%= link_to variant.name.to_s.humanize.titleize, preview_url(variant), target: :blank, class: "text-dark" %>
         <% else %>
@@ -29,19 +43,7 @@
         <% end %>
       <% end %>
 
-      <td class="text-right">
-        <% if experiment.running? || experiment.calibrating? %>
-          <% if participant.variant(experiment) == variant %>
-            <%= link_to trail_guide_admin.leave_experiment_path(experiment.experiment_name), class: "btn btn-sm btn-outline-secondary", method: :put, data: {toggle: :tooltip}, title: 'leave this cohort' do %>
-              <span class="fas fa-sign-out-alt fa-flip-horizontal" />
-            <% end %>
-          <% elsif !experiment.calibrating? && !experiment.winner? %>
-            <%= link_to trail_guide_admin.join_experiment_path(experiment.experiment_name, variant.name), class: "btn btn-sm btn-secondary", method: :put, data: {toggle: :tooltip}, title: 'join this cohort' do %>
-              <span class="fas fa-sign-in-alt" />
-            <% end %>
-          <% end %>
-        <% end %>
-
+      <td class="text-right btn-col">
         <% if !experiment.winner? || variant != experiment.winner %>
           <%= link_to trail_guide_admin.winner_experiment_path(experiment.experiment_name, variant.name), class: "btn btn-sm btn-#{experiment.winner? ? "outline-" : ""}primary", method: :put, data: {toggle: :tooltip}, title: 'rollout this variant as the winner for this experiment' do %>
             <span class="fas fa-flag-checkered" />
