@@ -16,6 +16,12 @@
       </td>
 
       <th scope="row" class="text-left">
+        <% if variant.control? %>
+          <span class="fas fa-cog text-muted" data-toggle="tooltip" title="this variant is the control group for this experiment"></span>
+        <% else %>
+          <span class="fas fa-vial text-muted" data-toggle="tooltip" title="this variant is an alternate group for this experiment"></span>
+        <% end %>
+
         <% if experiment.configuration.preview_url? %>
           <%= link_to variant.name.to_s.humanize.titleize, preview_url(variant), target: :blank, class: "text-dark" %>
         <% else %>
@@ -27,9 +33,6 @@
         <% end %>
         <% if experiment.winner? && variant == experiment.winner %>
           <span class="fas fa-flag-checkered text-primary" data-toggle="tooltip" title="this variant has been promoted as the winner of the experiment"></span>
-        <% end %>
-        <% if variant.control? %>
-          <span class="fas fa-cog text-muted" data-toggle="tooltip" title="this variant is the control group for this experiment"></span>
         <% end %>
       </th>
 
