@@ -9,11 +9,5 @@
         <span class="fas fa-eye"></span>
       <% end %>
     <% end %>
-  <% else %>
-    <span data-toggle="tooltip" title="this experiment is not peekable because it's metrics are already visible">
-      <%= link_to "#", class: "btn btn-primary disabled #{classname if defined?(classname)}", method: :put do %>
-        <span class="fas fa-eye"></span>
-      <% end %>
-    </span>
   <% end %>
 <% end %>
