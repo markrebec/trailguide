@@ -9,6 +9,7 @@
     <% unless experiment <= TrailGuide::CombinedExperiment %>
       <div class="btn-group">
         <% if experiment.combined? %>
+          <%= render partial: 'btn_leave', locals: { experiment: experiment } %>
           <%= render partial: 'btn_enroll', locals: { experiment: experiment } %>
           <%= render partial: 'btn_peek', locals: { experiment: experiment } %>
         <% end %>

@@ -2,17 +2,7 @@
   <% experiment.variants.each do |variant| %>
     <tr>
       <td class="text-left btn-col">
-        <% if experiment.running? || experiment.calibrating? %>
-          <% if participant.variant(experiment) == variant %>
-            <%= link_to trail_guide_admin.leave_experiment_path(experiment.experiment_name), class: "btn btn-sm btn-outline-secondary", method: :put, data: {toggle: :tooltip}, title: 'leave this cohort' do %>
-              <span class="fas fa-sign-out-alt fa-flip-horizontal" />
-            <% end %>
-          <% elsif !experiment.calibrating? && !experiment.winner? %>
-            <%= link_to trail_guide_admin.join_experiment_path(experiment.experiment_name, variant.name), class: "btn btn-sm btn-secondary", method: :put, data: {toggle: :tooltip}, title: 'join this cohort' do %>
-              <span class="fas fa-sign-in-alt" />
-            <% end %>
-          <% end %>
-        <% end %>
+        <%= render partial: 'btn_join', locals: { experiment: experiment, variant: variant } %>
       </td>
 
       <th scope="row" class="text-left">

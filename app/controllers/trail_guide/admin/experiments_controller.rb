@@ -164,6 +164,7 @@ module TrailGuide
       end
 
       def join_experiment(experiment)
+        # TODO handle explicitly joining combined experiments
         leave_experiment(experiment)
         if experiment.is_combined?
           variant = experiment.parent.variants.find { |var| var == params[:variant] }
@@ -189,17 +190,10 @@ module TrailGuide
       end
 
       def leave_experiment(experiment)
-        if experiment.is_combined?
-          participant.exit!(experiment.parent)
-          experiment.parent.combined_experiments.each do |expmt|
+        participant.exit!(experiment)
+        if experiment.combined?
+          experiment.combined_experiments.each do |expmt|
             participant.exit!(expmt)
-          end
-        else
-          participant.exit!(experiment)
-          if experiment.combined?
-            experiment.combined_experiments.each do |expmt|
-              participant.exit!(expmt)
-            end
           end
         end
       end

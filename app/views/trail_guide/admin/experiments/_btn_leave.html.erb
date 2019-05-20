@@ -1,0 +1,7 @@
+<% if experiment.running? || experiment.calibrating? %>
+  <% if participant.participating?(experiment) %>
+    <%= link_to trail_guide_admin.leave_experiment_path(experiment.experiment_name), class: "btn btn-outline-secondary", method: :put, data: {toggle: :tooltip}, title: 'leave your cohort' do %>
+      <span class="fas fa-sign-out-alt fa-flip-horizontal" />
+    <% end %>
+  <% end %>
+<% end %>
