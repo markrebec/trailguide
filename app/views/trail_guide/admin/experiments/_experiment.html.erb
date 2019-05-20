@@ -1,12 +1,12 @@
 <button href="<%= trail_guide_admin.experiment_path(experiment.experiment_name) %>" class="experiment btn btn-outline-<%= experiment_color(experiment) %> rounded-lg text-left">
   <div class="row align-items-center">
-    <div class="col-12 col-md-6 col-lg-8 experiment-text">
+    <div class="col-12 col-md-6 col-lg-6 experiment-text">
       <h4 id="<%= experiment.experiment_name %>">
         <%= experiment.experiment_name.to_s.humanize.titleize %>
       </h4>
       <p style="margin: 0; padding: 0;"><%= experiment.configuration.summary %></p>
     </div>
-    <div class="col-12 col-md-6 col-lg-4 text-center text-md-right">
+    <div class="col-12 col-md-6 col-lg-6 text-center text-md-right">
       <div class="row align-items-center">
         <div class="col-4 experiment-text">
           <% if experiment.combined? %>

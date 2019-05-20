@@ -21,6 +21,13 @@ div.experiment {
   margin-bottom: 40px;
 }
 
+.experiments button.experiment .experiment-text h4,
+.experiments button.experiment .experiment-text p {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 div.experiment table th, .experiment table td {
   line-height: 31px;
   vertical-align: middle;

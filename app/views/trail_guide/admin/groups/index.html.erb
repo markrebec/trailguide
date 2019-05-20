@@ -20,8 +20,11 @@
                 </div>
 
                 <div class="col-4 text-center">
-                  <h4><%= TrailGuide.catalog.select(group).count %></h4>
-                  <p style="margin: 0; padding: 0;"><%= "experiment".pluralize(TrailGuide.catalog.select(group).count) %></p>
+                  <h4>
+                    <span class="fas fa-flask"></span>
+                    &times;
+                    <%= TrailGuide.catalog.select(group).count %>
+                  </h4>
                 </div>
               </div>
             </div>
