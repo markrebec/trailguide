@@ -8,7 +8,16 @@
     </div>
     <div class="col-12 col-md-6 col-lg-6 text-center text-md-right">
       <div class="row align-items-center">
-        <div class="col-4 experiment-text text-center">
+        <div class="col-3 experiment-text text-center">
+          <h5>
+            <span class="fas fa-vials"></span>
+          </h5>
+          <h5>
+            <span><%= number_with_delimiter experiment.variants.count %></span>
+          </h5>
+        </div>
+
+        <div class="col-3 experiment-text text-center">
           <h5>
             <span class="fas fa-users"></span>
           </h5>
@@ -22,7 +31,7 @@
           </h5>
         </div>
 
-        <div class="col-4 experiment-text text-center">
+        <div class="col-3 experiment-text text-center">
           <h5>
             <span class="fas fa-fill-drip"></span>
           </h5>
@@ -45,21 +54,23 @@
           </h5>
         </div>
 
-        <div class="col-4">
+        <div class="col-3">
           <% if experiment.winner? %>
-            <span class="fas fa-flag-checkered fa-2x"></span>
+            <span class="fas fa-flag-checkered fa-2x" data-toggle="tooltip" title="ended"></span>
+          <% elsif experiment.calibrating? %>
+            <span class="fas fa-cogs fa-2x" data-toggle="tooltip" title="calibrating"></span>
           <% elsif experiment.started? %>
             <% if experiment.stopped? %>
-              <span class="fas fa-stop fa-2x"></span>
+              <span class="fas fa-stop fa-2x" data-toggle="tooltip" title="stopped"></span>
             <% elsif experiment.paused? %>
-              <span class="fas fa-pause fa-2x"></span>
+              <span class="fas fa-pause fa-2x" data-toggle="tooltip" title="paused"></span>
             <% else %>
-              <span class="fas fa-play fa-2x"></span>
+              <span class="fas fa-play fa-2x" data-toggle="tooltip" title="running"></span>
             <% end %>
           <% elsif experiment.scheduled? %>
-            <span class="fas fa-clock fa-2x"></span>
+            <span class="fas fa-clock fa-2x" data-toggle="tooltip" title="scheduled"></span>
           <% else %>
-            <span class="fas fa-flask fa-2x"></span>
+            <span class="fas fa-flask fa-2x" data-toggle="tooltip" title="not started"></span>
           <% end %>
         </div>
       </div>
