@@ -22,12 +22,7 @@
             <span class="fas fa-users"></span>
           </h5>
           <h5>
-            <span style="white-space: nowrap;"><%= number_with_delimiter experiment.participants %></span>
-            <small style="white-space: nowrap;">
-              <% if experiment.configuration.target_sample_size %>
-                <span class="text-muted">/ <%= number_with_delimiter experiment.configuration.target_sample_size %></span>
-              <% end %>
-            </small>
+            <span><%= number_with_delimiter experiment.participants %></span>
           </h5>
         </div>
 

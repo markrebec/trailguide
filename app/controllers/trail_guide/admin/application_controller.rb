@@ -51,7 +51,7 @@ module TrailGuide
           return helpers.number_with_delimiter(metric.to_i)
         end
 
-        return helpers.content_tag('span', nil, class: 'fas fa-eye-slash', data: {toggle: 'tooltip'}, title: "metrics are hidden until this experiment reaches it's target sample size")
+        return helpers.content_tag('span', nil, class: 'fas fa-eye-slash text-muted', data: {toggle: 'tooltip'}, title: "metrics are hidden until this experiment reaches it's target sample size")
       end
       helper_method :experiment_metric
 
