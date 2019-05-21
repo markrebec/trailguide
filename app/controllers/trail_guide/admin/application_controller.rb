@@ -31,14 +31,13 @@ module TrailGuide
 
       def experiment_peeking?(experiment)
         peek_param == experiment.experiment_name.to_s ||
-          experiment <= TrailGuide::CombinedExperiment && peek_param == experiment.parent.experiment_name.to_s
+          experiment.is_combined? && peek_param == experiment.parent.experiment_name.to_s
       end
       helper_method :experiment_peeking?
 
       def experiment_metrics_visible?(experiment)
         return true unless experiment.started? && !experiment.stopped? && !experiment.winner?
-        return true if peek_param == experiment.experiment_name.to_s ||
-          experiment <= TrailGuide::CombinedExperiment && peek_param == experiment.parent.experiment_name.to_s
+        return true if experiment_peeking?(experiment)
         return false if experiment.combined? && !experiment.combined_experiments.all?(&:target_sample_size_reached?)
         return true if experiment.target_sample_size_reached?
         return false

@@ -247,8 +247,8 @@ module TrailGuide
       end
       helper_method :experiment_calculator
 
-      def variant_color(variant, calculator)
-        if !@analyzing
+      def variant_analysis_color(variant, calculator)
+        if !@analyzing || !experiment_metrics_visible?(calculator.experiment)
           'dark'
         elsif variant.measure > 0
           if variant == calculator.base
@@ -266,7 +266,7 @@ module TrailGuide
           'muted'
         end
       end
-      helper_method :variant_color
+      helper_method :variant_analysis_color
 
       def redirect_to_experiment(experiment)
         if experiment <= TrailGuide::CombinedExperiment

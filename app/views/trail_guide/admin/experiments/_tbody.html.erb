@@ -14,9 +14,9 @@
         <% end %>
 
         <% if experiment.configuration.preview_url? %>
-          <%= link_to variant.name.to_s.humanize.titleize, preview_url(variant), target: :blank, class: "text-#{variant_color(vcalc, calculator)}" %>
+          <%= link_to variant.name.to_s.humanize.titleize, preview_url(variant), target: :blank, class: "text-#{variant_analysis_color(vcalc, calculator)}" %>
         <% else %>
-          <span class="text-<%= variant_color(vcalc, calculator) %>"><%= variant.name.to_s.humanize.titleize %></span>
+          <span class="text-<%= variant_analysis_color(vcalc, calculator) %>"><%= variant.name.to_s.humanize.titleize %></span>
         <% end %>
 
         <% if (experiment.running? || experiment.calibrating?) && participant.variant(experiment) == variant %>
@@ -28,7 +28,7 @@
       </th>
 
       <td>
-        <strong class="text-<%= variant_color(vcalc, calculator) %>"><%= experiment_metric experiment, variant.participants %></strong>
+        <strong class="text-<%= variant_analysis_color(vcalc, calculator) %>"><%= experiment_metric experiment, variant.participants %></strong>
       </td>
 
       <% if experiment.goals.empty? %>
@@ -37,26 +37,26 @@
             <% if @analyzing %>
               <div class="row">
                 <div class="col-4 text-right">
-                  <strong class="text-<%= variant_color(vcalc, calculator) %>"><%= number_with_delimiter variant.converted %></strong>
+                  <strong class="text-<%= variant_analysis_color(vcalc, calculator) %>"><%= number_with_delimiter variant.converted %></strong>
                 </div>
                 <div class="col-8 text-left">
                   <small class="text-light">&nbsp;</small>
-                  <small class="text-<%= variant_color(vcalc, calculator) %>" data-toggle="tooltip" title="conversion rate vs all participants">
+                  <small class="text-<%= variant_analysis_color(vcalc, calculator) %>" data-toggle="tooltip" title="conversion rate vs all participants">
                     <span class="fas fa-<%= vcalc.difference == 0 ? "minus" : (vcalc.difference > 0 ? "long-arrow-alt-up" : "long-arrow-alt-down") %>"></span>
                     <%= number_with_delimiter (variant.measure * 100).round(1) %>%
                   </small>
                   <small class="text-light">&nbsp;</small>
-                  <small class="text-<%= variant_color(vcalc, calculator) %>" data-toggle="tooltip" title="performance vs control">
+                  <small class="text-<%= variant_analysis_color(vcalc, calculator) %>" data-toggle="tooltip" title="performance vs control">
                     <%= number_with_delimiter vcalc.difference.round(2) %>%
                   </small>
                   <small class="text-light">&nbsp;</small>
-                  <small class="text-<%= variant_color(vcalc, calculator) %>" data-toggle="tooltip" title="probability of winning">
+                  <small class="text-<%= variant_analysis_color(vcalc, calculator) %>" data-toggle="tooltip" title="probability of winning">
                     <%= number_with_delimiter vcalc.probability.round(2) %>%
                   </small>
                 </div>
               </div>
             <% else %>
-              <strong class="text-<%= variant_color(vcalc, calculator) %>"><%= number_with_delimiter variant.converted %></strong>
+              <strong class="text-<%= variant_analysis_color(vcalc, calculator) %>"><%= number_with_delimiter variant.converted %></strong>
             <% end %>
           <% end %>
         </td>
@@ -67,26 +67,26 @@
               <% if @analyzing && goal == calculator.goal %>
                 <div class="row">
                   <div class="col-4 text-right">
-                    <strong class="text-<%= variant_color(vcalc, calculator) %>"><%= number_with_delimiter variant.converted(goal) %></strong>
+                    <strong class="text-<%= variant_analysis_color(vcalc, calculator) %>"><%= number_with_delimiter variant.converted(goal) %></strong>
                   </div>
                   <div class="col-8 text-left">
                     <small class="text-light">&nbsp;</small>
-                    <small class="text-<%= variant_color(vcalc, calculator) %>" data-toggle="tooltip" title="conversion rate vs all participants">
+                    <small class="text-<%= variant_analysis_color(vcalc, calculator) %>" data-toggle="tooltip" title="conversion rate vs all participants">
                       <span class="fas fa-<%= vcalc.difference == 0 ? "minus" : (vcalc.difference > 0 ? "long-arrow-alt-up" : "long-arrow-alt-down") %>"></span>
                       <%= number_with_delimiter (variant.measure(goal) * 100).round(1) %>%
                     </small>
                     <small class="text-light">&nbsp;</small>
-                    <small class="text-<%= variant_color(vcalc, calculator) %>" data-toggle="tooltip" title="performance vs control">
+                    <small class="text-<%= variant_analysis_color(vcalc, calculator) %>" data-toggle="tooltip" title="performance vs control">
                       <%= number_with_delimiter vcalc.difference.round(2) %>%
                     </small>
                     <small class="text-light">&nbsp;</small>
-                    <small class="text-<%= variant_color(vcalc, calculator) %>" data-toggle="tooltip" title="probability of winning">
+                    <small class="text-<%= variant_analysis_color(vcalc, calculator) %>" data-toggle="tooltip" title="probability of winning">
                       <%= number_with_delimiter vcalc.probability.round(2) %>%
                     </small>
                   </div>
                 </div>
               <% else %>
-                <strong class="text-<%= variant_color(vcalc, calculator) %>"><%= number_with_delimiter variant.converted(goal) %></strong>
+                <strong class="text-<%= variant_analysis_color(vcalc, calculator) %>"><%= number_with_delimiter variant.converted(goal) %></strong>
               <% end %>
             <% end %>
           </td>
