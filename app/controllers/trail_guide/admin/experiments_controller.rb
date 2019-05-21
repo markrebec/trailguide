@@ -1,3 +1,5 @@
+require 'json'
+
 module TrailGuide
   module Admin
     class ExperimentsController < ::TrailGuide::Admin::ApplicationController
@@ -9,6 +11,13 @@ module TrailGuide
       before_action :experiment,  except: [:index]
 
       def index
+        respond_to do |format|
+          format.html { render }
+          format.json {
+            send_data JSON.pretty_generate(TrailGuide.catalog.export),
+                      filename: 'trailguide-export.json'
+          }
+        end
       end
 
       def show
