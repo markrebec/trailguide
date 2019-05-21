@@ -77,7 +77,7 @@ module TrailGuide
         raise InvalidGoalError, "Invalid goal checkpoint `#{checkpoint}` for experiment `#{experiment.experiment_name}`." if goal.nil?
         (TrailGuide.redis.hget(storage_key, goal.to_s) || 0).to_i
       else
-        experiment.goals.sum do |checkpoint|
+        experiment.goals.sum do |goal|
           (TrailGuide.redis.hget(storage_key, goal.to_s) || 0).to_i
         end
       end
