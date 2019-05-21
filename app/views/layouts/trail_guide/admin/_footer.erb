@@ -16,6 +16,11 @@
       <span class="fas fa-flask" data-toggle="tooltip" title="experiments"></span>
     </div>
     <div class="col-sm-3 text-right">
+      <small>
+        <%= link_to trail_guide_admin.export_experiments_path(format: :json), class: "text-muted", data: {toggle: :tooltip}, title: "export the current state of all experiments to a JSON file" do %>
+          <span class="fas fa-file-download"></span>
+        <% end %>
+      </small>
       <small class="text-muted"><%= TrailGuide.redis._client.id %><%= "/#{TrailGuide.redis.namespace}" if TrailGuide.redis.respond_to?(:namespace) %></small>
     </div>
   </div>
