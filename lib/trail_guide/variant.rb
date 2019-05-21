@@ -100,13 +100,16 @@ module TrailGuide
       TrailGuide.redis.hincrby(storage_key, checkpoint, 1)
     end
 
+    # export the variant state (not config) as json
     def as_json(opts={})
-      {
-        name: name,
-        control: control?,
-        weight: weight,
-        metadata: metadata.as_json,
-      }
+      if experiment.goals.empty?
+        conversions = converted
+      else
+        conversions = experiment.goals.map { |g| [g.name, converted(g)] }.to_h
+      end
+
+      { name => { participants: participants,
+                  converted: conversions } }
     end
 
     def to_s

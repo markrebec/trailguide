@@ -202,25 +202,14 @@ module TrailGuide
           return false
         end
 
+        # export the experiment state (not config) as json
         def as_json(opts={})
-          # TODO add more configuration & metadata, and start actually using
-          # this more
           { experiment_name => {
-            configuration: {
-              groups: groups,
-              algorithm: algorithm.name,
-              variants: variants.as_json,
-              goals: goals.as_json,
-              start_manually: start_manually?,
-              reset_manually: reset_manually?,
-              allow_multiple_conversions: allow_multiple_conversions?,
-              allow_multiple_goals: allow_multiple_goals?
-            },
-            statistics: {
-              # TODO expand on this for variants/goals
-              participants: variants.sum(&:participants),
-              converted: variants.sum(&:converted)
-            }
+            started_at: started_at,
+            paused_at: paused_at,
+            stopped_at: stopped_at,
+            winner: winner.try(:name),
+            variants: variants.map(&:as_json).reduce({}) { |r,v| r.merge!(v) },
           } }
         end
 

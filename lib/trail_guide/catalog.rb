@@ -239,6 +239,43 @@ module TrailGuide
       # TODO (mostly only useful for engine specs)
     end
 
+    def export
+      map do |exp|
+        if exp.combined?
+          [exp.as_json].concat(exp.combined_experiments.map(&:as_json))
+        else
+          exp.as_json
+        end
+      end.flatten.reduce({}) { |red,exp| red.merge!(exp) }
+    end
+
+    def import(state)
+      state.each do |exp,est|
+        experiment = find(exp)
+        next unless experiment.present?
+
+        TrailGuide.redis.hsetnx(experiment.storage_key, 'name', experiment.experiment_name)
+        TrailGuide.redis.hset(experiment.storage_key, 'started_at', est['started_at']) if est['started_at'].present?
+        TrailGuide.redis.hset(experiment.storage_key, 'paused_at', est['paused_at']) if est['paused_at'].present?
+        TrailGuide.redis.hset(experiment.storage_key, 'stopped_at', est['stopped_at']) if est['stopped_at'].present?
+        TrailGuide.redis.hset(experiment.storage_key, 'winner', est['winner']) if est['winner'].present?
+
+        est['variants'].each do |var,vst|
+          variant = experiment.variants.find { |v| v == var }
+          next unless variant.present?
+
+          TrailGuide.redis.hincrby(variant.storage_key, 'participants', vst['participants'].to_i) if vst['participants'].to_i > 0
+          if vst['converted'].is_a?(Hash)
+            vst['converted'].each do |goal,gct|
+              TrailGuide.redis.hincrby(variant.storage_key, goal, gct.to_i) if gct.to_i > 0
+            end
+          else
+            TrailGuide.redis.hincrby(variant.storage_key, 'converted', vst['converted'].to_i) if vst['converted'].to_i > 0
+          end
+        end
+      end
+    end
+
     def orphaned(key, trace)
       added = TrailGuide.redis.sadd("orphans:#{key}", trace)
       TrailGuide.redis.expire("orphans:#{key}", 15.minutes.seconds)
