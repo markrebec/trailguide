@@ -26,10 +26,19 @@
 </div>
 
 <div class="row">
-  <div class="col-12">
+  <div class="col-6">
+    <% if experiment.groups.count > 0 %>
+      <p class="text-muted" style="padding: 0; margin: 0;">
+        <span class="fas fa-object-group" data-toggle="tooltip" title="experiment groups"></span>
+        <%= experiment.groups.map { |g| g.to_s.humanize.titleize }.join(', ') %>
+      </p>
+    <% end %>
+  </div>
+
+  <div class="col-6 text-right">
     <p class="text-muted" style="padding: 0; margin: 0;">
-      <span class="fas fa-dice"></span>
       <%= experiment.algorithm.name.demodulize.humanize.titleize %> Algorithm
+      <span class="fas fa-dice" data-toggle="tooltip" title="configured algorithm"></span>
     </p>
   </div>
 </div>
