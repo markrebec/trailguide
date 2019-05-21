@@ -30,6 +30,17 @@
           <% end %>
         <% end %>
 
+        <% if TrailGuide.catalog.calibrating.count > 0 %>
+          <%= link_to trail_guide_admin.scoped_experiments_path(scope: :calibrating), class: "dropdown-item text-secondary" do %>
+            <span class="fas fa-cog"></span>
+            &nbsp;
+            <strong class="total">
+              <%= TrailGuide.catalog.calibrating.count %>
+            </strong>
+            <span>calibrating</span>
+          <% end %>
+        <% end %>
+
         <% if TrailGuide.catalog.running.count > 0 %>
           <%= link_to trail_guide_admin.scoped_experiments_path(scope: :running), class: "dropdown-item text-success" do %>
             <span class="fas fa-play"></span>

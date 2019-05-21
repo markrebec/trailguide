@@ -103,6 +103,10 @@ module TrailGuide
       self.class.new(exploded)
     end
 
+    def calibrating
+      self.class.new(to_a.select(&:calibrating?))
+    end
+
     def started
       self.class.new(to_a.select { |e| e.started? && !e.winner? })
     end
@@ -128,7 +132,7 @@ module TrailGuide
     end
 
     def unstarted
-      self.class.new(to_a.select { |e| !e.started? && !e.scheduled? && !e.winner? })
+      self.class.new(to_a.select { |e| !e.started? && !e.calibrating? && !e.scheduled? && !e.winner? })
     end
 
     def not_running
