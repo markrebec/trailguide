@@ -24,6 +24,7 @@
     <% else %>
       <% experiment.goals.each do |goal| %>
         <th scope="col">
+          <%= render partial: 'btn_analyze_goal', locals: { experiment: experiment, goal: goal } %>
           <%= goal.to_s.humanize.titleize %>
           <%= render partial: 'btn_convert', locals: { experiment: experiment, goal: goal } %>
         </th>

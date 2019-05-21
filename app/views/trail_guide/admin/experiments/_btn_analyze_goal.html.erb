@@ -1,0 +1,5 @@
+<% if @analyzing && (@analyze_goal.present? && @analyze_goal != goal.name) %>
+  <%= link_to trail_guide_admin.experiment_path(experiment.experiment_name, analyze: true, peek: true, goal: goal.to_s), class: "btn btn-sm btn-outline-dark border-0", method: :put, data: {toggle: :tooltip}, title: 'analyze this metric' do %>
+    <span class="fas fa-search"></span>
+  <% end %>
+<% end %>
