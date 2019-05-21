@@ -59,6 +59,20 @@
       </table>
     <% end %>
 
+    <div class="row" style="display: none;">
+      <div class="col-12">
+        <% if @analyzing && experiment_metrics_visible?(@experiment) %>
+          <div class="alert alert-primary">
+            <h6>
+              <span class="fas fa-chart-line"></span>
+              Analysis
+            </h6>
+            <p><small>TODO</small></p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
     <%= render partial: 'alert_peek', locals: {experiment: @experiment} %>
   </div>
 </div>
