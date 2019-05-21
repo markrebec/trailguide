@@ -8,9 +8,9 @@
       <span class="fas fa-users" data-toggle="tooltip" title="participants"></span> generating
       <strong><%= number_with_delimiter TrailGuide.catalog.all.sum(&:converted) %></strong>
       <span class="fas fa-fill-drip" data-toggle="tooltip" title="conversions"></span> against
-      <strong><%= number_with_delimiter TrailGuide.catalog.sum { |exp| exp.variants.count } %></strong>
+      <strong><%= number_with_delimiter TrailGuide.catalog.all.sum { |exp| exp.variants.count } %></strong>
       <span class="fas fa-vials" data-toggle="tooltip" title="variants"></span> across
-      <strong><%= number_with_delimiter TrailGuide.catalog.count %></strong>
+      <strong><%= number_with_delimiter TrailGuide.catalog.all.count %></strong>
       <span class="fas fa-flask" data-toggle="tooltip" title="experiments"></span>
     </div>
     <div class="col-sm-3 text-right">
