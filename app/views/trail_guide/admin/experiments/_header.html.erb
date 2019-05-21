@@ -6,7 +6,7 @@
   </div>
 
   <div class="col-4 col-lg-2 text-right">
-    <% unless experiment <= TrailGuide::CombinedExperiment %>
+    <% unless experiment.is_combined? %>
       <div class="btn-group">
         <% if experiment.combined? %>
           <%= render partial: 'btn_leave', locals: { experiment: experiment } %>
@@ -27,28 +27,9 @@
 
 <div class="row">
   <div class="col-12">
-    <p style="padding: 0; margin: 0;">
-      <% if experiment.started? %>
-        <% if experiment.stopped? %>
-          <span class="text-muted">
-            <%= experiment.started_at.strftime('%b %e %Y @ %l:%M %p') %>
-          </span>
-          <span class="text-muted">&mdash;</span>
-          <span class="text-muted"><%= experiment.stopped_at.strftime('%b %e %Y @ %l:%M %p') %></span>
-        <% elsif experiment.paused? %>
-          <span class="text-muted">
-            <%= experiment.paused_at.strftime('%b %e %Y @ %l:%M %p') %>
-          </span>
-        <% else %>
-          <span class="text-muted">
-            <%= experiment.started_at.strftime('%b %e %Y @ %l:%M %p') %>
-          </span>
-        <% end %>
-      <% elsif experiment.scheduled? %>
-        <span class="text-muted">
-          <%= experiment.started_at.strftime('%b %e %Y @ %l:%M %p') %>
-        </span>
-      <% end %>
+    <p class="text-muted" style="padding: 0; margin: 0;">
+      <span class="fas fa-dice"></span>
+      <%= experiment.algorithm.name.demodulize.humanize.titleize %> Algorithm
     </p>
   </div>
 </div>

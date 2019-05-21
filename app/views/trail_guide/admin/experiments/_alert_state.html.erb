@@ -29,7 +29,7 @@
       <% if experiment.stopped? %>
         This experiment has been stopped and he control variant will be returned to all participants until it is restarted or a winner is selected. It ran from <strong><%= experiment.started_at.strftime(TrailGuide::Admin::DISPLAY_DATE_FORMAT) %></strong> to <strong><%= experiment.stopped_at.strftime(TrailGuide::Admin::DISPLAY_DATE_FORMAT) %></strong>.
       <% elsif experiment.paused? %>
-        This experiment has been paused. The control variant will be returned to all participants until it is resumed, restarted or a winner is selected.
+        This experiment was paused on <strong><%= experiment.paused_at.strftime(TrailGuide::Admin::DISPLAY_DATE_FORMAT) %></strong> paused. The control variant will be returned to all participants until it is resumed, restarted or a winner is selected.
       <% else %>
         This experiment was started on <strong><%= experiment.started_at.strftime(TrailGuide::Admin::DISPLAY_DATE_FORMAT) %></strong> and is currently running. Participants will be enrolled and served a variant based on the configured alrogithm.
       <% end %>
