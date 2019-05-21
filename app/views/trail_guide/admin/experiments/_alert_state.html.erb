@@ -27,29 +27,22 @@
       <% end %>
     <% elsif experiment.started? %>
       <% if experiment.stopped? %>
-        This experiment has been stopped. The control variant will be returned to all participants until it is restarted or a winner is selected.
+        This experiment has been stopped and he control variant will be returned to all participants until it is restarted or a winner is selected. It ran from <strong><%= experiment.started_at.strftime(TrailGuide::Admin::DISPLAY_DATE_FORMAT) %></strong> to <strong><%= experiment.stopped_at.strftime(TrailGuide::Admin::DISPLAY_DATE_FORMAT) %></strong>.
       <% elsif experiment.paused? %>
         This experiment has been paused. The control variant will be returned to all participants until it is resumed, restarted or a winner is selected.
       <% else %>
-        This experiment is currently running. Participants will be enrolled and served a variant based on the configured alrogithm.
+        This experiment was started on <strong><%= experiment.started_at.strftime(TrailGuide::Admin::DISPLAY_DATE_FORMAT) %></strong> and is currently running. Participants will be enrolled and served a variant based on the configured alrogithm.
       <% end %>
     <% elsif experiment.scheduled? %>
       This experiment has been scheduled to start on <strong><%= experiment.started_at.strftime(TrailGuide::Admin::DISPLAY_DATE_FORMAT) %></strong>
       <% if experiment.stopped_at.present? %>
         and stop on <strong><%= experiment.stopped_at.strftime(TrailGuide::Admin::DISPLAY_DATE_FORMAT) %></strong>
       <% end %>
-      <% if experiment.enable_calibration? %>
-        <br /><br />
-        In the meantime, this experiment is configured with <code>enable_calibration: true</code> and will track participation and conversion against your control variant to help determine a baseline conversion rate.
-      <% end %>
     <% else %>
-      This experiment is not running, and the control variant will be returned to all participants until it is started. You may use the controls below to start or schedule your experiment.
+      This experiment is not running, and the control variant will be returned to all participants until it is started. You may use the controls above to start or schedule your experiment.
       <% if !experiment.start_manually? %>
         <br /><br />
         This experiment is configured with <code>start_manually: false</code> and will start automatically the first time a participant encounters it.
-      <% elsif experiment.enable_calibration? %>
-        <br /><br />
-        In the meantime, this experiment is configured with <code>enable_calibration: true</code> and will track participation and conversion against your control variant to help determine a baseline conversion rate.
       <% end %>
     <% end %>
   </small></p>

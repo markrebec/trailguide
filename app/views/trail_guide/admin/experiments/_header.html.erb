@@ -61,7 +61,19 @@
 
 <div class="row">
   <div class="col-12">
-    <% if experiment <= TrailGuide::CombinedExperiment %>
+    <%= render partial: 'alert_state', locals: {experiment: experiment} %>
+
+    <% if experiment.calibrating? %>
+      <div class="alert alert-dark">
+        <h6>
+          <span class="fas fa-cogs"></span>
+          Calibrating
+        </h6>
+        <p><small>This experiment is configured with <code>enable_calibration: true</code> and will track participation and conversion against your control variant until it is started to help you determine a baseline conversion rate.</small></p>
+      </div>
+    <% end %>
+
+    <% if experiment.is_combined? %>
       <div class="alert alert-dark">
         <h6>
           <span class="fas fa-link"></span>
@@ -70,7 +82,5 @@
         <p><small>This experiment is part of a combined experiment, and some features must be managed via it's parent experiment <strong><%= link_to experiment.parent.experiment_name.to_s.humanize.titleize, trail_guide_admin.experiment_path(experiment.parent.experiment_name), class: 'text-dark' %></strong></small></p>
       </div>
     <% end %>
-
-    <%= render partial: 'alert_state', locals: {experiment: experiment} %>
   </div>
 </div>
