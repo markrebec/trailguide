@@ -30,6 +30,8 @@ module TrailGuide
       end
 
       def experiment_peeking?(experiment)
+        # TODO deprecate the argument/param??
+        return params.key?(TrailGuide::Admin.configuration.peek_parameter)
         peek_param == experiment.experiment_name.to_s ||
           experiment.is_combined? && peek_param == experiment.parent.experiment_name.to_s
       end
