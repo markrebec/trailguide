@@ -18,7 +18,8 @@ module TrailGuide
         @variants ||= experiment.variants.map do |variant|
           superset = @against ? variant.converted(@against) : variant.participants
           converts = variant.converted(goal)
-          measure = converts.to_f / superset.to_f
+          measure = (converts.to_f / superset.to_f) rescue 0
+          measure = 0 if measure.nan?
 
           Struct.new(:name, :control, :superset, :subset, :measure,
                      :difference, :probability, :significance, :z_score)

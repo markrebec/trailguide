@@ -69,14 +69,23 @@ module TrailGuide
       end
 
       def calculate!
-        variants.each do |variant|
+        variants_with_conversion.each do |variant|
           expvar = experiment.variants.find { |var| var.name == variant.name }
           vprob = variant_probability(variant)
           variant.probability = vprob
           variant.significance = TrailGuide::Calculators::SIGNIFICANT_PROBABILITIES.reverse.find { |pct| vprob >= pct } || 0
 
-          if worst && variant.measure > worst.measure
-            variant.difference = (variant.measure - worst.measure) / worst.measure * 100
+          #if worst && variant.measure > worst.measure
+          #  variant.difference = (variant.measure - worst.measure) / worst.measure * 100
+          #end
+          if base
+            if variant.measure > base.measure
+              variant.difference = (variant.measure - base.measure) / base.measure * 100
+            elsif base.measure > variant.measure
+              variant.difference = -((base.measure - variant.measure) / base.measure * 100)
+            else
+              variant.difference = 0
+            end
           end
         end
 

@@ -34,7 +34,7 @@ module TrailGuide
       def calculate!
         pc = base.measure
         nc = base.superset
-        variants.each do |var|
+        variants_with_conversion.each do |var|
           p = var.measure
           n = var.superset
           z_score = (p - pc) / ((p * (1-p)/n) + (pc * (1-pc)/nc)).abs ** 0.5
@@ -45,8 +45,17 @@ module TrailGuide
           var.significance = self.class.significant_probability(z_score)
           var.significance = -(var.significance) if var.z_score.negative?
 
-          if worst && var.measure > worst.measure
-            var.difference = (var.measure - worst.measure) / worst.measure * 100
+          #if worst && var.measure > worst.measure
+          #  var.difference = (var.measure - worst.measure) / worst.measure * 100
+          #end
+          if base
+            if var.measure > base.measure
+              var.difference = (var.measure - base.measure) / base.measure * 100
+            elsif base.measure > var.measure
+              var.difference = -((base.measure - var.measure) / base.measure * 100)
+            else
+              var.difference = 0
+            end
           end
         end
 
