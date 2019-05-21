@@ -1,23 +1,27 @@
 <button href="<%= trail_guide_admin.experiment_path(experiment.experiment_name) %>" class="experiment btn btn-outline-<%= experiment_color(experiment) %> rounded-lg text-left">
   <div class="row align-items-center">
-    <div class="col-12 col-md-6 col-lg-6 experiment-text">
+    <div class="col-11 col-md-5 col-lg-5 experiment-text">
       <h4 id="<%= experiment.experiment_name %>">
         <%= experiment.experiment_name.to_s.humanize.titleize %>
       </h4>
       <p style="margin: 0; padding: 0;"><%= experiment.configuration.summary %></p>
     </div>
-    <div class="col-12 col-md-6 col-lg-6 text-center text-md-right">
+    <div class="col-10 col-md-6 col-lg-6 text-center text-md-right">
       <div class="row align-items-center">
-        <div class="col-3 experiment-text text-center">
+        <div class="col-4 experiment-text text-center">
           <h5>
-            <span class="fas fa-vials"></span>
+            <span class="fas fa-vials" style="width: 25px;"></span>
+            <span class="text-muted" style="display: inline-block; width: 25px; text-align: center;">&times;</span>
+            <span><%= number_with_delimiter experiment.variants.count %></span>
           </h5>
           <h5>
-            <span><%= number_with_delimiter experiment.variants.count %></span>
+            <span class="fas fa-fill" style="width: 25px;"></span>
+            <span class="text-muted" style="display: inline-block; width: 25px; text-align: center;">&times;</span>
+            <span><%= number_with_delimiter experiment.goals.count %></span>
           </h5>
         </div>
 
-        <div class="col-3 experiment-text text-center">
+        <div class="col-4 experiment-text text-center">
           <h5>
             <span class="fas fa-users"></span>
           </h5>
@@ -26,7 +30,7 @@
           </h5>
         </div>
 
-        <div class="col-3 experiment-text text-center">
+        <div class="col-4 experiment-text text-center">
           <h5>
             <span class="fas fa-fill-drip"></span>
           </h5>
@@ -48,27 +52,27 @@
             <% end %>
           </h5>
         </div>
-
-        <div class="col-3">
-          <% if experiment.winner? %>
-            <span class="fas fa-flag-checkered fa-2x" data-toggle="tooltip" title="ended"></span>
-          <% elsif experiment.calibrating? %>
-            <span class="fas fa-cogs fa-2x" data-toggle="tooltip" title="calibrating"></span>
-          <% elsif experiment.started? %>
-            <% if experiment.stopped? %>
-              <span class="fas fa-stop fa-2x" data-toggle="tooltip" title="stopped"></span>
-            <% elsif experiment.paused? %>
-              <span class="fas fa-pause fa-2x" data-toggle="tooltip" title="paused"></span>
-            <% else %>
-              <span class="fas fa-play fa-2x" data-toggle="tooltip" title="running"></span>
-            <% end %>
-          <% elsif experiment.scheduled? %>
-            <span class="fas fa-clock fa-2x" data-toggle="tooltip" title="scheduled"></span>
-          <% else %>
-            <span class="fas fa-flask fa-2x" data-toggle="tooltip" title="not started"></span>
-          <% end %>
-        </div>
       </div>
+    </div>
+
+    <div class="col-2 col-md-1">
+      <% if experiment.winner? %>
+        <span class="fas fa-flag-checkered fa-2x" data-toggle="tooltip" title="ended"></span>
+      <% elsif experiment.calibrating? %>
+        <span class="fas fa-cogs fa-2x" data-toggle="tooltip" title="calibrating"></span>
+      <% elsif experiment.started? %>
+        <% if experiment.stopped? %>
+          <span class="fas fa-stop fa-2x" data-toggle="tooltip" title="stopped"></span>
+        <% elsif experiment.paused? %>
+          <span class="fas fa-pause fa-2x" data-toggle="tooltip" title="paused"></span>
+        <% else %>
+          <span class="fas fa-play fa-2x" data-toggle="tooltip" title="running"></span>
+        <% end %>
+      <% elsif experiment.scheduled? %>
+        <span class="fas fa-clock fa-2x" data-toggle="tooltip" title="scheduled"></span>
+      <% else %>
+        <span class="fas fa-flask fa-2x" data-toggle="tooltip" title="not started"></span>
+      <% end %>
     </div>
   </div>
 </button>
