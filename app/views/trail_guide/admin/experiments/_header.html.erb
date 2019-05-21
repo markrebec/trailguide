@@ -62,6 +62,14 @@
         </h6>
         <p><small>This experiment is part of a combined experiment, and some features must be managed via it's parent experiment <strong><%= link_to experiment.parent.experiment_name.to_s.humanize.titleize, trail_guide_admin.experiment_path(experiment.parent.experiment_name), class: 'text-dark' %></strong></small></p>
       </div>
+    <% elsif experiment.combined? %>
+      <div class="alert alert-dark">
+        <h6>
+          <span class="fas fa-link"></span>
+          Combined Experiment
+        </h6>
+        <p><small>This experiment is configured as a combined experiment, which means it defines multiple individual experiments. These experiments share a <em>lifecycle and enrollment</em> via the parent, but track <em>independent participation, conversion and winner selection</em>. This means that when you're enrolled in one experiment you'll also be enrolled in the parent, and any sibling experiments you encounter thereafter will always select that same variant.</small></p>
+      </div>
     <% end %>
   </div>
 </div>
