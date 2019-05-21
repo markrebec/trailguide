@@ -1,0 +1,9 @@
+<% if @analyzing %>
+  <%= link_to trail_guide_admin.experiment_path(experiment.experiment_name), class: "btn btn-info #{classname if defined?(classname)}", method: :put, data: {toggle: :tooltip}, title: "hide this experiment's analysis" do %>
+    <span class="fas fa-chart-line"></span>
+  <% end %>
+<% else %>
+  <%= link_to trail_guide_admin.experiment_path(experiment.experiment_name, analyze: true, peek: true), class: "btn btn-outline-info #{classname if defined?(classname)}", method: :put, data: {toggle: :tooltip}, title: "analyze this experiment's metrics" do %>
+    <span class="fas fa-chart-line"></span>
+  <% end %>
+<% end %>
