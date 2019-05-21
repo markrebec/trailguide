@@ -47,7 +47,7 @@ module TrailGuide
 
       def experiment_metric(experiment, metric=nil, &block)
         if experiment_metrics_visible?(experiment)
-          return helpers.raw yield if block_given?
+          yield and return if block_given?
           return helpers.number_with_delimiter(metric.to_i)
         end
 
