@@ -41,6 +41,13 @@ module TrailGuide
       end
 
       def show
+        @analyzing = params.key?(:analyze)
+        @analyze_goal = params[:goal].present? ?
+          params[:goal].underscore.to_sym :
+          experiment.goals.first.try(:name)
+        @analyze_method = params[:method].present? ?
+          params[:method].underscore.to_sym :
+          :score
       end
 
       def start
@@ -231,6 +238,35 @@ module TrailGuide
         @participant ||= TrailGuide::Participant.new(self)
       end
       helper_method :participant
+
+      def experiment_calculator(experiment, **opts)
+        klass = "TrailGuide::Calculators::#{@analyze_method.to_s.classify}".constantize
+        calculator = klass.new(experiment, **{base: :control, goal: @analyze_goal}.merge(opts))
+        calculator.calculate! if @analyzing
+        calculator
+      end
+      helper_method :experiment_calculator
+
+      def variant_color(variant, calculator)
+        if !@analyzing
+          'dark'
+        elsif variant.measure > 0
+          if variant == calculator.base
+            'dark'
+          elsif variant.measure == calculator.best.measure
+            'success'
+          elsif variant.measure == calculator.worst.measure
+            'danger'
+          elsif variant.measure > calculator.base.measure
+            'info'
+          elsif variant.measure < calculator.base.measure
+            'warning'
+          end
+        else
+          'muted'
+        end
+      end
+      helper_method :variant_color
 
       def redirect_to_experiment(experiment)
         if experiment <= TrailGuide::CombinedExperiment

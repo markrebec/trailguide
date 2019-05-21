@@ -7,7 +7,7 @@
         <% combined_experiments = @experiment.combined.map { |e| TrailGuide.catalog.find(e) } %>
         <% combined_experiments.each do |experiment| %>
           <%= render partial: 'thead', locals: { experiment: experiment } %>
-          <%= render partial: 'tbody', locals: { experiment: experiment } %>
+          <%= render partial: 'tbody', locals: { experiment: experiment, calculator: experiment_calculator(experiment) } %>
         <% end %>
 
         <tfoot class="thead-light">
@@ -34,7 +34,7 @@
     <% else %>
       <table class="table table-hover">
         <%= render partial: 'thead', locals: { experiment: @experiment } %>
-        <%= render partial: 'tbody', locals: { experiment: @experiment } %>
+        <%= render partial: 'tbody', locals: { experiment: @experiment, calculator: experiment_calculator(@experiment) } %>
 
         <tfoot class="thead-light">
           <tr>
