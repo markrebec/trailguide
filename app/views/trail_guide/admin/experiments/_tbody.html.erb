@@ -26,13 +26,29 @@
         <% end %>
       </th>
 
-      <td><%= experiment_metric experiment, variant.participants %></td>
+      <td>
+        <strong class="text-dark"><%= experiment_metric experiment, variant.participants %></strong>
+      </td>
 
       <% if experiment.goals.empty? %>
-        <td><%= experiment_metric experiment, variant.converted %></td>
+        <td>
+          <%= experiment_metric experiment do %>
+            <strong class="text-dark"><%= number_with_delimiter variant.converted %></strong>
+            <small class="text-muted" data-toggle="tooltip" title="conversion rate vs all participants">
+              <%= number_with_delimiter (variant.measure * 100).round(1) %>%
+            </small>
+          <% end %>
+        </td>
       <% else %>
         <% experiment.goals.each do |goal| %>
-          <td><%= experiment_metric experiment, variant.converted(goal) %></td>
+          <td>
+            <%= experiment_metric experiment do %>
+              <strong class="text-dark"><%= number_with_delimiter variant.converted(goal) %></strong>
+              <small class="text-muted" data-toggle="tooltip" title="conversion rate vs all participants">
+                <%= number_with_delimiter (variant.measure(goal) * 100).round(1) %>%
+              </small>
+            <% end %>
+          </td>
         <% end %>
       <% end %>
 
