@@ -5,13 +5,10 @@
   <% end %>
   <div class="col-sm text-center">
     <div class="btn-group">
-      <%= link_to trail_guide_admin.experiments_path, class: "btn btn-light text-dark" do %>
+      <%= link_to trail_guide_admin.experiments_path, class: "btn btn-light text-dark", data: {toggle: :tooltip}, title: "Experiment".pluralize(TrailGuide.catalog.count) do %>
         <span class="fas fa-flask"></span>
         &nbsp;
-        <strong class="total">
-          <%= TrailGuide.catalog.count %>
-        </strong>
-        <span>experiments</span>
+        <strong class="total"><%= TrailGuide.catalog.count %></strong>
       <% end %>
 
       <button type="button" class="btn btn-light text-dark dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -22,77 +19,70 @@
         <% if TrailGuide.catalog.unstarted.count > 0 %>
           <%= link_to trail_guide_admin.scoped_experiments_path(scope: :unstarted), class: "dropdown-item text-secondary" do %>
             <span class="fas fa-flask"></span>
+            <small>&times;</small>
+            <strong class="total"><%= TrailGuide.catalog.unstarted.count %></strong>
             &nbsp;
-            <strong class="total">
-              <%= TrailGuide.catalog.unstarted.count %>
-            </strong>
-            <span>unstarted</span>
+            <span>Unstarted</span>
           <% end %>
         <% end %>
 
         <% if TrailGuide.catalog.calibrating.count > 0 %>
           <%= link_to trail_guide_admin.scoped_experiments_path(scope: :calibrating), class: "dropdown-item text-secondary" do %>
             <span class="fas fa-cog"></span>
+            <small>&times;</small>
+            <strong class="total"><%= TrailGuide.catalog.calibrating.count %></strong>
             &nbsp;
-            <strong class="total">
-              <%= TrailGuide.catalog.calibrating.count %>
-            </strong>
-            <span>calibrating</span>
+            <span>Calibrating</span>
           <% end %>
         <% end %>
 
         <% if TrailGuide.catalog.running.count > 0 %>
           <%= link_to trail_guide_admin.scoped_experiments_path(scope: :running), class: "dropdown-item text-success" do %>
             <span class="fas fa-play"></span>
+            <small>&times;</small>
+            <strong class="total"><%= TrailGuide.catalog.running.count %></strong>
             &nbsp;
-            <strong class="total">
-              <%= TrailGuide.catalog.running.count %>
-            </strong>
-            <span>running</span>
+            <span>Running</span>
           <% end %>
         <% end %>
 
         <% if TrailGuide.catalog.paused.count > 0 %>
           <%= link_to trail_guide_admin.scoped_experiments_path(scope: :paused), class: "dropdown-item text-warning" do %>
             <span class="fas fa-pause"></span>
+            <small>&times;</small>
+            <strong class="total"><%= TrailGuide.catalog.paused.count %></strong>
             &nbsp;
-            <strong class="total">
-              <%= TrailGuide.catalog.paused.count %>
-            </strong>
-            <span>paused</span>
+            <span>Paused</span>
           <% end %>
         <% end %>
 
         <% if TrailGuide.catalog.scheduled.count > 0 %>
           <%= link_to trail_guide_admin.scoped_experiments_path(scope: :scheduled), class: "dropdown-item text-info" do %>
             <span class="fas fa-calendar"></span>
+            <small>&times;</small>
+            <strong class="total"><%= TrailGuide.catalog.scheduled.count %></strong>
             &nbsp;
-            <strong class="total">
-              <%= TrailGuide.catalog.scheduled.count %>
-            </strong>
-            <span>scheduled</span>
+            <span>Scheduled</span>
           <% end %>
         <% end %>
 
         <% if TrailGuide.catalog.stopped.count > 0 %>
           <%= link_to trail_guide_admin.scoped_experiments_path(scope: :stopped), class: "dropdown-item text-danger" do %>
             <span class="fas fa-stop"></span>
+            <small>&times;</small>
+            <strong class="total"><%= TrailGuide.catalog.stopped.count %></strong>
             &nbsp;
-            <strong class="total">
-              <%= TrailGuide.catalog.stopped.count %>
-            </strong>
-            <span>stopped</span>
+            <span>Stopped</span>
           <% end %>
         <% end %>
 
         <% if TrailGuide.catalog.ended.count > 0 %>
           <%= link_to trail_guide_admin.scoped_experiments_path(scope: :ended), class: "dropdown-item text-primary" do %>
             <span class="fas fa-flag-checkered"></span>
+            <small>&times;</small>
+            <strong class="total"><%= TrailGuide.catalog.ended.count %></strong>
             &nbsp;
-            <strong class="total">
-              <%= TrailGuide.catalog.ended.count %>
-            </strong>
-            <span>ended</span>
+            <span>Ended</span>
           <% end %>
         <% end %>
       </div>
@@ -100,13 +90,12 @@
 
     <% unless TrailGuide.catalog.groups.empty? %>
       <div class="btn-group">
-        <%= link_to trail_guide_admin.groups_path, class: "btn btn-light text-dark" do %>
+        <%= link_to trail_guide_admin.groups_path, class: "btn btn-light text-dark", data: {toggle: :tooltip}, title: "Group".pluralize(TrailGuide.catalog.groups.count) do %>
           <span class="fas fa-th-large"></span>
           &nbsp;
           <strong class="total">
             <%= TrailGuide.catalog.groups.count %>
           </strong>
-          <span><%= "group".pluralize(TrailGuide.catalog.groups.count) %></span>
         <% end %>
 
         <button type="button" class="btn btn-light text-dark dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
