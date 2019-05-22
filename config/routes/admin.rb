@@ -21,7 +21,8 @@ TrailGuide::Admin::Engine.routes.draw do
     end
 
     collection do
-      get  '/export', action: :index, format: [:json], as: :export
+      put  '/import', action: :import, as: :import
+      get  '/export', action: :index,  as: :export, format: [:json]
       get  '/scope/:scope', action: :index, as: :scoped
     end
   end

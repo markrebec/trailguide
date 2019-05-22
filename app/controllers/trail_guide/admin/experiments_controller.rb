@@ -3,12 +3,12 @@ require 'json'
 module TrailGuide
   module Admin
     class ExperimentsController < ::TrailGuide::Admin::ApplicationController
-      before_action except: [:index] do
+      before_action except: [:index, :import] do
         (redirect_to :back rescue redirect_to trail_guide_admin.experiments_path) and return unless experiment.present?
       end
 
       before_action :experiments, only: [:index]
-      before_action :experiment,  except: [:index]
+      before_action :experiment,  except: [:index, :import]
 
       def index
         respond_to do |format|
@@ -18,6 +18,26 @@ module TrailGuide
                       filename: 'trailguide-export.json'
           }
         end
+      end
+
+      def import
+        import_file = params[:file]
+
+        if import_file
+          if import_file.respond_to?(:read)
+            state_json = JSON.load(import_file.read)
+          elsif import_file.respond_to?(:path)
+            state_json= JSON.load(File.read(import_file.path))
+          end
+          TrailGuide.catalog.import(state_json)
+          flash[:success] = "Experiment state imported successfully"
+          redirect_to trail_guide_admin.experiments_path
+        else
+          raise "Please provide an import file"
+        end
+      rescue => e
+        flash[:error] = "There was a problem importing this file: #{e.message}"
+        redirect_to trail_guide_admin.experiments_path
       end
 
       def show

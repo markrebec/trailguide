@@ -1,0 +1,45 @@
+<div id="import-modal" class="modal import-modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <%= form_tag trail_guide_admin.import_experiments_path, multipart: true, method: :put do %>
+        <div class="modal-header">
+          <h5 class="modal-title">Import or Export Experiment State</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body text-left">
+          <p><small>You can export the current state of all experiments using the <strong class="text-info" style="white-space: nowrap;"><span class="fas fa-file-download"></span> Export JSON</strong> button below. The downloaded JSON file will include participation counts, conversion counts, winner selection, and the current state of each experiment (i.e. running, stopped).</small></p>
+
+          <p><small>If you already have an export file from another trailguide instance, you can import it using the form below. This can be useful to replicate state locally if you're trying to debug complex experiment behavior or interactions between experiments reported in another environment (like production).</small></p>
+
+          <div class="form-group row">
+            <label for="import-file" class="col-sm-3 col-form-label"><strong>File</strong></label>
+            <div class="col-sm-9">
+              <div class="custom-file">
+                <input type="file" name="file" class="custom-file-input" id="import-file">
+                <label class="custom-file-label" for="import-file">Choose file</label>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <div class="col-sm-5">
+            <%= link_to trail_guide_admin.export_experiments_path(format: :json), class: "btn btn-info", data: {toggle: :tooltip}, title: "download a JSON export of the current state of all experiments" do %>
+              <span class="fas fa-file-download"></span>
+              Export JSON
+            <% end %>
+          </div>
+          <div class="col-sm-7 text-right">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-success">
+              <span class="fas fa-file-upload"></span>
+              Import JSON
+            </button>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
