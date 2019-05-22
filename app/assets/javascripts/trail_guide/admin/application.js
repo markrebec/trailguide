@@ -25,6 +25,9 @@ $(function () {
     allowInputToggle: true,
   })
 
+  // bootstrap custom file picker
+  bsCustomFileInput.init()
+
   $('button[href]').on('click', function(evt) {
     window.location.href = $(evt.currentTarget).attr('href')
   })
