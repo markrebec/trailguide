@@ -12,8 +12,21 @@ module TrailGuide
         @participating ||= variant.present?
       end
 
+      def participating!(variant)
+        @participating = true
+        @variant = variant
+        participant.participating!(variant) if experiment.configuration.store_participation?
+      end
+
       def converted?(checkpoint=nil)
-        @converted ||= participant.converted?(experiment, checkpoint)
+        @converted ||= {}
+        @converted[checkpoint || :converted] ||= participant.converted?(experiment, checkpoint)
+      end
+
+      def converted!(variant, checkpoint, reset: false)
+        @converted ||= {}
+        @converted[checkpoint || :converted] ||= true
+        participant.converted!(experiment, checkpoint, reset: false)
       end
 
       def variant

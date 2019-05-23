@@ -3,10 +3,10 @@ module TrailGuide
     class Config < Canfig::Config
       DEFAULT_KEYS = [
         :name, :summary, :preview_url, :algorithm, :groups, :variants, :goals,
-        :start_manually, :reset_manually, :store_override, :track_override,
-        :combined, :allow_multiple_conversions, :allow_multiple_goals,
-        :track_winner_conversions, :skip_request_filter, :target_sample_size,
-        :can_resume, :enable_calibration
+        :start_manually, :reset_manually, :store_participation, :store_override,
+        :track_override, :combined, :allow_multiple_conversions,
+        :allow_multiple_goals, :track_winner_conversions, :skip_request_filter,
+        :target_sample_size, :can_resume, :enable_calibration
       ].freeze
 
       CALLBACK_KEYS = [
@@ -56,6 +56,10 @@ module TrailGuide
 
       def reset_manually?
         !!reset_manually
+      end
+
+      def store_participation?
+        !!store_participation
       end
 
       def allow_multiple_conversions?
