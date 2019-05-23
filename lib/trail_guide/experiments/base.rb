@@ -303,18 +303,14 @@ module TrailGuide
         return control unless allow_participation?(metadata)
 
         variant = algorithm_choose!(metadata: metadata)
-        variant_chosen!(variant, metadata: metadata)
+        variant.increment_participation!
+        participant.participating!(variant)
+        run_callbacks(:on_choose, variant, metadata)
         variant
       end
 
       def algorithm_choose!(metadata: nil)
         algorithm.choose!(metadata: metadata)
-      end
-
-      def variant_chosen!(variant, metadata: nil)
-        variant.increment_participation!
-        participant.participating!(variant)
-        run_callbacks(:on_choose, variant, metadata)
       end
 
       def convert!(checkpoint=nil, metadata: nil)
