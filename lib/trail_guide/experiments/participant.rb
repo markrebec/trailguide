@@ -26,7 +26,7 @@ module TrailGuide
       def converted!(variant, checkpoint, reset: false)
         @converted ||= {}
         @converted[checkpoint || :converted] ||= true
-        participant.converted!(experiment, checkpoint, reset: false)
+        participant.converted!(variant, checkpoint, reset: reset)
       end
 
       def variant
