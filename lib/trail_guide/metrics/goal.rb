@@ -7,7 +7,7 @@ module TrailGuide
       delegate :allow_multiple_conversions?, :callbacks, to: :configuration
 
       def dup(experiment)
-        self.class.new(experiment, name, **configuration.map { |k,v| [k, v.try(:dup)] }.to_h)
+        self.class.new(experiment, name, **configuration.to_h.map { |k,v| [k, v.try(:dup)] }.to_h)
       end
 
       def configuration
