@@ -363,13 +363,13 @@ module TrailGuide
 
       def allow_participation?(metadata=nil)
         return true if callbacks[:allow_participation].empty?
-        run_callbacks(:allow_participation, participant, metadata)
+        run_callbacks(:allow_participation, true, participant, metadata)
       end
 
       def allow_conversion?(variant, checkpoint=nil, metadata=nil)
         if checkpoint.nil?
           return true if callbacks[:allow_conversion].empty?
-          run_callbacks(:allow_conversion, checkpoint, variant, participant, metadata)
+          run_callbacks(:allow_conversion, true, checkpoint, variant, participant, metadata)
         else
           checkpoint.allow_conversion?(self, variant, metadata)
         end

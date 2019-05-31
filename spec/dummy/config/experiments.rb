@@ -101,6 +101,10 @@ experiment :multi_goal_example do |config|
   variant :red
   variant :black
 
+  config.allow_participation = -> (experiment, allowed, participant, metadata) do
+    return allowed
+  end
+
   config.allow_conversion = -> (exp, gl, vt, ptp, mtd) do
     puts "DEFAULT ALLOW"
     return true

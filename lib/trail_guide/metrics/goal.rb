@@ -45,7 +45,7 @@ module TrailGuide
 
       def allow_conversion?(trial, variant, metadata=nil)
         return true if callbacks[:allow_conversion].empty?
-        run_callbacks(:allow_conversion, trial, variant, trial.participant, metadata)
+        run_callbacks(:allow_conversion, trial, true, variant, trial.participant, metadata)
       end
 
       def run_callbacks(hook, trial, *args)
