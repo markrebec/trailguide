@@ -147,8 +147,8 @@ module TrailGuide
         variant
       end
 
-      def goal(name)
-        goals << Metrics::Goal.new(experiment, name)
+      def goal(name, **config, &block)
+        goals << Metrics::Goal.new(experiment, name, **config, &block)
       end
       alias_method :funnel, :goal
 
@@ -162,18 +162,18 @@ module TrailGuide
       end
       alias_method :funnels=, :goals=
 
-      def goals(*names)
+      def goals(*names, **config, &block)
         self[:goals] ||= []
         unless names.empty?
-          self[:goals] = self[:goals].concat([names].flatten.map { |g| Metrics::Goal.new(experiment, g) })
+          self[:goals] = self[:goals].concat([names].flatten.map { |g| Metrics::Goal.new(experiment, g, **config, &block) })
         end
         self[:goals]
       end
       alias_method :funnels, :goals
 
-      def metric(name)
+      def metric(name, **config, &block)
         group(name)
-        goal(name)
+        goal(name, **config, &block)
       end
 
       def metric=(name)
@@ -181,9 +181,9 @@ module TrailGuide
         self.goal = name
       end
 
-      def metrics(*names)
+      def metrics(*names, **config, &block)
         groups(*names)
-        goals(*names)
+        goals(*names, **config, &block)
       end
 
       def metrics=(*names)

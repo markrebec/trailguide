@@ -101,10 +101,12 @@ experiment :multi_goal_example do |config|
   variant :red
   variant :black
 
-  #metric :first
-  #metric :second
-  config.groups = [:first, :second]
-  config.goals = [:first, :second]
+  metric :first, allow_multiple_conversions: true
+  metric :second do |gcfg|
+    gcfg.track_winner_conversions = true
+  end
+  #config.groups = [:first, :second]
+  #config.goals = [:first, :second]
 
   config.enable_calibration = true
   config.target_sample_size = 100
