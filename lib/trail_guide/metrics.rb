@@ -1,3 +1,4 @@
+require 'trail_guide/metrics/config'
 require 'trail_guide/metrics/goal'
 require 'trail_guide/metrics/funnel'
 require 'trail_guide/metrics/checkpoint'

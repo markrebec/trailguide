@@ -5,12 +5,21 @@ module TrailGuide
       attr_reader :experiment, :name
 
       def dup(experiment)
-        self.class.new(experiment, name)
+        self.class.new(experiment, name, config: configuration.map { |k,v| [k, v.try(:dup)] }.to_h)
       end
 
-      def initialize(experiment, name)
+      def configuration
+        @configuration ||= Metrics::Config.new(self)
+      end
+
+      def configure(*args, &block)
+        configuration.configure(*args, &block)
+      end
+
+      def initialize(experiment, name, config: {}, &block)
         @experiment = experiment
         @name = name.to_s.underscore.to_sym
+        configure(**config, &block)
       end
 
       def ==(other)
