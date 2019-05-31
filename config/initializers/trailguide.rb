@@ -325,17 +325,17 @@ TrailGuide::Experiment.configure do |config|
   # callback when a participant is entered into a variant for the first time,
   # can be used for logging, tracking, etc.
   #
-  # config.on_choose = -> (experiment, variant, metadata) { ... }
+  # config.on_choose = -> (experiment, variant, participant, metadata) { ... }
 
   # callback every time a participant is returned a variant in the experiment,
   # can be used for logging, tracking, etc.
   #
-  # config.on_use = -> (experiment, variant, metadata) { ... }
+  # config.on_use = -> (experiment, variant, participant, metadata) { ... }
 
   # callback when a participant converts for a variant in the experiment, can be
   # used for logging, tracking, etc.
   #
-  # config.on_convert = -> (experiment, checkpoint, variant, metadata) { ... }
+  # config.on_convert = -> (experiment, checkpoint, variant, participant, metadata) { ... }
 
 
   # callback that can short-circuit participation based on your own logic, which
@@ -346,7 +346,7 @@ TrailGuide::Experiment.configure do |config|
   #
   # should return true or false
   #
-  # config.allow_participation = -> (experiment, allowed, metadata) { ... return true }
+  # config.allow_participation = -> (experiment, allowed, participant, metadata) { ... return true }
 
 
   # callback that can short-circuit conversion based on your own logic, which
@@ -358,7 +358,7 @@ TrailGuide::Experiment.configure do |config|
   #
   # should return true or false
   #
-  # config.allow_conversion = -> (experiment, checkpoint, allowed, metadata) { ... return true }
+  # config.allow_conversion = -> (experiment, allowed, checkpoint, variant, participant, metadata) { ... return true }
 
 
   # callback that can be used to modify the rollout of a selected winner - for
@@ -370,9 +370,11 @@ TrailGuide::Experiment.configure do |config|
   # variant is returned from this callback chain is what will be tracked for
   # participation and conversion as long as the experiment is still running
   #
+  # `winner` will be the variant returned by any previous callbacks in the chain
+  #
   # must return an experiment variant
   #
-  # config.rollout_winner = -> (experiment, winner) { ... return variant }
+  # config.rollout_winner = -> (experiment, winner, participant) { ... return variant }
 end
 
 # admin ui configuration

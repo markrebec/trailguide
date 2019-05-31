@@ -233,14 +233,14 @@ module TrailGuide
       end
 
       def winning_variant
-        run_callbacks(:rollout_winner, self.class.winner)
+        run_callbacks(:rollout_winner, self.class.winner, participant)
       end
 
       def choose!(override: nil, metadata: nil, **opts)
         return control if TrailGuide.configuration.disabled
 
         variant = choose_variant!(override: override, metadata: metadata, **opts)
-        run_callbacks(:on_use, variant, metadata)
+        run_callbacks(:on_use, variant, participant, metadata)
         variant
       rescue Errno::ECONNREFUSED, Redis::BaseError, SocketError => e
         run_callbacks(:on_redis_failover, e)
@@ -305,7 +305,7 @@ module TrailGuide
         variant = algorithm_choose!(metadata: metadata)
         variant.increment_participation!
         participant.participating!(variant)
-        run_callbacks(:on_choose, variant, metadata)
+        run_callbacks(:on_choose, variant, participant, metadata)
         variant
       end
 
@@ -342,7 +342,7 @@ module TrailGuide
         elsif participant.converted?
           return false unless allow_multiple_goals?
         end
-        return false unless allow_conversion?(checkpoint, metadata)
+        return false unless allow_conversion?(variant, checkpoint, metadata)
 
         # TODO only reset if !reset_manually? AND they've converted all goals if
         # allow_multiple_goals? is set
@@ -351,9 +351,9 @@ module TrailGuide
         participant.converted!(variant, checkpoint, reset: !reset_manually?)
         variant.increment_conversion!(checkpoint)
         if checkpoint.nil?
-          run_callbacks(:on_convert, checkpoint, variant, metadata)
+          run_callbacks(:on_convert, checkpoint, variant, participant, metadata)
         else
-          checkpoint.run_callbacks(:on_convert, self, variant, metadata)
+          checkpoint.run_callbacks(:on_convert, self, variant, participant, metadata)
         end
         variant
       rescue Errno::ECONNREFUSED, Redis::BaseError, SocketError => e
@@ -363,15 +363,15 @@ module TrailGuide
 
       def allow_participation?(metadata=nil)
         return true if callbacks[:allow_participation].empty?
-        run_callbacks(:allow_participation, metadata)
+        run_callbacks(:allow_participation, participant, metadata)
       end
 
-      def allow_conversion?(checkpoint=nil, metadata=nil)
+      def allow_conversion?(variant, checkpoint=nil, metadata=nil)
         if checkpoint.nil?
           return true if callbacks[:allow_conversion].empty?
-          run_callbacks(:allow_conversion, checkpoint, metadata)
+          run_callbacks(:allow_conversion, checkpoint, variant, participant, metadata)
         else
-          checkpoint.allow_conversion?(self, metadata)
+          checkpoint.allow_conversion?(self, variant, metadata)
         end
       end
 

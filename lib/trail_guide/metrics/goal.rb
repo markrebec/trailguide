@@ -43,9 +43,9 @@ module TrailGuide
         return name == other.name && experiment == other.experiment
       end
 
-      def allow_conversion?(trial, metadata=nil)
+      def allow_conversion?(trial, variant, metadata=nil)
         return true if callbacks[:allow_conversion].empty?
-        run_callbacks(:allow_conversion, trial, metadata)
+        run_callbacks(:allow_conversion, trial, variant, trial.participant, metadata)
       end
 
       def run_callbacks(hook, trial, *args)
@@ -53,9 +53,9 @@ module TrailGuide
         if [:allow_conversion].include?(hook)
           callbacks[hook].reduce(args.slice!(0,1)[0]) do |result, callback|
             if callback.respond_to?(:call)
-              callback.call(trial, self, result, *args)
+              callback.call(trial, result, self, *args)
             else
-              trial.send(callback, trial, self, result, *args)
+              trial.send(callback, trial, result, self, *args)
             end
           end
         else
