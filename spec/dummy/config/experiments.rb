@@ -9,7 +9,7 @@ experiment :basic_experiment do |config|
 
   config.target_sample_size = 500
 
-  rollout_winner do |experiment, winner|
+  rollout_winner do |experiment, winner, participant|
     puts "RETURNING SAMPLE"
     [experiment.control, winner].sample
   end
@@ -101,12 +101,12 @@ experiment :multi_goal_example do |config|
   variant :red
   variant :black
 
-  config.allow_conversion = -> (exp, gl, mtd) do
+  config.allow_conversion = -> (exp, gl, vt, ptp, mtd) do
     puts "DEFAULT ALLOW"
     return true
   end
 
-  on_convert do |experiment, goal, variant, metadata|
+  on_convert do |experiment, goal, variant, participant, metadata|
     puts "CONVERTED"
     puts experiment
     puts goal
@@ -115,7 +115,7 @@ experiment :multi_goal_example do |config|
 
   metric :first, allow_multiple_conversions: true
   metric :second do |gcfg|
-    gcfg.allow_conversion = -> (experiment, goal, metadata) do
+    gcfg.allow_conversion = -> (experiment, goal, variant, participant, metadata) do
       puts "ALTERNATE ALLOW"
       puts experiment
       puts goal
