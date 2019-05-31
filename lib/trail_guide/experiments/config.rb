@@ -152,9 +152,15 @@ module TrailGuide
       end
       alias_method :funnel, :goal
 
+      def goal=(name)
+        goals << Metrics::Goal.new(experiment, name)
+      end
+      alias_method :funnel=, :goal=
+
       def goals=(*names)
         self[:goals] = [names].flatten.map { |g| Metrics::Goal.new(experiment, g) }
       end
+      alias_method :funnels=, :goals=
 
       def goals(*names)
         self[:goals] ||= []
@@ -164,6 +170,26 @@ module TrailGuide
         self[:goals]
       end
       alias_method :funnels, :goals
+
+      def metric(name)
+        group(name)
+        goal(name)
+      end
+
+      def metric=(name)
+        self.group = name
+        self.goal = name
+      end
+
+      def metrics(*names)
+        groups(*names)
+        goals(*names)
+      end
+
+      def metrics=(*names)
+        self.groups = *names
+        self.goals = *names
+      end
 
       def combined?
         !combined.empty?
