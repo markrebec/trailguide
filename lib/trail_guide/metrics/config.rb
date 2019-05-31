@@ -25,6 +25,25 @@ module TrailGuide
       def experiment
         metric.experiment
       end
+
+      def allow_multiple_conversions?
+        !!allow_multiple_conversions
+      end
+
+      def track_winner_conversions?
+        !!track_winner_conversions
+      end
+
+      # TODO do we allow a method here? do we call it on the experiment?
+      def allow_conversion(meth=nil, &block)
+        self[:allow_conversion] ||= []
+        self[:allow_conversion] << (meth || block)
+      end
+
+      def on_convert(meth=nil, &block)
+        self[:on_convert] ||= []
+        self[:on_convert] << (meth || block)
+      end
     end
   end
 end
