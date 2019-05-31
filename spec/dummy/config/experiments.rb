@@ -13,6 +13,8 @@ experiment :basic_experiment do |config|
     puts "RETURNING SAMPLE"
     [experiment.control, winner].sample
   end
+
+  config.preview_url = :root_url
 end
 
 experiment :non_resumable_experiment do |config|
