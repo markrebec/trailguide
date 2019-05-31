@@ -15,7 +15,7 @@ module TrailGuide
           format.html { render }
           format.json {
             send_data JSON.pretty_generate(TrailGuide.catalog.export),
-                      filename: 'trailguide-export.json'
+            filename: "trailguide-#{Rails.env}-#{Time.now.to_i}.json"
           }
         end
       end
