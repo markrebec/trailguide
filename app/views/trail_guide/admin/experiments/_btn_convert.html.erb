@@ -1,7 +1,7 @@
 <% if experiment.running? || experiment.calibrating? %>
   <% if participant.participating?(experiment) %>
     <% if participant.converted?(experiment, goal) %>
-      <% if experiment.allow_multiple_conversions? %>
+      <% if (goal.nil? && experiment.allow_multiple_conversions?) || (goal.present? && goal.allow_multiple_conversions?) %>
         <%= link_to trail_guide_admin.convert_experiment_path(experiment.experiment_name, goal || "converted"), class: "btn btn-sm btn-outline-primary border-0", method: :put, data: {toggle: :tooltip}, title: 'convert this metric' do %>
           <span class="fas fa-fill-drip"></span>
         <% end %>

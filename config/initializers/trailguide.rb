@@ -335,16 +335,18 @@ TrailGuide::Experiment.configure do |config|
   # callback when a participant converts for a variant in the experiment, can be
   # used for logging, tracking, etc.
   #
-  # config.on_convert = -> (experiment, variant, checkpoint, metadata) { ... }
+  # config.on_convert = -> (experiment, checkpoint, variant, metadata) { ... }
 
 
   # callback that can short-circuit participation based on your own logic, which
   # gets called *after* all the core engine checks (i.e. that the user is
   # not excluded or already participating, etc.)
   #
+  # `allowed` will be the value returned by any previous callbacks in the chain
+  #
   # should return true or false
   #
-  # config.allow_participation = -> (experiment, metadata) { ... return true }
+  # config.allow_participation = -> (experiment, allowed, metadata) { ... return true }
 
 
   # callback that can short-circuit conversion based on your own logic, which
@@ -352,9 +354,11 @@ TrailGuide::Experiment.configure do |config|
   # participating in the experiment, is within the bounds of the experiment
   # configuration for allow_multiple_*, etc.)
   #
+  # `allowed` will be the value returned by any previous callbacks in the chain
+  #
   # should return true or false
   #
-  # config.allow_conversion = -> (experiment, checkpoint, metadata) { ... return true }
+  # config.allow_conversion = -> (experiment, checkpoint, allowed, metadata) { ... return true }
 
 
   # callback that can be used to modify the rollout of a selected winner - for

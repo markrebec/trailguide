@@ -338,7 +338,7 @@ module TrailGuide
 
         # TODO eventually allow progressing through funnel checkpoints towards goals
         if participant.converted?(checkpoint)
-          return false unless allow_multiple_conversions?
+          return false unless (checkpoint.nil? && allow_multiple_conversions?) || (checkpoint.present? && checkpoint.allow_multiple_conversions?)
         elsif participant.converted?
           return false unless allow_multiple_goals?
         end
@@ -350,7 +350,11 @@ module TrailGuide
         # TODO eventually only reset if we're at the final goal in a funnel
         participant.converted!(variant, checkpoint, reset: !reset_manually?)
         variant.increment_conversion!(checkpoint)
-        run_callbacks(:on_convert, variant, checkpoint, metadata)
+        if checkpoint.nil?
+          run_callbacks(:on_convert, checkpoint, variant, metadata)
+        else
+          checkpoint.run_callbacks(:on_convert, self, variant, metadata)
+        end
         variant
       rescue Errno::ECONNREFUSED, Redis::BaseError, SocketError => e
         run_callbacks(:on_redis_failover, e)
@@ -363,8 +367,12 @@ module TrailGuide
       end
 
       def allow_conversion?(checkpoint=nil, metadata=nil)
-        return true if callbacks[:allow_conversion].empty?
-        run_callbacks(:allow_conversion, checkpoint, metadata)
+        if checkpoint.nil?
+          return true if callbacks[:allow_conversion].empty?
+          run_callbacks(:allow_conversion, checkpoint, metadata)
+        else
+          checkpoint.allow_conversion?(self, metadata)
+        end
       end
 
       def run_callbacks(hook, *args)

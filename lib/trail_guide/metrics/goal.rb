@@ -4,6 +4,8 @@ module TrailGuide
     class Goal
       attr_reader :experiment, :name
 
+      delegate :allow_multiple_conversions?, :callbacks, to: :configuration
+
       def dup(experiment)
         self.class.new(experiment, name, **configuration.map { |k,v| [k, v.try(:dup)] }.to_h)
       end
@@ -39,6 +41,34 @@ module TrailGuide
       def ===(other)
         return false unless other.is_a?(self.class)
         return name == other.name && experiment == other.experiment
+      end
+
+      def allow_conversion?(trial, metadata=nil)
+        return true if callbacks[:allow_conversion].empty?
+        run_callbacks(:allow_conversion, trial, metadata)
+      end
+
+      def run_callbacks(hook, trial, *args)
+        return unless callbacks[hook]
+        if [:allow_conversion].include?(hook)
+          callbacks[hook].reduce(args.slice!(0,1)[0]) do |result, callback|
+            if callback.respond_to?(:call)
+              callback.call(trial, self, result, *args)
+            else
+              trial.send(callback, trial, self, result, *args)
+            end
+          end
+        else
+          args.unshift(self)
+          args.unshift(trial)
+          callbacks[hook].each do |callback|
+            if callback.respond_to?(:call)
+              callback.call(*args)
+            else
+              trial.send(callback, *args)
+            end
+          end
+        end
       end
 
       def as_json(opts={})

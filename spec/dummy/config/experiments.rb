@@ -101,9 +101,26 @@ experiment :multi_goal_example do |config|
   variant :red
   variant :black
 
+  config.allow_conversion = -> (exp, gl, mtd) do
+    puts "DEFAULT ALLOW"
+    return true
+  end
+
+  on_convert do |experiment, goal, variant, metadata|
+    puts "CONVERTED"
+    puts experiment
+    puts goal
+    puts variant
+  end
+
   metric :first, allow_multiple_conversions: true
   metric :second do |gcfg|
-    gcfg.track_winner_conversions = true
+    gcfg.allow_conversion = -> (experiment, goal, metadata) do
+      puts "ALTERNATE ALLOW"
+      puts experiment
+      puts goal
+      return true
+    end
   end
   #config.groups = [:first, :second]
   #config.goals = [:first, :second]

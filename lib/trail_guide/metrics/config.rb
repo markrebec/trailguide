@@ -3,12 +3,8 @@ module TrailGuide
     class Config < Canfig::Config
       attr_reader :metric
 
-      INHERIT_KEYS = [
-        # configs
-        :allow_multiple_conversions, :track_winner_conversions,
-        # callbacks
-        :allow_conversion, :on_convert
-      ]
+      INHERIT_KEYS = [ :allow_multiple_conversions, :allow_conversion, :on_convert ]
+      CALLBACK_KEYS = [ :allow_conversion, :on_convert ]
 
       def initialize(metric, *args, **opts, &block)
         @metric = metric
@@ -26,12 +22,12 @@ module TrailGuide
         metric.experiment
       end
 
-      def allow_multiple_conversions?
-        !!allow_multiple_conversions
+      def callbacks
+        to_h.slice(*CALLBACK_KEYS).map { |k,v| [k, [v].flatten.compact] }.to_h
       end
 
-      def track_winner_conversions?
-        !!track_winner_conversions
+      def allow_multiple_conversions?
+        !!allow_multiple_conversions
       end
 
       # TODO do we allow a method here? do we call it on the experiment?
