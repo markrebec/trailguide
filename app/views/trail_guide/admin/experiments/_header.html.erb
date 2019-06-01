@@ -31,9 +31,9 @@
     <% if experiment.groups.count > 0 %>
       <p class="text-muted" style="padding: 0; margin: 0;">
         <span class="fas fa-th-large" data-toggle="tooltip" title="experiment groups"></span>
-        <% experiment.groups.each do |group| %>
-          <%= link_to group.to_s.humanize.titleize, trail_guide_admin.group_path(group), class: "text-muted" %>
-        <% end %>
+        <%= raw(experiment.groups.map do |group| %>
+          <% link_to group.to_s.humanize.titleize, trail_guide_admin.group_path(group), class: "text-muted" %>
+        <% end.join(', ')) %>
       </p>
     <% end %>
   </div>
