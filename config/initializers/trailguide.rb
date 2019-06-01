@@ -122,7 +122,7 @@ end
 #
 TrailGuide::Experiment.configure do |config|
   # the default algorithm to use for new experiments
-  config.algorithm = :weighted
+  config.algorithm = :distributed
 
   # whether or not experiments must be started manually
   #
