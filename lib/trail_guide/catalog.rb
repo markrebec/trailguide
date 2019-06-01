@@ -139,6 +139,13 @@ module TrailGuide
       self.class.new(to_a.select { |e| !e.running? })
     end
 
+    def missing
+      TrailGuide.redis.keys.select do |key|
+        exp = key.split(':').first
+        find(exp).nil?
+      end
+    end
+
     def by_started
       scoped = to_a.sort do |a,b|
         if !(a.started? || a.scheduled? || a.winner?) && !(b.started? || b.scheduled? || b.winner?)
