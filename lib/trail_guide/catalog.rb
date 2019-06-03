@@ -263,9 +263,9 @@ module TrailGuide
 
         experiment.reset!
         TrailGuide.redis.hsetnx(experiment.storage_key, 'name', experiment.experiment_name)
-        TrailGuide.redis.hset(experiment.storage_key, 'started_at', est['started_at']) if est['started_at'].present?
-        TrailGuide.redis.hset(experiment.storage_key, 'paused_at', est['paused_at']) if est['paused_at'].present?
-        TrailGuide.redis.hset(experiment.storage_key, 'stopped_at', est['stopped_at']) if est['stopped_at'].present?
+        TrailGuide.redis.hset(experiment.storage_key, 'started_at', DateTime.parse(est['started_at']).to_i) if est['started_at'].present?
+        TrailGuide.redis.hset(experiment.storage_key, 'paused_at', DateTime.parse(est['paused_at']).to_i) if est['paused_at'].present?
+        TrailGuide.redis.hset(experiment.storage_key, 'stopped_at', DateTime.parse(est['stopped_at']).to_i) if est['stopped_at'].present?
         TrailGuide.redis.hset(experiment.storage_key, 'winner', est['winner']) if est['winner'].present?
 
         est['variants'].each do |var,vst|
