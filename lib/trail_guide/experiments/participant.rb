@@ -15,7 +15,7 @@ module TrailGuide
       def participating!(variant)
         @participating = true
         @variant = variant
-        participant.participating!(variant) if experiment.configuration.store_participation?
+        participant.participating!(variant) if experiment.configuration.sticky_assignment?
       end
 
       def converted?(checkpoint=nil)

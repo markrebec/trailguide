@@ -138,18 +138,21 @@ TrailGuide::Experiment.configure do |config|
   #         the experiment if they encounter it again
   config.reset_manually = true
 
-  # whether or not to store individual participation when returning a variant
+  # whether or not individual assignment is sticky when returning a variant
   #
   # this can be useful if you are using a custom, content-based algorithm where
   # the variant is determined by content rather than user bucketing, and you
   # want to treat participation more like impressions (i.e. for seo experiments)
   #
+  # when this option is set to false, conversions will always be tracked against
+  # the last variant that the participant was served
+  #
   # true    participation is incremented the first time a participant is
   #         enrolled, and the participant is assigned their selection for future
   #         reference, stored via the configured participant adapter
-  # false   participation will be incremented every time a variant is returned,
-  #         and the participant will not have their assignment stored
-  config.store_participation = true
+  # false   participation will be incremented every time a variant is selected,
+  #         and the participant will not be forced into a bucket
+  config.sticky_assignment = true
 
   # whether or not to enter participants into a variant when using the override
   # parameter to preview variants

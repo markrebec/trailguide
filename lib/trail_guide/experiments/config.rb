@@ -3,7 +3,7 @@ module TrailGuide
     class Config < Canfig::Config
       DEFAULT_KEYS = [
         :name, :summary, :preview_url, :algorithm, :groups, :variants, :goals,
-        :start_manually, :reset_manually, :store_participation, :store_override,
+        :start_manually, :reset_manually, :sticky_assignment, :store_override,
         :track_override, :combined, :allow_multiple_conversions,
         :allow_multiple_goals, :track_winner_conversions, :skip_request_filter,
         :target_sample_size, :can_resume, :enable_calibration
@@ -58,8 +58,8 @@ module TrailGuide
         !!reset_manually
       end
 
-      def store_participation?
-        !!store_participation
+      def sticky_assignment?
+        !!sticky_assignment
       end
 
       def allow_multiple_conversions?

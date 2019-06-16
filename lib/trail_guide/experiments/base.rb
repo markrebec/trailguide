@@ -293,7 +293,10 @@ module TrailGuide
         start! unless started? || scheduled?
         return control unless running?
 
-        if participant.participating?
+        # only re-use the variant for experiments that store participation,
+        # all other (i.e. content-based) experiments should re-select and
+        # re-assign on enrollment
+        if configuration.sticky_assignment? && participant.participating?
           variant = participant.variant
           participant.participating!(variant)
           return variant

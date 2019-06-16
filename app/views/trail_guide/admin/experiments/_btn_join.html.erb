@@ -3,7 +3,7 @@
     <%= link_to trail_guide_admin.leave_experiment_path(experiment.experiment_name), class: "btn btn-sm btn-outline-secondary", method: :put, data: {toggle: :tooltip}, title: 'leave this cohort' do %>
       <span class="fas fa-sign-out-alt fa-flip-horizontal" />
     <% end %>
-  <% elsif !experiment.calibrating? && !experiment.winner? && experiment.configuration.store_participation? && (!experiment.is_combined? || (!participant.participating?(experiment.parent) || participant.variant(experiment.parent).name == variant.name)) %>
+  <% elsif !experiment.calibrating? && !experiment.winner? && experiment.configuration.sticky_assignment? && (!experiment.is_combined? || (!participant.participating?(experiment.parent) || participant.variant(experiment.parent).name == variant.name)) %>
     <%= link_to trail_guide_admin.join_experiment_path(experiment.experiment_name, variant.name), class: "btn btn-sm btn-secondary", method: :put, data: {toggle: :tooltip}, title: 'join this cohort' do %>
       <span class="fas fa-sign-in-alt" />
     <% end %>
