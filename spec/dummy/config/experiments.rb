@@ -105,9 +105,9 @@ experiment :multi_goal_example do |config|
     return allowed
   end
 
-  config.allow_conversion = -> (exp, gl, vt, ptp, mtd) do
+  config.allow_conversion = -> (experiment, result, goal, variant, participant, metadata) do
     puts "DEFAULT ALLOW"
-    return true
+    return result
   end
 
   on_convert do |experiment, goal, variant, participant, metadata|
@@ -119,7 +119,7 @@ experiment :multi_goal_example do |config|
 
   metric :first, allow_multiple_conversions: true
   metric :second do |gcfg|
-    gcfg.allow_conversion = -> (experiment, goal, variant, participant, metadata) do
+    gcfg.allow_conversion = -> (experiment, result, goal, variant, participant, metadata) do
       puts "ALTERNATE ALLOW"
       puts experiment
       puts goal
