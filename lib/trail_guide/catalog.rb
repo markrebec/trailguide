@@ -242,8 +242,10 @@ module TrailGuide
       klass
     end
 
-    def deregister(key)
-      # TODO (mostly only useful for engine specs)
+    def deregister(key, remove_const=false)
+      klass = find(key)
+      experiments.delete(klass) if klass.present?
+      Object.send(:remove_const, :"#{klass.name}") if remove_const && klass.name.present?
     end
 
     def export

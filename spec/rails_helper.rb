@@ -43,6 +43,10 @@ module TrailGuide::SpecDSL
   def create_experiment(name, **opts, &block)
     TrailGuide::Catalog::DSL.experiment name, **opts, &block
   end
+
+  def destroy_experiment(name)
+    TrailGuide::Catalog.deregister(name)
+  end
 end
 
 RSpec.configure do |config|
