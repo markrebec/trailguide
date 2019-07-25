@@ -45,7 +45,7 @@ module TrailGuide::SpecDSL
   end
 
   def destroy_experiment(name)
-    TrailGuide::Catalog.deregister(name)
+    TrailGuide.catalog.deregister(name)
   end
 end
 
