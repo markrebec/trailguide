@@ -1,6 +1,42 @@
 # TrailGuide
 
-TrailGuide is a rails engine providing a framework for running user experiments and A/B tests in rails apps.
+TrailGuide is a rails engine providing a framework for running user experiments, A/B tests and content/SEO experiments in rails applications.
+
+## Concepts
+
+### Experiments
+
+Experiments are the core component of TrailGuide. They're defined and configured via the TrailGuide experiment DSL and are represented by ruby classes. When using the DSL meta classes will be created at runtime, inheriting from `TrailGuide::Experiment`, but you can also take full control and define your own experiment classes (i.e. `class MyExperiment < TrailGuide::Experiment`).
+
+### Variants
+
+Variants represent the different behavior paths available in your **experiments** - i.e. your *control* and *alternative* groups in a standard A/B test. A variant as defined within your experiments is just a simple name and some optional configuration/metadata. The actual logic and behavior associated with each variant should be defined separately, allowing you to use whatever patterns you prefer (service objects, etc.). There are built-in helpers for common patterns like inline blocks, calling named methods within a context, and rendering templates automatically depending on the assigned variant.
+
+### Participants
+
+Participants are the users/visitors/requests to whom you'll serve **variants** based on your **experiment** configurations. A participant will generally have their assigned variant stored via the configured adapter, and that same variant will always be returned for that participant for the duration of the experiment.
+
+#### Participant Adapters
+
+There are multiple adapters available for storing **participants'** assignment, allowing you to keep them in a cookie, rails sessions, redis or elsewhere depending on your needs. Different adapters have different requirements - for example, if you're using redis you'll probably need a unique identifier for visitors to provide a consistent experience. See the adapters and configuration sections below for more details.
+
+#### Unity
+
+TrailGuide includes a small utility called Unity which can be used to link two identifiers, for example when a "logged out visitor" logs in and becomes identified as a "registered user" (i.e. a `user_id` and a `visitor_cookie_id`). In the context of TrailGuide, this allows you to serve a consistent experience with the same variants across logins and devices. There is a built-in `UnityAdapter` to make taking advantage of Unity in your experiments as easy as possible, but you can also use Unity directly, even outside of TrailGuide.
+
+### Trials
+
+A Trial is an *instance* of an **experiment** class, initialized with a **participant**, and is responsible for assigning, selecting and serving the appropriate **variant**.
+
+### Algorithms
+
+### User Experiments
+
+A/B tests are the most common form of user experiment, and the main use-case for this library. TrailGuide has full support for building A/B tests as well as multi-variant experiments using a variety of built-in **algorithms** or your own custom algorithms. You can define your control vs. alternate variant groups, and configure all kinds of experiment options and lifecycle behavior - things like whether to reset a participant assignment when they convert a metric, allow conversion against single vs. multiple metrics in a funnel, specifically (dis)allow robots or other types of requests, or perform custom tracking callbacks when lifecycle events are triggered.
+
+### Content Experiments
+
+Unlike user experiments, content-based experiments serve variants assigned to the *content being served* (via metadata), rather than the *user who is requesting it*. The most common form of content experiments are probably **SEO Experiments** and **Market Experiments**. These are cases where you want to test a new page layout, product feature, etc. based on a specific regional market or similar content bucket. You might want to test conversion against a new page design in your Los Angeles market before rolling it out to others, or monitor what happens to your SEO page rankings over time if you add more relevant content and keywords to a small statically defined variant group.
 
 ## Getting Started
 
