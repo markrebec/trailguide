@@ -60,6 +60,51 @@ RSpec.describe TrailGuide::Variant do
     end
   end
 
+  describe '#===' do
+    context 'when other is a variant object' do
+      context 'which is a match' do
+        context 'and belongs to the same experiment' do
+          let(:other) { TrailGuide::Variant.new(experiment, :test_variant_a) }
+
+          it 'returns true' do
+            expect(proc { subject === other }.call).to be_truthy
+          end
+        end
+
+        context 'but belongs to another experiment' do
+          let(:other) { TrailGuide::Variant.new(create_experiment(:another_test_experiment), :test_variant_a) }
+
+          it 'returns false' do
+            expect(proc { subject === other }.call).to be_falsey
+          end
+        end
+      end
+
+      context 'which is not a match' do
+        let(:other) { TrailGuide::Variant.new(experiment, :test_variant_b) }
+
+        it 'returns false' do
+          expect(proc { subject === other }.call).to be_falsey
+        end
+      end
+    end
+
+    context 'when other is a string' do
+      let(:other) { 'test_variant_a' }
+
+      it 'returns false' do
+        expect(proc { subject === other }.call).to be_falsey
+      end
+    end
+
+    context 'when other is a symbol' do
+      let(:other) { :test_variant_a }
+      it 'returns false' do
+        expect(proc { subject === other }.call).to be_falsey
+      end
+    end
+  end
+
   describe '#control!' do
     it 'flags the variant as a control' do
       expect { subject.control! }.to change { subject.control? }.from(false).to(true)
