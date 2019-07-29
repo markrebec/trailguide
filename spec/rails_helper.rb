@@ -52,15 +52,9 @@ end
 RSpec.configure do |config|
   config.include TrailGuide::SpecDSL
 
-  config.before(:suite) do
+  config.before(:example) do
     redis_keys = TrailGuide.redis.keys
-    TrailGuide.redis.del(redis_keys) if redis_keys.present?
-    TrailGuide.catalog.instance_variable_set :@experiments, []
-  end
-
-  config.after(:example) do
-    redis_keys = TrailGuide.redis.keys
-    TrailGuide.redis.del(redis_keys) if redis_keys.present?
+    TrailGuide.redis.del(*redis_keys) if redis_keys.present?
     TrailGuide.catalog.instance_variable_set :@experiments, []
   end
 
