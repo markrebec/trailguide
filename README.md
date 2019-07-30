@@ -10,7 +10,7 @@ Experiments are the core component of TrailGuide. They're defined and configured
 
 ### Variants
 
-Variants represent the different behavior paths available in your **experiments** - i.e. your *control* and *alternative* groups in a standard A/B test. A variant as defined within your experiments is just a simple name and some optional configuration/metadata. The actual logic and behavior associated with each variant should be defined separately, allowing you to use whatever patterns you prefer (service objects, etc.). There are built-in helpers for common patterns like inline blocks, calling named methods within a context, and rendering templates automatically depending on the assigned variant.
+Variants represent the different behavior paths available in your **experiments** - i.e. your *control* and *alternative* groups in a standard A/B test. A variant as defined within your experiments is just a simple name and some optional configuration/metadata. The actual logic and behavior associated with each variant should be defined separately, allowing you to use whatever patterns you prefer (service objects, etc.). There are built-in helpers for common patterns like inline blocks, calling named methods within a context, and rendering templates or partials automatically depending on the assigned variant.
 
 ### Participants
 
@@ -18,7 +18,7 @@ Participants are the users/visitors/requests to whom you'll serve **variants** b
 
 #### Participant Adapters
 
-There are multiple adapters available for storing **participants'** assignment, allowing you to keep them in a cookie, rails sessions, redis or elsewhere depending on your needs. Different adapters have different requirements - for example, if you're using redis you'll probably need a unique identifier for visitors to provide a consistent experience. See the adapters and configuration sections below for more details.
+There are multiple adapters available for storing **participants'** assignment, allowing you to keep them in a cookie, rails sessions, redis or elsewhere depending on your needs. Different adapters have different requirements - for example, if you're using redis you'll probably need a unique identifier for visitors in order to generate a storage key and provide a consistent experience. See the adapters and configuration sections below for more details.
 
 #### Unity
 
@@ -30,23 +30,25 @@ A Trial is an *instance* of an **experiment** class, initialized with a **partic
 
 ### Algorithms
 
+All **experiments** are configured with an algorithm, which selects and assigns a **variant** to the current **participant** on enrollment. There are a few built-in algorithms for common patterns like weighted variants, evenly distributed participation, and [multi-armed bandit](http://stevehanov.ca/blog/index.php?id=132), but you can also provide your own algorithm class as long as it conforms to a simple interface.
+
 ### User Experiments
 
-A/B tests are the most common form of user experiment, and the main use-case for this library. TrailGuide has full support for building A/B tests as well as multi-variant experiments using a variety of built-in **algorithms** or your own custom algorithms. You can define your control vs. alternate variant groups, and configure all kinds of experiment options and lifecycle behavior - things like whether to reset a participant assignment when they convert a metric, allow conversion against single vs. multiple metrics in a funnel, specifically (dis)allow robots or other types of requests, or perform custom tracking callbacks when lifecycle events are triggered.
+A/B tests are the most common form of user experiment, and the main use-case for this library. TrailGuide has full support for building A/B tests (as well as multi-variant experiments) using a variety of built-in **algorithms** or your own custom algorithms. You can define your control vs. alternative variant groups, and configure all kinds of experiment options and lifecycle behavior - things like whether to reset a participant assignment when they convert a metric, allow conversion against single vs. multiple metrics in a funnel, specifically (dis)allow robots or other types of requests, or perform custom tracking callbacks when lifecycle events are triggered.
 
 ### Content Experiments
 
-Unlike user experiments, content-based experiments serve variants assigned to the *content being served* (via metadata), rather than the *user who is requesting it*. The most common form of content experiments are probably **SEO Experiments** and **Market Experiments**. These are cases where you want to test a new page layout, product feature, etc. based on a specific regional market or similar content bucket. You might want to test conversion against a new page design in your Los Angeles market before rolling it out to others, or monitor what happens to your SEO page rankings over time if you add more relevant content and keywords to a small statically defined variant group.
+Unlike user experiments, content-based experiments serve variants assigned to the *content being served* (via metadata), rather than the *user who is requesting it*. The most common form of content experiments are probably **SEO Experiments** and **Market Experiments**. These are cases where you want to test a new page layout, product feature, etc. based on a specific regional market or similar content bucket. You might want to test conversion against a new page design in your Los Angeles market before rolling it out to others, or monitor what happens to your SEO page rankings over time if you add more relevant content and keywords to a small statically defined list of pages/content.
 
 ## Getting Started
 
 ### Requirements
 
-Currently only rails 5.x is officially tested/supported, and trailguide requires redis to store experiment metadata and (optionally) participants.
+Currently only rails 5.x is officially tested/supported, and TrailGuide requires redis to store experiment metadata and (optionally) participants.
 
 `docker-compose` is a great way to run redis in development. Take a look at the `docker-compose.yml` in the root of this repo for an example.
 
-In production I recommend configuring redis as a persistent datastore (rather than a cache), in order to avoid evicting experiment or participant keys unexpectedly.
+In production I recommend configuring redis as a persistent datastore (rather than a cache), in order to avoid evicting experiment or participant keys unexpectedly. You can [read more about key eviction and policies here](https://redis.io/topics/lru-cache).
 
 ### Installation
 
