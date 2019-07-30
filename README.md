@@ -26,7 +26,7 @@ TrailGuide includes a small utility called Unity which can be used to link two i
 
 ### Trials
 
-A Trial is an *instance* of an **experiment** class, initialized with a **participant**, and is responsible for assigning, selecting and serving the appropriate **variant**.
+The idea of a Trial is is represented by an *instance* of an **experiment** class, initialized with a **participant**, and is responsible for assigning, selecting and returning the appropriate **variant**.
 
 ### Algorithms
 
