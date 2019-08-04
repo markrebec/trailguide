@@ -41,7 +41,10 @@ module TrailGuide
     end
 
     def variant(experiment)
+      # TODO return memoized @variant?
+      # or maybe remove memoization altogether??
       return nil unless experiment.calibrating? || experiment.started?
+      # TODO more efficient to stop checking if keys exist, and just return if the value is blank??
       return nil unless adapter.key?(experiment.storage_key)
       varname = adapter[experiment.storage_key]
       variant = experiment.variants.find { |var| var == varname }
@@ -189,8 +192,10 @@ module TrailGuide
       adapter.keys.each do |key|
         experiment_name = key.to_s.split(":").first.to_sym
         experiment = TrailGuide.catalog.find(experiment_name)
-        if !experiment || (!experiment.started? && !experiment.calibrating?)
+        if !experiment
           adapter.delete(key)
+        elsif !experiment.started? && !experiment.calibrating?
+          exit!(experiment)
         end
       end
 

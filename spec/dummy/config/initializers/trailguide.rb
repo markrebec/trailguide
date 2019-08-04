@@ -8,6 +8,7 @@ TrailGuide.configure do |config|
 
   config.adapter = :multi
   config.allow_multiple_experiments = true
+  config.cleanup_participant_experiments = false
 end
 
 TrailGuide::Experiment.configure do |config|
