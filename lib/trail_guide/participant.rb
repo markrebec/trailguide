@@ -192,10 +192,8 @@ module TrailGuide
       adapter.keys.each do |key|
         experiment_name = key.to_s.split(":").first.to_sym
         experiment = TrailGuide.catalog.find(experiment_name)
-        if !experiment
+        if !experiment || (!experiment.started? && !experiment.calibrating?)
           adapter.delete(key)
-        elsif !experiment.started? && !experiment.calibrating?
-          exit!(experiment)
         end
       end
 

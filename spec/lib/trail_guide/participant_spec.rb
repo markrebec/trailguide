@@ -204,19 +204,19 @@ RSpec.describe TrailGuide::Participant do
     end
 
     context 'when a stored experiment does not exist' do
-      it 'deletes the stored experiment key'
+      it 'deletes the key'
     end
 
     context 'when a stored experiment is not started or calibrating' do
-      it 'calls exit! to delete the experiment, variant and goals'
+      it 'deletes the key'
     end
 
     context 'when a stored experiment is started' do
-      it 'skips the experiment key'
+      it 'skips the key'
     end
 
     context 'when a stored experiment is calibrating' do
-      it 'skips the experiment key'
+      it 'skips the key'
     end
   end
 end
