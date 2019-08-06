@@ -42,6 +42,7 @@ end
 module TrailGuide::SpecDSL
   def create_experiment(name, **opts, &block)
     TrailGuide::Catalog::DSL.experiment name, **opts, &block
+    TrailGuide.catalog.find(name)
   end
 
   def destroy_experiment(name)
@@ -49,8 +50,24 @@ module TrailGuide::SpecDSL
   end
 end
 
+module TrailGuide::GroupDSL
+  def experiment(name, config=nil, **opts, &block)
+    after  { destroy_experiment(name) }
+    before {
+      config.nil? ?
+        create_experiment(name, **opts) :
+        create_experiment(name, **opts, &send(config))
+    }
+    let(:experiment) { TrailGuide.catalog.find(name) }
+    let(name)        { TrailGuide.catalog.find(name) }
+
+    yield if block_given?
+  end
+end
+
 RSpec.configure do |config|
   config.include TrailGuide::SpecDSL
+  config.extend  TrailGuide::GroupDSL
 
   config.before(:example) do
     redis_keys = TrailGuide.redis.keys
