@@ -163,17 +163,21 @@ module TrailGuide
         end.each { |key| adapter.delete(key) }
       end
 
+      return false if active.empty?
       return active
     end
 
     def calibrating_experiments
       return false if adapter.keys.empty?
 
-      adapter.keys.map { |key| key.to_s.split(":").first.to_sym }.uniq.map do |key|
+      calibrating = adapter.keys.map { |key| key.to_s.split(":").first.to_sym }.uniq.map do |key|
         experiment = TrailGuide.catalog.find(key)
         next unless experiment && experiment.calibrating?
         [ experiment.experiment_name, adapter[experiment.storage_key] ]
       end.compact.to_h
+
+      return false if calibrating.empty?
+      return calibrating
     end
 
     def participating_in_active_experiments?(include_control=true)
