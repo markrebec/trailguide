@@ -41,11 +41,91 @@ RSpec.describe TrailGuide::Participant do
   end
 
   describe '#adapter' do
-    it 'TODO example for each supported adapter type'
+    let(:context) { nil }
+    before  { TrailGuide.configuration.adapter = adapter }
+    after   { TrailGuide.configuration.adapter = :multi } # fallback to our dummy app default config
+    subject { described_class.new(context) }
 
-    # configure in before
-    # unconfigure in after
-    # check if new(nil).adapter == configured adapter
+    context 'when configured with the cookie adapter' do
+      let(:adapter) { :cookie }
+      let(:context) {
+        Class.new do
+          def cookies
+            {}
+          end
+        end.new
+      }
+
+      it 'uses the cookie adapter' do
+        expect(subject.adapter).to be_an_instance_of(TrailGuide::Adapters::Participants::Cookie::Adapter)
+      end
+    end
+
+    context 'when configured with the session adapter' do
+      let(:adapter) { :session }
+      let(:context) {
+        Class.new do
+          def session
+            {}
+          end
+        end.new
+      }
+
+      it 'uses the session adapter' do
+        expect(subject.adapter).to be_an_instance_of(TrailGuide::Adapters::Participants::Session::Adapter)
+      end
+    end
+
+    context 'when configured with the redis adapter' do
+      let(:adapter) { :redis }
+
+      it 'uses the redis adapter' do
+        expect(subject.adapter).to be_an_instance_of(TrailGuide::Adapters::Participants::Redis::Adapter)
+      end
+    end
+
+    context 'when configured with the anonymous adapter' do
+      let(:adapter) { :anonymous }
+
+      it 'uses the anonymous adapter' do
+        expect(subject.adapter).to be_an_instance_of(TrailGuide::Adapters::Participants::Anonymous::Adapter)
+      end
+    end
+
+    context 'when configured with the multi adapter' do
+      let(:adapter) { :multi }
+
+      it 'uses the anonymous adapter by default' do
+        expect(subject.adapter).to be_an_instance_of(TrailGuide::Adapters::Participants::Anonymous::Adapter)
+      end
+    end
+
+    context 'when configured with a custom adapter class' do
+      let(:adapter) { 'TrailGuide::Adapters::Participants::Redis' }
+
+      it 'uses the custom adapter class' do
+        expect(subject.adapter).to be_an_instance_of(TrailGuide::Adapters::Participants::Redis::Adapter)
+      end
+    end
+
+    context 'when configured incorrectly' do
+      let(:adapter) { :cookie } # without a context that supports cookies this fails and falls back
+
+      it 'falls back to the anonymous adapter' do
+        expect(subject.adapter).to be_an_instance_of(TrailGuide::Adapters::Participants::Anonymous::Adapter)
+      end
+
+      context 'and failover callbacks are configured' do
+        let(:callback) { -> (adp,err) { nil } }
+        before { TrailGuide.configuration.on_adapter_failover = callback }
+        after  { TrailGuide.configuration.on_adapter_failover = nil }
+
+        it 'triggers adapter failover callbacks' do
+          expect(callback).to receive(:call).with(TrailGuide::Adapters::Participants::Cookie, an_instance_of(TrailGuide::UnsupportedContextError))
+          subject.adapter
+        end
+      end
+    end
   end
 
   describe '#variant' do
