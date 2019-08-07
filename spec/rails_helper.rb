@@ -51,17 +51,26 @@ module TrailGuide::SpecDSL
 end
 
 module TrailGuide::GroupDSL
-  def experiment(name, config=nil, **opts, &block)
+  def experiment(name=nil, **opts, &block)
+    name ||= [*('a'..'z'),*('0'..'9')].shuffle[0,8].join
     after  { destroy_experiment(name) }
-    before {
-      config.nil? ?
-        create_experiment(name, **opts) :
-        create_experiment(name, **opts, &send(config))
-    }
+    before { create_experiment(name, **opts, &block) }
     let(:experiment) { TrailGuide.catalog.find(name) }
     let(name)        { TrailGuide.catalog.find(name) }
+  end
 
-    yield if block_given?
+  def variant(name, varname=nil, &block)
+    block ||= -> { experiment.variants.find { |v| v == name } }
+    varname ||= name
+    let(:variant, &block)
+    let(varname, &block)
+  end
+
+  def metric(name, varname=nil, &block)
+    block ||= -> { experiment.goals.find { |g| g == name } }
+    varname ||= name
+    let(:metric, &block)
+    let(varname, &block)
   end
 end
 
