@@ -7,10 +7,6 @@ module TrailGuide
       @context = context
       @adapter = adapter.new(context) if adapter.present?
 
-      @participating = {}
-      @converted = {}
-      @variant = {}
-
       cleanup_inactive_experiments! if TrailGuide.configuration.cleanup_participant_experiments == true
     end
 
@@ -41,8 +37,6 @@ module TrailGuide
     end
 
     def variant(experiment)
-      # TODO return memoized @variant?
-      # or maybe remove memoization altogether??
       return nil unless experiment.calibrating? || experiment.started?
       # TODO more efficient to stop checking if keys exist, and just return if the value is blank??
       return nil unless adapter.key?(experiment.storage_key)
@@ -52,16 +46,14 @@ module TrailGuide
 
       chosen_at = Time.at(adapter[variant.storage_key].to_i)
       started_at = experiment.started_at
-      return @variant[experiment.storage_key] = variant if (variant.control? && experiment.calibrating?) || (started_at && chosen_at >= started_at)
+      return variant if (variant.control? && experiment.calibrating?) || (started_at && chosen_at >= started_at)
     end
 
     def participating?(experiment, include_control=true)
-      return @participating[experiment.storage_key] if @participating.key?(experiment.storage_key)
-
       var = variant(experiment)
-      return @participating[experiment.storage_key] = false if var.nil?
-      return @participating[experiment.storage_key] = false if !include_control && var.control?
-      return @participating[experiment.storage_key] = true
+      return false if var.nil?
+      return false if !include_control && var.control?
+      return true
     end
 
     def converted?(experiment, checkpoint=nil)
@@ -72,7 +64,6 @@ module TrailGuide
       if experiment.goals.empty?
         raise InvalidGoalError, "You provided the checkpoint `#{checkpoint}` but the experiment `#{experiment.experiment_name}` does not have any goals defined." unless checkpoint.nil?
         storage_key = "#{experiment.storage_key}:converted"
-        return @converted[experiment.storage_key][storage_key] if @converted.key?(experiment.storage_key) && @converted[experiment.storage_key].key?(storage_key)
         return false unless adapter.key?(storage_key)
 
         converted_at = Time.at(adapter[storage_key].to_i)
@@ -80,14 +71,12 @@ module TrailGuide
       elsif !checkpoint.nil?
         goal = experiment.goals.find { |g| g == checkpoint }
         raise InvalidGoalError, "Invalid goal checkpoint `#{checkpoint}` for experiment `#{experiment.experiment_name}`." if goal.nil?
-        return @converted[experiment.storage_key][goal.storage_key] if @converted.key?(experiment.storage_key) && @converted[experiment.storage_key].key?(goal.storage_key)
         return false unless adapter.key?(goal.storage_key)
 
         converted_at = Time.at(adapter[goal.storage_key].to_i)
         (experiment.calibrating? && variant.try(:control?)) || converted_at >= experiment.started_at
       else
         experiment.goals.each do |goal|
-          return true if @converted.key?(experiment.storage_key) && @converted[experiment.storage_key][goal.storage_key] == true
           next unless adapter.key?(goal.storage_key)
           converted_at = Time.at(adapter[goal.storage_key].to_i)
           return true if (experiment.calibrating? && variant.try(:control?)) || converted_at >= experiment.started_at
@@ -97,7 +86,6 @@ module TrailGuide
     end
 
     def participating!(variant)
-      @participating[variant.experiment.storage_key] = true
       adapter[variant.experiment.storage_key] = variant.name
       adapter[variant.storage_key] = Time.now.to_i
     end
@@ -117,17 +105,11 @@ module TrailGuide
           adapter.delete(goal.storage_key)
         end
       else
-        @converted[variant.experiment.storage_key] ||= {}
-        @converted[variant.experiment.storage_key][storage_key] = true
         adapter[storage_key] = Time.now.to_i
       end
     end
 
     def exit!(experiment)
-      @participating.delete(experiment.storage_key)
-      @converted.delete(experiment.storage_key)
-      @variant.delete(experiment.storage_key)
-
       chosen = variant(experiment)
       return true if chosen.nil?
       adapter.delete(experiment.storage_key)

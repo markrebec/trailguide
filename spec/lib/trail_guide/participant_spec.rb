@@ -128,7 +128,6 @@ RSpec.describe TrailGuide::Participant do
   end
 
   describe '#variant' do
-    #context 'when the result has been memoized'
     context 'when the experiment is not calibrating or started' do
       experiment {
         variant :control
@@ -232,7 +231,6 @@ RSpec.describe TrailGuide::Participant do
   end
 
   describe '#participating?' do
-    #context 'when the result has been memoized'
     context 'when the variant does not exist' do
       experiment {
         variant :control
@@ -337,7 +335,6 @@ RSpec.describe TrailGuide::Participant do
         variant :alternate
       }
 
-      #context 'and the result has been memoized'
       context 'and a checkpoint argument was provided' do
         before { experiment.start! }
 
@@ -417,7 +414,6 @@ RSpec.describe TrailGuide::Participant do
       }
 
       context 'and a checkpoint argument was provided' do
-        #context 'and the result has been memoized'
         context 'but the checkpoint is not a valid metric' do
           before { experiment.start! }
 
@@ -490,7 +486,6 @@ RSpec.describe TrailGuide::Participant do
       end
 
       context 'and a checkpoint argument was not provided' do
-        #context 'and any results have been memoized'
         context 'and the experiment is not calibrating' do
           experiment { |cfg|
             variant :control
@@ -567,7 +562,6 @@ RSpec.describe TrailGuide::Participant do
       allow(subject.adapter).to receive(:[]=).with(variant.storage_key, kind_of(Numeric))
     }
 
-    #it 'memoizes the result'
     it 'stores the variant under the experiment storage key' do
       expect(subject.adapter).to receive(:[]=).with(experiment.storage_key, variant.name)
       subject.participating!(variant)
@@ -643,9 +637,6 @@ RSpec.describe TrailGuide::Participant do
     variant(:random) { experiment.variants.sample }
     metric(:random) { experiment.goals.sample }
 
-    #it 'deletes any memoized participation'
-    #it 'deletes any memoized conversion'
-    #it 'deletes any memoized variants'
     context 'when the experiment has not been stored' do
       it 'does not delete any keys' do
         expect(subject.adapter).to_not receive(:delete)
