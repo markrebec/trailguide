@@ -7,12 +7,11 @@ RSpec.describe TrailGuide::Participant do
     context 'with an adapter argument' do
       let(:adapter) { TrailGuide::Adapters::Participants::Cookie }
       let(:context) do
-        klass = Class.new do
+        Class.new do
           def cookies
             {}
           end
-        end
-        klass.new
+        end.new
       end
       subject { described_class.new(context, adapter: adapter) }
 
