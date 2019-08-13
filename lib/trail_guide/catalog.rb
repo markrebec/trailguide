@@ -84,7 +84,10 @@ module TrailGuide
     end
 
     def combined_experiment(exp, name)
-      combo = @combined.find { |cex| cex.experiment_name == name.to_s.underscore.to_sym }
+      combo = @combined.find do |cex|
+        cex.experiment_name == name.to_s.underscore.to_sym &&
+        cex.parent.experiment_name == exp.experiment_name
+      end
       return combo if combo.present?
       combo = self.class.combined_experiment(exp, name)
       @combined << combo
