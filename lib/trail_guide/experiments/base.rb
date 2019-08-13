@@ -23,6 +23,7 @@ module TrailGuide
           configuration.configure(*args, &block)
         end
 
+        # TODO alias name once specs have solid coverage
         def experiment_name
           configuration.name
         end
@@ -45,7 +46,7 @@ module TrailGuide
 
         def run_callbacks(hook, *args)
           return unless callbacks[hook]
-          return args[0] if hook == :rollout_winner
+          return args[0] if hook == :rollout_winner # TODO do we need to account for this case here at the class level?
           args.unshift(self)
           callbacks[hook].each do |callback|
             if callback.respond_to?(:call)
@@ -91,7 +92,7 @@ module TrailGuide
           return false unless paused? && configuration.can_resume?
           resumed = TrailGuide.redis.hdel(storage_key, 'paused_at')
           run_callbacks(:on_resume, context)
-          resumed
+          !!resumed
         end
 
         def started_at
@@ -175,13 +176,14 @@ module TrailGuide
           variants.each(&:delete!)
           deleted = TrailGuide.redis.del(storage_key)
           run_callbacks(:on_delete, context)
-          deleted
+          true
         end
 
         def reset!(context=nil)
-          reset = (delete! && save!)
+          delete!(context)
+          save!
           run_callbacks(:on_reset, context)
-          reset
+          true
         end
 
         def participants

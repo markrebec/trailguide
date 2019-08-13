@@ -119,6 +119,10 @@ module TrailGuide
         @algorithm ||= TrailGuide::Algorithms.algorithm(self[:algorithm])
       end
 
+      def variants
+        self[:variants]
+      end
+
       def variant(varname, metadata: {}, weight: 1, control: false)
         raise ArgumentError, "The variant `#{varname}` already exists in the experiment `#{name}`" if variants.any? { |var| var == varname }
         control = true if variants.empty?
@@ -189,6 +193,10 @@ module TrailGuide
       def metrics=(*names)
         self.groups = *names
         self.goals = *names
+      end
+
+      def combined
+        self[:combined]
       end
 
       def combined?

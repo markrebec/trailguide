@@ -76,11 +76,19 @@ module TrailGuide
       end
     end
 
-    delegate :combined_experiment, to: :class
     attr_reader :experiments
 
     def initialize(experiments=[])
       @experiments = experiments
+      @combined = []
+    end
+
+    def combined_experiment(exp, name)
+      combo = @combined.find { |cex| cex.experiment_name == name.to_s.underscore.to_sym }
+      return combo if combo.present?
+      combo = self.class.combined_experiment(exp, name)
+      @combined << combo
+      combo
     end
 
     def each(&block)
