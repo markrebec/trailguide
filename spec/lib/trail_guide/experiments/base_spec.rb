@@ -4,7 +4,7 @@ require 'rails_helper'
 
 RSpec.describe TrailGuide::Experiments::Base do
 
-  describe 'configuration' do
+  describe '.configuration' do
     subject {
       Class.new(described_class) do
         configure do |config|
@@ -22,30 +22,42 @@ RSpec.describe TrailGuide::Experiments::Base do
     it 'memoizes the configuration object' do
       expect(subject.instance_variable_get(:@configuration)).to eq(subject.configuration)
     end
+  end
 
-    [
-      :algorithm,
-      :allow_multiple_conversions?,
-      :allow_multiple_goals?,
-      :callbacks,
-      :combined,
-      :combined?,
-      :control,
-      :enable_calibration?,
-      :goals,
-      :groups,
-      :reset_manually?,
-      :start_manually?,
-      :track_winner_conversions?
-    ].each do |method|
-      it "delegates ##{method} to the configuration object" do
+  [
+    :algorithm,
+    :allow_multiple_conversions?,
+    :allow_multiple_goals?,
+    :callbacks,
+    :combined,
+    :combined?,
+    :control,
+    :enable_calibration?,
+    :goals,
+    :groups,
+    :reset_manually?,
+    :start_manually?,
+    :track_winner_conversions?
+  ].each do |method|
+    describe ".#{method}" do
+      subject {
+        Class.new(described_class) do
+          configure do |config|
+            config.name = :config_test
+            variant :control
+            variant :alternate
+          end
+        end
+      }
+
+      it "delegates directly to the configuration object" do
         expect(subject.configuration).to receive(method)
         subject.send(method)
       end
     end
   end
 
-  describe 'configure' do
+  describe '.configure' do
     subject {
       Class.new(described_class) do
         configure do |config|
@@ -67,7 +79,7 @@ RSpec.describe TrailGuide::Experiments::Base do
     end
   end
 
-  describe 'experiment_name' do
+  describe '.experiment_name' do
     subject {
       Class.new(described_class) do
         configure do |config|
@@ -88,7 +100,7 @@ RSpec.describe TrailGuide::Experiments::Base do
     end
   end
 
-  describe 'register!' do
+  describe '.register!' do
     subject {
       Class.new(described_class) do
         configure do |config|
@@ -105,7 +117,7 @@ RSpec.describe TrailGuide::Experiments::Base do
     end
   end
 
-  describe 'variants' do
+  describe '.variants' do
     subject {
       Class.new(described_class) do
         configure do |config|
@@ -140,7 +152,7 @@ RSpec.describe TrailGuide::Experiments::Base do
     end
   end
 
-  describe 'is_combined?' do
+  describe '.is_combined?' do
     subject {
       Class.new(described_class) do
         configure do |config|
@@ -156,7 +168,7 @@ RSpec.describe TrailGuide::Experiments::Base do
     end
   end
 
-  describe 'combined_experiments' do
+  describe '.combined_experiments' do
     subject {
       Class.new(described_class) do
         configure do |config|
@@ -199,7 +211,7 @@ RSpec.describe TrailGuide::Experiments::Base do
     end
   end
 
-  describe 'run_callbacks' do
+  describe '.run_callbacks' do
     subject {
       Class.new(described_class) do
         configure do |config|
@@ -266,7 +278,7 @@ RSpec.describe TrailGuide::Experiments::Base do
     end
   end
 
-  describe 'start!' do
+  describe '.start!' do
     subject {
       Class.new(described_class) do
         configure do |config|
@@ -331,7 +343,7 @@ RSpec.describe TrailGuide::Experiments::Base do
     end
   end
 
-  describe 'schedule!' do
+  describe '.schedule!' do
     subject {
       Class.new(described_class) do
         configure do |config|
@@ -412,7 +424,7 @@ RSpec.describe TrailGuide::Experiments::Base do
     end
   end
 
-  describe 'pause!' do
+  describe '.pause!' do
     subject {
       Class.new(described_class) do
         configure do |config|
@@ -497,7 +509,7 @@ RSpec.describe TrailGuide::Experiments::Base do
     end
   end
 
-  describe 'resume!' do
+  describe '.resume!' do
     subject {
       Class.new(described_class) do
         configure do |config|
@@ -552,7 +564,7 @@ RSpec.describe TrailGuide::Experiments::Base do
     end
   end
 
-  describe 'stop!' do
+  describe '.stop!' do
     subject {
       Class.new(described_class) do
         configure do |config|
@@ -625,7 +637,7 @@ RSpec.describe TrailGuide::Experiments::Base do
     end
   end
 
-  describe 'started_at' do
+  describe '.started_at' do
     subject {
       Class.new(described_class) do
         configure do |config|
@@ -668,7 +680,7 @@ RSpec.describe TrailGuide::Experiments::Base do
     end
   end
 
-  describe 'paused_at' do
+  describe '.paused_at' do
     subject {
       Class.new(described_class) do
         configure do |config|
@@ -711,7 +723,7 @@ RSpec.describe TrailGuide::Experiments::Base do
     end
   end
 
-  describe 'stopped_at' do
+  describe '.stopped_at' do
     subject {
       Class.new(described_class) do
         configure do |config|
@@ -762,7 +774,7 @@ RSpec.describe TrailGuide::Experiments::Base do
     end
   end
 
-  describe 'started?' do
+  describe '.started?' do
     subject {
       Class.new(described_class) do
         configure do |config|
@@ -805,7 +817,7 @@ RSpec.describe TrailGuide::Experiments::Base do
     end
   end
 
-  describe 'scheduled?' do
+  describe '.scheduled?' do
     subject {
       Class.new(described_class) do
         configure do |config|
@@ -840,7 +852,7 @@ RSpec.describe TrailGuide::Experiments::Base do
     end
   end
 
-  describe 'paused?' do
+  describe '.paused?' do
     subject {
       Class.new(described_class) do
         configure do |config|
@@ -875,7 +887,7 @@ RSpec.describe TrailGuide::Experiments::Base do
     end
   end
 
-  describe 'stopped?' do
+  describe '.stopped?' do
     subject {
       Class.new(described_class) do
         configure do |config|
@@ -909,7 +921,7 @@ RSpec.describe TrailGuide::Experiments::Base do
     end
   end
 
-  describe 'running?' do
+  describe '.running?' do
     subject {
       Class.new(described_class) do
         configure do |config|
@@ -960,7 +972,7 @@ RSpec.describe TrailGuide::Experiments::Base do
     end
   end
 
-  describe 'calibrating?' do
+  describe '.calibrating?' do
     context 'when configured to enable calibration' do
       subject {
         Class.new(described_class) do
@@ -1026,7 +1038,7 @@ RSpec.describe TrailGuide::Experiments::Base do
     end
   end
 
-  describe 'persisted?' do
+  describe '.persisted?' do
     subject {
       Class.new(described_class) do
         configure do |config|
@@ -1057,7 +1069,7 @@ RSpec.describe TrailGuide::Experiments::Base do
     end
   end
 
-  describe 'save!' do
+  describe '.save!' do
     subject {
       Class.new(described_class) do
         configure do |config|
@@ -1099,7 +1111,7 @@ RSpec.describe TrailGuide::Experiments::Base do
     end
   end
 
-  describe 'delete!' do
+  describe '.delete!' do
     subject {
       Class.new(described_class) do
         configure do |config|
@@ -1159,7 +1171,7 @@ RSpec.describe TrailGuide::Experiments::Base do
     end
   end
 
-  describe 'reset!' do
+  describe '.reset!' do
     subject {
       Class.new(described_class) do
         configure do |config|
@@ -1193,7 +1205,7 @@ RSpec.describe TrailGuide::Experiments::Base do
     end
   end
 
-  describe 'storage_key' do
+  describe '.storage_key' do
     subject {
       Class.new(described_class) do
         configure do |config|
