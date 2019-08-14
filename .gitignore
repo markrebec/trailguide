@@ -4,6 +4,7 @@ Gemfile.lock
 .bundle/
 log/*.log
 pkg/
+spec/examples.txt
 spec/dummy/db/*.sqlite3
 spec/dummy/db/*.sqlite3-journal
 spec/dummy/log/*.log
