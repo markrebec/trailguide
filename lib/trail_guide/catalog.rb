@@ -77,10 +77,11 @@ module TrailGuide
     end
 
     attr_reader :experiments
+    delegate :new, to: :class
 
-    def initialize(experiments=[])
+    def initialize(experiments=[], combined=[])
       @experiments = experiments
-      @combined = []
+      @combined = combined
     end
 
     def combined_experiment(exp, name)
@@ -111,43 +112,43 @@ module TrailGuide
         end
       end.flatten
 
-      self.class.new(exploded)
+      new(exploded, @combined)
     end
 
     def calibrating
-      self.class.new(to_a.select(&:calibrating?))
+      new(to_a.select(&:calibrating?), @combined)
     end
 
     def started
-      self.class.new(to_a.select { |e| e.started? && !e.winner? })
+      new(to_a.select { |e| e.started? && !e.winner? }, @combined)
     end
 
     def scheduled
-      self.class.new(to_a.select { |e| e.scheduled? && !e.winner? })
+      new(to_a.select { |e| e.scheduled? && !e.winner? }, @combined)
     end
 
     def running
-      self.class.new(to_a.select { |e| e.running? && !e.winner? })
+      new(to_a.select { |e| e.running? && !e.winner? }, @combined)
     end
 
     def paused
-      self.class.new(to_a.select { |e| e.paused? && !e.winner? })
+      new(to_a.select { |e| e.paused? && !e.winner? }, @combined)
     end
 
     def stopped
-      self.class.new(to_a.select { |e| e.stopped? && !e.winner? })
+      new(to_a.select { |e| e.stopped? && !e.winner? }, @combined)
     end
 
     def ended
-      self.class.new(to_a.select(&:winner?))
+      new(to_a.select(&:winner?), @combined)
     end
 
     def unstarted
-      self.class.new(to_a.select { |e| !e.started? && !e.calibrating? && !e.scheduled? && !e.winner? })
+      new(to_a.select { |e| !e.started? && !e.calibrating? && !e.scheduled? && !e.winner? }, @combined)
     end
 
     def not_running
-      self.class.new(to_a.select { |e| !e.running? })
+      new(to_a.select { |e| !e.running? }, @combined)
     end
 
     def missing
@@ -202,7 +203,7 @@ module TrailGuide
         end
       end
 
-      self.class.new(scoped)
+      new(scoped, @combined)
     end
 
     def find(name)
@@ -245,7 +246,7 @@ module TrailGuide
         end
       end
 
-      self.class.new(selected)
+      new(selected, @combined)
     end
 
     def register(klass)

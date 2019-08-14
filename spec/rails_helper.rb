@@ -82,6 +82,7 @@ RSpec.configure do |config|
     redis_keys = TrailGuide.redis.keys
     TrailGuide.redis.del(*redis_keys) if redis_keys.present?
     TrailGuide.catalog.instance_variable_set :@experiments, []
+    TrailGuide.catalog.instance_variable_set :@combined, []
   end
 
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
