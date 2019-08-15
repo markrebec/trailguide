@@ -1593,4 +1593,100 @@ RSpec.describe TrailGuide::Experiments::Base do
     end
   end
 
+
+  [
+    :allow_multiple_conversions?,
+    :allow_multiple_goals?,
+    :callbacks,
+    :combined?,
+    :configuration,
+    :control,
+    :enable_calibration?,
+    :experiment_name,
+    :goals,
+    :is_combined?,
+    :reset_manually?,
+    :start_manually?,
+    :storage_key,
+    :track_winner_conversions?,
+    :variants
+  ].each do |method|
+    describe "##{method}" do
+      experiment
+      participant
+      subject { experiment.new(participant) }
+
+      it 'delegates directly to the experiment class' do
+        expect(subject.class).to receive(method)
+        subject.send(method)
+      end
+    end
+  end
+
+  describe '#initialize' do
+    experiment
+    participant
+
+    it 'initializes an experiment participant' do
+      expect(TrailGuide::Experiments::Participant).to receive(:new).with(experiment, participant)
+      experiment.new(participant)
+    end
+
+    it 'memoizes the experiment participant' do
+      expect(experiment.new(participant).instance_variable_get(:@participant)).to be_an_instance_of(TrailGuide::Experiments::Participant)
+    end
+  end
+
+  describe '#algorithm' do
+    it 'initializes an instance of the configured algorithm'
+    it 'memoizes the alrogithm instance'
+  end
+
+  describe '#winning_variant' do
+    context 'when a winner has been declared' do
+      context 'and a rollout callback has been configured' do
+        it 'runs the configured rollout callbacks'
+      end
+    end
+
+    context 'when no winner has been delcared' do
+      it 'returns nil'
+      it 'does not run rollout callbacks'
+    end
+  end
+
+  describe '#choose!' do
+    pending
+  end
+
+  describe '#choose_variant!' do
+    pending
+  end
+
+  describe '#algorithm_choose!' do
+    pending
+  end
+
+  describe '#convert!' do
+    pending
+  end
+
+  describe '#allow_participation?' do
+    pending
+  end
+
+  describe '#allow_conversion?' do
+    pending
+  end
+
+  describe '#run_callbacks' do
+    pending
+  end
+
+  describe '#combined_experiments' do
+    pending
+  end
+
+  # TODO memoization methods (maybe re-work all that in favor of "trials" instead...)
+
 end

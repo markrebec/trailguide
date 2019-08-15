@@ -241,7 +241,8 @@ module TrailGuide
       end
 
       def winning_variant
-        run_callbacks(:rollout_winner, self.class.winner, participant)
+        return nil unless winner?
+        run_callbacks(:rollout_winner, winner, participant)
       end
 
       def choose!(override: nil, metadata: nil, **opts)
