@@ -138,6 +138,10 @@ module TrailGuide
           enable_calibration? && start_manually? && !started?
         end
 
+        def fresh?
+          !started? && !scheduled? && !winner?
+        end
+
         def declare_winner!(variant, context=nil)
           variant = variants.find { |var| var == variant } unless variant.is_a?(Variant)
           run_callbacks(:on_winner, variant, context)

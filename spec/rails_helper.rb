@@ -42,7 +42,12 @@ end
 module TrailGuide::SpecDSL
   def create_experiment(name, **opts, &block)
     TrailGuide::Catalog::DSL.experiment name, **opts, &block
-    TrailGuide.catalog.find(name)
+    exp = TrailGuide.catalog.find(name)
+    exp.configure do # add a couple default variants if none were provided
+      variant :control
+      variant :alternate
+    end if exp.variants.empty?
+    exp
   end
 
   def destroy_experiment(name)
@@ -53,10 +58,11 @@ end
 module TrailGuide::GroupDSL
   def experiment(name=nil, **opts, &block)
     name ||= [*('a'..'z'),*('0'..'9')].shuffle[0,8].join
-    after  { destroy_experiment(name) }
-    before { create_experiment(name, **opts, &block) }
-    let(:experiment) { TrailGuide.catalog.find(name) }
-    let(name)        { TrailGuide.catalog.find(name) }
+    let!(name)         { create_experiment(name, **opts, &block) }
+    let!(:experiment)  { send(name) }
+    let!(:experiments) { [] }
+    before             { experiments << send(name) }
+    after              { destroy_experiment(name) }
   end
 
   def variant(name, varname=nil, &block)

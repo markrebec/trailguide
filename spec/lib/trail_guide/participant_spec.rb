@@ -722,8 +722,8 @@ RSpec.describe TrailGuide::Participant do
         cfg.combined = [:first_combo, :second_combo]
       }
 
-      let(:experiments) { [first_exp, second_exp, not_sticky, combined] }
-      before { experiments.each(&:start!) }
+      let(:started_experiments) { [first_exp, second_exp, not_sticky, combined] }
+      before { started_experiments.each(&:start!) }
 
 
       it 'returns a hash of active experiments' do
@@ -929,8 +929,8 @@ RSpec.describe TrailGuide::Participant do
         cfg.combined = [:first_combo, :second_combo]
       }
 
-      let(:experiments) { [first_exp, second_exp, not_sticky, combined] }
-      before { experiments.each(&:start!) }
+      let(:started_experiments) { [first_exp, second_exp, not_sticky, combined] }
+      before { started_experiments.each(&:start!) }
 
 
       it 'returns true' do

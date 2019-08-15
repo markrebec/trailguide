@@ -76,8 +76,9 @@ module TrailGuide
       end
     end
 
-    attr_reader :experiments
+    attr_reader :experiments, :combined
     delegate :new, to: :class
+    delegate :each, to: :experiments
 
     def initialize(experiments=[], combined=[])
       @experiments = experiments
@@ -93,10 +94,6 @@ module TrailGuide
       combo = self.class.combined_experiment(exp, name)
       @combined << combo
       combo
-    end
-
-    def each(&block)
-      experiments.each(&block)
     end
 
     def groups
@@ -151,15 +148,10 @@ module TrailGuide
       new(to_a.select { |e| !e.running? }, @combined)
     end
 
-    def missing
-      TrailGuide.redis.keys.select do |key|
-        exp = key.split(':').first
-        find(exp).nil?
-      end
-    end
-
     def by_started
       scoped = to_a.sort do |a,b|
+        # TODO finish implementing specs, then implement `experiment.fresh?`, then (maybe) re-work this all
+        # into an experiment spaceship operator
         if !(a.started? || a.scheduled? || a.winner?) && !(b.started? || b.scheduled? || b.winner?)
           a.experiment_name.to_s <=> b.experiment_name.to_s
         elsif !(a.started? || a.scheduled? || a.winner?)
@@ -256,8 +248,11 @@ module TrailGuide
 
     def deregister(key, remove_const=false)
       klass = find(key)
-      experiments.delete(klass) if klass.present?
-      Object.send(:remove_const, :"#{klass.name}") if remove_const && klass.name.present?
+      return unless klass.present?
+      experiments.delete(klass)
+      return klass unless remove_const && klass.name.present?
+      Object.send(:remove_const, :"#{klass.name}")
+      return key
     end
 
     def export
@@ -295,6 +290,13 @@ module TrailGuide
             TrailGuide.redis.hincrby(variant.storage_key, 'converted', vst['converted'].to_i) if vst['converted'].to_i > 0
           end
         end
+      end
+    end
+
+    def missing
+      TrailGuide.redis.keys.select do |key|
+        exp = key.split(':').first
+        find(exp).nil?
       end
     end
 
