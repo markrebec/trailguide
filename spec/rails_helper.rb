@@ -78,6 +78,12 @@ module TrailGuide::GroupDSL
     let(:metric, &block)
     let(varname, &block)
   end
+
+  def combined(name=nil, **opts, &block)
+    name ||= [*('a'..'z'),*('0'..'9')].shuffle[0,8].join
+    experiment(name, **opts, &block)
+    let!(:combined) { send(name).combined_experiments }
+  end
 end
 
 RSpec.configure do |config|
