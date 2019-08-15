@@ -107,4 +107,41 @@ RSpec.describe TrailGuide::CombinedExperiment do
       subject.stopped_at
     end
   end
+
+  describe '#parent' do
+    let(:participant) { TrailGuide::Participant.new(nil, adapter: TrailGuide::Adapters::Participants::Anonymous) }
+    combined { |cfg| cfg.combined = [:first_combo, :second_combo] }
+    subject { combined.first.new(participant) }
+
+    it 'initializes an instance of the parent experiment with the participant' do
+      expect(experiment).to receive(:new).with(participant)
+      subject.parent
+    end
+
+    it 'memoizes the parent instance' do
+      expect { subject.parent }.to change { subject.instance_variable_get(:@parent) }
+    end
+  end
+
+  describe '#algorithm_choose!' do
+    let(:participant) { TrailGuide::Participant.new(nil, adapter: TrailGuide::Adapters::Participants::Anonymous) }
+    combined { |cfg| cfg.combined = [:first_combo, :second_combo] }
+    subject { combined.first.new(participant) }
+    before { experiment.start! }
+
+    it 'uses the parent experiment in place of an algorithm to select a variant' do
+      expect(subject.parent).to receive(:choose!).and_return(experiment.variants.first)
+      subject.algorithm_choose!
+    end
+
+    it 'passes metadata through to the parent' do
+      expect(subject.parent).to receive(:choose!).with(metadata: {foo: :bar}).and_return(experiment.variants.first)
+      subject.algorithm_choose!(metadata: {foo: :bar})
+    end
+
+    it 'returns the matching variant for the combined experiment' do
+      allow(subject.parent).to receive(:choose!).and_return(experiment.variants.first)
+      expect(subject.algorithm_choose!).to eq(combined.first.variants.first)
+    end
+  end
 end
