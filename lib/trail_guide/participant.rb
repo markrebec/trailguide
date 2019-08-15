@@ -11,6 +11,7 @@ module TrailGuide
     end
 
     def adapter
+      # TODO move this case selection to Adapters::Participant (like Algorithms)?
       @adapter ||= begin
         config_adapter = TrailGuide.configuration.adapter
         case config_adapter

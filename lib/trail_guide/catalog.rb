@@ -170,25 +170,41 @@ module TrailGuide
           elsif !a.running? && b.running?
             1
           elsif a.running? && b.running?
-            a.started_at <=> b.started_at
+            if a.started_at == b.started_at
+              a.experiment_name.to_s <=> b.experiment_name.to_s
+            else
+              a.started_at <=> b.started_at
+            end
           elsif a.paused? && !b.paused?
             -1
           elsif !a.paused? && b.paused?
             1
           elsif a.paused? && b.paused?
-            a.paused_at <=> b.paused_at
+            if a.paused_at == b.paused_at
+              a.experiment_name.to_s <=> b.experiment_name.to_s
+            else
+              a.paused_at <=> b.paused_at
+            end
           elsif a.scheduled? && !b.scheduled?
             -1
           elsif !a.scheduled? && b.scheduled?
             1
           elsif a.scheduled? && b.scheduled?
-            a.started_at <=> b.started_at
+            if a.started_at == b.started_at
+              a.experiment_name.to_s <=> b.experiment_name.to_s
+            else
+              a.started_at <=> b.started_at
+            end
           elsif a.stopped? && !b.stopped?
-            -1
+            -1 # TODO remove unused case
           elsif !a.stopped? && b.stopped?
-            1
+            1 # TODO remove unused case
           elsif a.stopped? && b.stopped?
-            a.stopped_at <=> b.stopped_at
+            if a.stopped_at == b.stopped_at
+              a.experiment_name.to_s <=> b.experiment_name.to_s
+            else
+              a.stopped_at <=> b.stopped_at
+            end
           else
             a.experiment_name.to_s <=> b.experiment_name.to_s
           end

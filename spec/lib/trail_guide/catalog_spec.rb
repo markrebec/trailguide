@@ -405,9 +405,188 @@ RSpec.describe TrailGuide::Catalog do
   end
 
   describe '#by_started' do
+    experiment(:foo) { |cfg| cfg.can_resume = true }
+    experiment(:bar) { |cfg| cfg.can_resume = true }
+    subject { described_class.new(experiments) }
+
     it_behaves_like 'a catalog enumerator'
 
-    it 'sorts experiments by their state'
+    context 'when the experiments are both fresh' do
+      it 'sorts experiments by their names' do
+        expect(subject.by_started.to_a).to eq([bar, foo])
+      end
+    end
+
+    context 'when one experiment is fresh' do
+      before { bar.start! }
+
+      it 'sorts fresh experiments above others' do
+        expect(subject.by_started.to_a).to eq([foo, bar])
+      end
+    end
+
+    context 'when neither experiment is fresh' do
+      before { experiments.each(&:start!) }
+
+      context 'and both have a winner defined' do
+        before { experiments.each { |exp| exp.declare_winner!(exp.variants.sample) } }
+
+        it 'sorts experiments by their names' do
+          expect(subject.by_started.to_a).to eq([bar, foo])
+        end
+      end
+
+      context 'and one has a winner defined' do
+        before { bar.declare_winner!(bar.variants.sample) }
+
+        it 'sorts experiments with winners below others' do
+          expect(subject.by_started.to_a).to eq([foo, bar])
+        end
+      end
+
+      context 'and neither have a winner defined' do
+        context 'and both are running' do
+          before {
+            TrailGuide.redis.hset(bar.storage_key, 'started_at', 1.hours.ago.to_i)
+            TrailGuide.redis.hset(foo.storage_key, 'started_at', 2.hours.ago.to_i)
+          }
+
+          it 'sorts experiments by their started_at time ascending' do
+            expect(subject.by_started.to_a).to eq([foo, bar])
+          end
+
+          context 'and their started_at time is equal' do
+            before {
+              start_time = 1.hour.ago.to_i
+              TrailGuide.redis.hset(bar.storage_key, 'started_at', start_time)
+              TrailGuide.redis.hset(foo.storage_key, 'started_at', start_time)
+            }
+
+            it 'sorts experiments by their names' do
+              expect(subject.by_started.to_a).to eq([bar, foo])
+            end
+          end
+        end
+
+        context 'and one is running' do
+          before { bar.stop! }
+
+          it 'sorts running experiments above others' do
+            expect(subject.by_started.to_a).to eq([foo, bar])
+          end
+        end
+
+        context 'and neither are running' do
+          context 'and both are paused' do
+            before {
+              TrailGuide.redis.hset(bar.storage_key, 'started_at', 1.hours.ago.to_i)
+              TrailGuide.redis.hset(bar.storage_key, 'paused_at',  20.minutes.ago.to_i)
+              TrailGuide.redis.hset(foo.storage_key, 'started_at', 2.hours.ago.to_i)
+              TrailGuide.redis.hset(foo.storage_key, 'paused_at',  30.minutes.ago.to_i)
+            }
+
+            it 'sorts experiments by their paused_at time ascending' do
+              expect(subject.by_started.to_a).to eq([foo, bar])
+            end
+
+            context 'and their paused_at time is equal' do
+              before {
+                start_time = 1.hours.ago.to_i
+                pause_time = 30.minutes.ago.to_i
+                TrailGuide.redis.hset(bar.storage_key, 'started_at', start_time)
+                TrailGuide.redis.hset(bar.storage_key, 'paused_at',  pause_time)
+                TrailGuide.redis.hset(foo.storage_key, 'started_at', start_time)
+                TrailGuide.redis.hset(foo.storage_key, 'paused_at',  pause_time)
+              }
+
+              it 'sorts experiments by their names' do
+                expect(subject.by_started.to_a).to eq([bar, foo])
+              end
+            end
+          end
+
+          context 'and one is paused' do
+            before {
+              foo.pause!
+              bar.stop!
+            }
+
+            it 'sorts paused experiments above others' do
+              expect(subject.by_started.to_a).to eq([foo, bar])
+            end
+          end
+
+          context 'and neither is paused' do
+            context 'and both are scheduled' do
+              before {
+                experiments.each(&:reset!)
+                foo.schedule!(1.hours.from_now)
+                bar.schedule!(2.hours.from_now)
+              }
+
+              it 'sorts experiments by their scheduled started_at time ascending' do
+                expect(subject.by_started.to_a).to eq([foo, bar])
+              end
+
+              context 'and their scheduled started_at time is equal' do
+                before {
+                  start_time = 1.hour.from_now
+                  experiments.each(&:reset!)
+                  foo.schedule!(start_time)
+                  bar.schedule!(start_time)
+                }
+
+                it 'sorts experiments by their names' do
+                  expect(subject.by_started.to_a).to eq([bar, foo])
+                end
+              end
+            end
+
+            context 'and one is scheduled' do
+              before {
+                bar.stop!
+                foo.reset!
+                foo.schedule!(2.hours.from_now)
+              }
+
+              it 'sorts scheduled experiments above others' do
+                expect(subject.by_started.to_a).to eq([foo, bar])
+              end
+            end
+
+            context 'and neither is scheduled' do
+              context 'and both are stopped' do
+                before {
+                  TrailGuide.redis.hset(bar.storage_key, 'started_at', 1.hours.ago.to_i)
+                  TrailGuide.redis.hset(bar.storage_key, 'stopped_at',  20.minutes.ago.to_i)
+                  TrailGuide.redis.hset(foo.storage_key, 'started_at', 2.hours.ago.to_i)
+                  TrailGuide.redis.hset(foo.storage_key, 'stopped_at',  30.minutes.ago.to_i)
+                }
+
+                it 'sorts experiments by their stopped_at time ascending' do
+                  expect(subject.by_started.to_a).to eq([foo, bar])
+                end
+
+                context 'and their stopped_at time is equal' do
+                  before {
+                    start_time = 1.hour.ago.to_i
+                    stop_time = 30.minutes.ago.to_i
+                    TrailGuide.redis.hset(bar.storage_key, 'started_at', start_time)
+                    TrailGuide.redis.hset(bar.storage_key, 'stopped_at',  stop_time)
+                    TrailGuide.redis.hset(foo.storage_key, 'started_at', start_time)
+                    TrailGuide.redis.hset(foo.storage_key, 'stopped_at',  stop_time)
+                  }
+
+                  it 'sorts experiments by their names' do
+                    expect(subject.by_started.to_a).to eq([bar, foo])
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+    end
   end
 
   describe '#find' do
@@ -604,20 +783,56 @@ RSpec.describe TrailGuide::Catalog do
   end
 
   describe '#export' do
+    pending
   end
 
   describe '#import' do
+    pending
   end
 
   describe '#missing' do
+    pending
   end
 
   describe '#orphaned' do
+    it 'sets the provided orphan key as a list and adds the provided trace value' do
+      expect(TrailGuide.redis).to receive(:sadd).with('orphans:testkey', 'dummy trace')
+      subject.orphaned('testkey', 'dummy trace')
+    end
+
+    it 'sets the expiration of the key to 15 minutes' do
+      expect(TrailGuide.redis).to receive(:expire).with('orphans:testkey', 15.minutes.seconds)
+      subject.orphaned('testkey', 'dummy trace')
+    end
   end
 
   describe '#orphans' do
+    context 'when there are orphaned experiments or groups' do
+      before {
+        subject.orphaned('first', 'first orphan')
+        subject.orphaned('first', 'also first')
+        subject.orphaned('second', 'second orphan')
+      }
+
+      it 'returns all orphan keys as a hash' do
+        expect(subject.orphans).to eq({
+          'first' => ['also first', 'first orphan'],
+          'second' => ['second orphan']
+        })
+      end
+    end
+
+    context 'when there are no orphaned experiments or groups' do
+      it 'returns an empty hash' do
+        expect(subject.orphans).to eq({})
+      end
+    end
   end
 
   describe '#adopted' do
+    it 'deletes the provided key under the orphans namespace' do
+      expect(TrailGuide.redis).to receive(:del).with('orphans:testkey')
+      subject.adopted('testkey')
+    end
   end
 end
