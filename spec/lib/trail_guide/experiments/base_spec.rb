@@ -1038,6 +1038,261 @@ RSpec.describe TrailGuide::Experiments::Base do
     end
   end
 
+  describe '.fresh?' do
+    subject {
+      Class.new(described_class) do
+        configure do |config|
+          config.name = :fresh_test
+          variant :control
+          variant :alternate
+        end
+      end
+    }
+
+    context 'when the experiment is started' do
+      before { subject.start! }
+
+      it 'returns false' do
+        expect(subject.fresh?).to be_falsey
+      end
+    end
+
+    context 'when the experiment is scheduled' do
+      before { subject.schedule!(1.hour.from_now) }
+
+      it 'returns false' do
+        expect(subject.fresh?).to be_falsey
+      end
+    end
+
+    context 'when the experiment has a winner' do
+      before { subject.declare_winner!(subject.variants.sample) }
+
+      it 'returns false' do
+        expect(subject.fresh?).to be_falsey
+      end
+    end
+
+    context 'when the experiment is not started, not scheduled and does not have a winner' do
+      it 'returns true' do
+        expect(subject.fresh?).to be_truthy
+      end
+    end
+  end
+
+  describe '.declare_winner!' do
+    subject {
+      Class.new(described_class) do
+        configure do |config|
+          config.name = :winner_test
+          variant :control
+          variant :alternate
+        end
+      end
+    }
+
+    context 'when provided with a variant' do
+      context 'which belongs to the experiment' do
+        it 'uses the variant' do
+          expect(subject.declare_winner!(subject.variants.first)).to eq(subject.variants.first)
+        end
+
+        it 'runs callbacks' do
+          expect(subject).to receive(:run_callbacks).with(:on_winner, subject.variants.first, nil)
+          subject.declare_winner!(subject.variants.first)
+        end
+
+        it 'stores the winning variant' do
+          expect(TrailGuide.redis).to receive(:hset).with(subject.storage_key, 'winner', subject.variants.first.name.to_s.underscore)
+          subject.declare_winner!(subject.variants.first)
+        end
+
+        context 'and provided with a context argument' do
+          let(:ctx) { {foo: :bar} }
+
+          it 'passes the provided context to callbacks' do
+            expect(subject).to receive(:run_callbacks).with(:on_winner, subject.variants.first, ctx)
+            subject.declare_winner!(subject.variants.first, ctx)
+          end
+        end
+      end
+
+      context 'which does not belong to the experiment' do
+        let(:other) {
+          Class.new(described_class) do
+            configure do |config|
+              config.name = :other_test
+              variant :control
+              variant :alternate
+            end
+          end
+        }
+
+        it 'returns false' do
+          expect(subject.declare_winner!(other.variants.first)).to be_falsey
+        end
+
+        it 'does not run callbacks' do
+          expect(subject).to_not receive(:run_callbacks)
+          subject.declare_winner!(other.variants.first)
+        end
+
+        it 'does not store the winning variant' do
+          expect(TrailGuide.redis).to_not receive(:hset)
+          subject.declare_winner!(other.variants.first)
+        end
+      end
+    end
+
+    context 'when provided with a name' do
+      context 'which matches a variant of the experiment' do
+        it 'finds the variant' do
+          expect(subject.declare_winner!(:control)).to eq(subject.variants.first)
+        end
+
+        it 'runs callbacks' do
+          expect(subject).to receive(:run_callbacks).with(:on_winner, subject.variants.first, nil)
+          subject.declare_winner!(:control)
+        end
+
+        it 'stores the winning variant' do
+          expect(TrailGuide.redis).to receive(:hset).with(subject.storage_key, 'winner', subject.variants.first.name.to_s.underscore)
+          subject.declare_winner!(:control)
+        end
+
+        context 'and provided with a context argument' do
+          let(:ctx) { {foo: :bar} }
+
+          it 'passes the provided context to callbacks' do
+            expect(subject).to receive(:run_callbacks).with(:on_winner, subject.variants.first, ctx)
+            subject.declare_winner!(:control, ctx)
+          end
+        end
+      end
+
+      context 'which does not match a variant of the experiment' do
+        it 'returns false' do
+          expect(subject.declare_winner!(:nonexistent)).to be_falsey
+        end
+
+        it 'does not run callbacks' do
+          expect(subject).to_not receive(:run_callbacks)
+          subject.declare_winner!(:nonexistent)
+        end
+
+        it 'does not store the winning variant' do
+          expect(TrailGuide.redis).to_not receive(:hset)
+          subject.declare_winner!(:nonexistent)
+        end
+      end
+    end
+  end
+
+  describe '.clear_winner!' do
+    subject {
+      Class.new(described_class) do
+        configure do |config|
+          config.name = :winner_test
+          variant :control
+          variant :alternate
+        end
+      end
+    }
+
+    it 'deletes the stored winner' do
+      expect(TrailGuide.redis).to receive(:hdel).with(subject.storage_key, 'winner')
+      subject.clear_winner!
+    end
+  end
+
+  describe '.winner' do
+    subject {
+      Class.new(described_class) do
+        configure do |config|
+          config.name = :winner_test
+          variant :control
+          variant :alternate
+        end
+      end
+    }
+
+    context 'when a winner has not been declared' do
+      it 'returns nil' do
+        expect(subject.winner).to be_nil
+      end
+    end
+
+    context 'when a winner has been declared' do
+      before { subject.declare_winner!(subject.variants.first) }
+
+      it 'returns the winning variant' do
+        expect(subject.winner).to eq(subject.variants.first)
+      end
+    end
+  end
+
+  describe '.winner?' do
+    subject {
+      Class.new(described_class) do
+        configure do |config|
+          config.name = :winner_test
+          variant :control
+          variant :alternate
+        end
+      end
+    }
+
+    context 'when a winner has not been declared' do
+      it 'returns false' do
+        expect(subject.winner?).to be_falsey
+      end
+    end
+
+    context 'when a winner has been declared' do
+      before { subject.declare_winner!(subject.variants.first) }
+
+      it 'returns true' do
+        expect(subject.winner?).to be_truthy
+      end
+    end
+
+    context 'with a combined experiment' do
+      subject {
+        Class.new(described_class) do
+          configure do |config|
+            config.name = :winner_test
+            config.combined = [:first_combo, :second_combo]
+            variant :control
+            variant :alternate
+          end
+          register!
+        end
+      }
+
+      context 'when a winnr has been declared for all child experiments' do
+        before { subject.combined_experiments.each { |exp| exp.declare_winner!(exp.variants.first) } }
+
+        it 'returns true' do
+          expect(subject.winner?).to be_truthy
+        end
+      end
+
+      context 'when a winner has been declared for some child experiments' do
+        before { subject.combined_experiments.first.declare_winner!(subject.combined_experiments.first.variants.first) }
+
+        it 'returns false' do
+          expect(subject.winner?).to be_falsey
+        end
+      end
+
+      context 'when no winner has been declared for any child experiments' do
+        it 'returns false' do
+          expect(subject.winner?).to be_falsey
+        end
+      end
+    end
+  end
+
   describe '.persisted?' do
     subject {
       Class.new(described_class) do
@@ -1201,6 +1456,123 @@ RSpec.describe TrailGuide::Experiments::Base do
         allow(subject).to receive(:run_callbacks).with(:on_delete, ctx)
         expect(subject).to receive(:run_callbacks).with(:on_reset, ctx)
         subject.reset!(ctx)
+      end
+    end
+  end
+
+  describe '.participants' do
+    subject {
+      Class.new(described_class) do
+        configure do |config|
+          config.name = :participants_test
+          variant :control
+          variant :alternate
+        end
+      end
+    }
+
+    it 'sums the participants across all variants' do
+      expect(subject.variants).to receive(:sum) { |&block| expect(block).to eq(Proc.new(&:participants)) }
+      subject.participants
+    end
+  end
+
+  describe '.converted' do
+    subject {
+      Class.new(described_class) do
+        configure do |config|
+          config.name = :participants_test
+          variant :control
+          variant :alternate
+        end
+      end
+    }
+
+    it 'sums the conversions across all variants' do
+      expect(subject.variants).to receive(:sum)
+      subject.converted
+    end
+
+    context 'when provided with a checkpoint' do
+      subject {
+        Class.new(described_class) do
+          configure do |config|
+            config.name = :participants_test
+            variant :control
+            variant :alternate
+            metric  :checkpoint
+          end
+        end
+      }
+
+      it 'passes the checkpoint to variants when summing' do
+        subject.variants.each { |var| expect(var).to receive(:converted).with(:checkpoint).and_return(0) }
+        subject.converted(:checkpoint)
+      end
+    end
+  end
+
+  describe '.unconverted' do
+    subject {
+      Class.new(described_class) do
+        configure do |config|
+          config.name = :participants_test
+          variant :control
+          variant :alternate
+        end
+      end
+    }
+    before {
+      allow(subject).to receive(:participants).and_return(200)
+      allow(subject).to receive(:converted).and_return(100)
+    }
+
+    it 'subtracts all conversions from total participants' do
+      expect(subject.unconverted).to eq(100)
+    end
+  end
+
+  describe '.target_sample_size_reached?' do
+    context 'when configured with a target sample size' do
+      subject {
+        Class.new(described_class) do
+          configure do |config|
+            config.name = :participants_test
+            config.target_sample_size = 10
+            variant :control
+            variant :alternate
+          end
+        end
+      }
+
+      context 'and the target has not been reached' do
+        it 'returns false' do
+          expect(subject.target_sample_size_reached?).to be_falsey
+        end
+      end
+
+      context 'and the target has been reached' do
+        before { allow(subject).to receive(:participants).and_return(10) }
+
+        it 'returns true' do
+          expect(subject.target_sample_size_reached?).to be_truthy
+        end
+      end
+    end
+
+    context 'when not configured with a target sample size' do
+      subject {
+        Class.new(described_class) do
+          configure do |config|
+            config.name = :participants_test
+            variant :control
+            variant :alternate
+          end
+        end
+      }
+
+      it 'returns true' do
+        expect(subject.target_sample_size_reached?).to be_truthy
       end
     end
   end

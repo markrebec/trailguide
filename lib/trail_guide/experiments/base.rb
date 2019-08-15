@@ -144,8 +144,10 @@ module TrailGuide
 
         def declare_winner!(variant, context=nil)
           variant = variants.find { |var| var == variant } unless variant.is_a?(Variant)
+          return false unless variant.present? && variant.experiment == self
           run_callbacks(:on_winner, variant, context)
           TrailGuide.redis.hset(storage_key, 'winner', variant.name.to_s.underscore)
+          variant
         end
 
         def clear_winner!
