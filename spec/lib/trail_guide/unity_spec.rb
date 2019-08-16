@@ -8,7 +8,7 @@ RSpec.describe TrailGuide::Unity do
     before { keys.each { |key| TrailGuide.redis.set(key, "foobar") } }
 
     it "clears all keys under the namespace" do
-      expect(TrailGuide.redis).to receive(:del).with(*TrailGuide.redis.keys("#{TrailGuide::Unity::NAMESPACE}:*"))
+      expect(TrailGuide.redis).to receive(:del) { |*args| expect(args.sort).to eq(TrailGuide.redis.keys("#{TrailGuide::Unity::NAMESPACE}:*").sort) }
       TrailGuide::Unity.clear!
     end
   end

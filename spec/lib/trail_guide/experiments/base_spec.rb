@@ -1656,7 +1656,13 @@ RSpec.describe TrailGuide::Experiments::Base do
   end
 
   describe '#choose!' do
-    pending
+    context 'when trailguide is globally disabled' do
+      it 'returns control'
+    end
+
+    it 'calls choose_variant! with the provided arguments'
+    it 'runs callbacks'
+    it 'returns the variant' # mock choose_variant! to return a specific one
   end
 
   describe '#choose_variant!' do
@@ -1664,7 +1670,8 @@ RSpec.describe TrailGuide::Experiments::Base do
   end
 
   describe '#algorithm_choose!' do
-    pending
+    it 'calls choose! on the algorithm'
+    it 'passes metadata through to the algorithm'
   end
 
   describe '#convert!' do
@@ -1672,11 +1679,28 @@ RSpec.describe TrailGuide::Experiments::Base do
   end
 
   describe '#allow_participation?' do
-    pending
+    context 'when no allow_participation callbacks are defined' do
+      it 'returns true'
+    end
+
+    it 'runs callbacks'
+    it 'returns the result of callbacks'
   end
 
   describe '#allow_conversion?' do
-    pending
+    context 'when a checkpoint is provided' do
+      it 'calls allow_conversion? on the checkpoint'
+      it 'passes the metadata through to the checkpoint'
+    end
+
+    context 'when no checkpoint is provided' do
+      context 'and no allow_conversion callbacks are defined' do
+        it 'returns true'
+      end
+
+      it 'runs callbacks'
+      it 'returns the result of callbacks'
+    end
   end
 
   describe '#run_callbacks' do
@@ -1684,7 +1708,13 @@ RSpec.describe TrailGuide::Experiments::Base do
   end
 
   describe '#combined_experiments' do
-    pending
+    context 'when the experiment is a combined experiment' do
+      it 'returns an array of child experiments'
+    end
+
+    context 'when the experiment is not a combined experiment' do
+      it 'returns an empty array'
+    end
   end
 
   # TODO memoization methods (maybe re-work all that in favor of "trials" instead...)

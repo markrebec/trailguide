@@ -58,10 +58,16 @@ end
 module TrailGuide::GroupDSL
   def experiment(name=nil, **opts, &block)
     name ||= [*('a'..'z'),*('0'..'9')].shuffle[0,8].join
-    let!(name)         { create_experiment(name, **opts, &block) }
-    let!(:experiment)  { send(name) }
-    let!(:experiments) { [] }
+    let(name)         { create_experiment(name, **opts, &block) }
+    let(:experiment)  { send(name) }
+    let(:experiments) { [] }
     before             { experiments << send(name) }
+  end
+
+  def combined(name=nil, **opts, &block)
+    name ||= [*('a'..'z'),*('0'..'9')].shuffle[0,8].join
+    experiment(name, **opts, &block)
+    let(:combined) { send(name).combined_experiments }
   end
 
   def variant(name, varname=nil, &block)
@@ -78,15 +84,15 @@ module TrailGuide::GroupDSL
     let(varname, &block)
   end
 
-  def combined(name=nil, **opts, &block)
-    name ||= [*('a'..'z'),*('0'..'9')].shuffle[0,8].join
-    experiment(name, **opts, &block)
-    let!(:combined) { send(name).combined_experiments }
-  end
-
   def participant(context=nil, adapter: nil)
     adapter ||= TrailGuide::Adapters::Participants::Anonymous
-    let!(:participant) { TrailGuide::Participant.new(context, adapter: adapter) }
+    let(:participant) { TrailGuide::Participant.new(context, adapter: adapter) }
+  end
+
+  def trial(expmt=nil, ptcpt=nil)
+    expmt ||= experiment
+    ptcpt ||= participant
+    let(:trial) { expmt.new(ptcpt) }
   end
 end
 
