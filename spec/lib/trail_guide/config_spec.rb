@@ -12,8 +12,7 @@ RSpec.describe TrailGuide::Config do
     end
 
     context 'when configured with a redis namespace client' do
-      let!(:rns) { Redis::Namespace = Class.new(Redis) }
-      let(:redis) { Redis::Namespace.new }
+      let(:redis) { Redis::Namespace.new(:test, redis: Redis.new) }
       before { subject.redis = redis }
 
       it 'returns the redis namespace client' do
