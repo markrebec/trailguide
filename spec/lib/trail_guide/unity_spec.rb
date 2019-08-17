@@ -26,8 +26,8 @@ RSpec.describe TrailGuide::Unity do
     subject { described_class.new }
 
     it "sets the visitor_id" do
-      subject.user_id = 123
-      expect(subject.user_id).to eq("123")
+      subject.visitor_id = 123
+      expect(subject.visitor_id).to eq("123")
     end
   end
 
