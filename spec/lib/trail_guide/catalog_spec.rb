@@ -21,13 +21,16 @@ RSpec.describe TrailGuide::Catalog do
     end
   end
 
-  describe '.load_experiments' do
+  describe '.load_experiments!' do
+    pending
   end
 
   describe '.load_yaml_experiments' do
+    pending
   end
 
   describe '.combined_experiment' do
+    pending
   end
 
   describe '#initialize' do
@@ -67,6 +70,7 @@ RSpec.describe TrailGuide::Catalog do
   end
 
   describe '#combined_experiment' do
+    pending
   end
 
   describe '#each' do
