@@ -1638,31 +1638,80 @@ RSpec.describe TrailGuide::Experiments::Base do
   end
 
   describe '#algorithm' do
-    it 'initializes an instance of the configured algorithm'
-    it 'memoizes the alrogithm instance'
+    trial({algorithm: :random})
+    subject { trial }
+
+    it 'initializes an instance of the configured algorithm' do
+      expect(subject.algorithm).to be_an_instance_of(TrailGuide::Algorithms::Random)
+    end
+
+    it 'memoizes the alrogithm instance' do
+      expect { subject.algorithm }.to change { subject.instance_variable_get(:@algorithm) }
+    end
   end
 
   describe '#winning_variant' do
+    trial { |cfg| cfg.rollout_winner = -> (expmt, winner, ptcpt) { return expmt.control } }
+    subject { trial }
+
     context 'when a winner has been declared' do
+      before { experiment.declare_winner!(experiment.variants.last) }
+
       context 'and a rollout callback has been configured' do
-        it 'runs the configured rollout callbacks'
+        it 'returns the result of the rollout callback' do
+          expect(subject.winning_variant).to eq(experiment.control)
+        end
+      end
+
+      context 'and no rollout callback has been configured' do
+        trial
+
+        it 'returns the winning variant' do
+          expect(subject.winning_variant).to eq(experiment.variants.last)
+        end
       end
     end
 
     context 'when no winner has been delcared' do
-      it 'returns nil'
-      it 'does not run rollout callbacks'
+      it 'returns nil' do
+        expect(subject.winning_variant).to be_nil
+      end
+
+      it 'does not run rollout callbacks' do
+        expect(subject).to_not receive(:run_callbacks)
+        subject.winning_variant
+      end
     end
   end
 
   describe '#choose!' do
+    trial_subject
+
     context 'when trailguide is globally disabled' do
-      it 'returns control'
+      before { TrailGuide.configuration.disabled = true }
+      before { experiment.start! }
+      after  { TrailGuide.configuration.disabled = false }
+
+      it 'returns control' do
+        expect(subject.choose!).to eq(experiment.control)
+      end
     end
 
-    it 'calls choose_variant! with the provided arguments'
-    it 'runs callbacks'
-    it 'returns the variant' # mock choose_variant! to return a specific one
+    it 'calls choose_variant! with the provided arguments' do
+      expect(subject).to receive(:choose_variant!).with(override: :control, metadata: {foo: :bar})
+      subject.choose!(override: :control, metadata: {foo: :bar})
+    end
+
+    it 'runs callbacks' do
+      allow(subject).to receive(:run_callbacks).with(:on_choose, any_args)
+      expect(subject).to receive(:run_callbacks).with(:on_use, experiment.control, subject.participant, nil)
+      subject.choose!
+    end
+
+    it 'returns the variant' do
+      allow(subject).to receive(:choose_variant!).with(any_args).and_return(experiment.variants.last)
+      expect(subject.choose!).to eq(experiment.variants.last)
+    end
   end
 
   describe '#choose_variant!' do
@@ -1670,8 +1719,17 @@ RSpec.describe TrailGuide::Experiments::Base do
   end
 
   describe '#algorithm_choose!' do
-    it 'calls choose! on the algorithm'
-    it 'passes metadata through to the algorithm'
+    trial_subject
+
+    it 'calls choose! on the algorithm' do
+      expect(subject.algorithm).to receive(:choose!)
+      subject.algorithm_choose!
+    end
+
+    it 'passes metadata through to the algorithm' do
+      expect(subject.algorithm).to receive(:choose!).with(metadata: {foo: :bar})
+      subject.algorithm_choose!(metadata: {foo: :bar})
+    end
   end
 
   describe '#convert!' do
@@ -1680,26 +1738,76 @@ RSpec.describe TrailGuide::Experiments::Base do
 
   describe '#allow_participation?' do
     context 'when no allow_participation callbacks are defined' do
-      it 'returns true'
+      trial_subject
+
+      it 'returns true' do
+        expect(subject.allow_participation?).to be_truthy
+      end
+
+      it 'does not run callbacks' do
+        expect(subject).to_not receive(:run_callbacks)
+        subject.allow_participation?
+      end
     end
 
-    it 'runs callbacks'
-    it 'returns the result of callbacks'
+    context 'when allow_participation callbacks are defined' do
+      trial_subject { |cfg| cfg.allow_participation = -> (expmt, allowed, ptcpt, mtdt) { return false } }
+
+      it 'runs callbacks' do
+        expect(subject).to receive(:run_callbacks).with(:allow_participation, true, subject.participant, nil)
+        subject.allow_participation?
+      end
+
+      it 'returns the result of callbacks' do
+        expect(subject.allow_participation?).to be_falsey
+      end
+    end
   end
 
   describe '#allow_conversion?' do
     context 'when a checkpoint is provided' do
-      it 'calls allow_conversion? on the checkpoint'
-      it 'passes the metadata through to the checkpoint'
+      trial_subject { metric :test_goal }
+      metric(:test_goal)
+      variant(:alternate)
+
+      it 'calls allow_conversion? on the checkpoint' do
+        expect(metric).to receive(:allow_conversion?).with(subject, variant, nil)
+        subject.allow_conversion?(variant, metric)
+      end
+
+      it 'passes the metadata through to the checkpoint' do
+        expect(metric).to receive(:allow_conversion?).with(subject, variant, {foo: :bar})
+        subject.allow_conversion?(variant, metric, {foo: :bar})
+      end
     end
 
     context 'when no checkpoint is provided' do
+      trial_subject
+      variant(:alternate)
+
       context 'and no allow_conversion callbacks are defined' do
-        it 'returns true'
+        it 'does not run callbacks' do
+          expect(subject).to_not receive(:run_callbacks)
+          subject.allow_conversion?(variant)
+        end
+
+        it 'returns true' do
+          expect(subject.allow_conversion?(variant)).to be_truthy
+        end
       end
 
-      it 'runs callbacks'
-      it 'returns the result of callbacks'
+      context 'and allow_conversion callbacks are defined' do
+        trial_subject { |cfg| cfg.allow_conversion = -> (expmt, allowed, chkpt, vrnt, ptcpt, mtdt) { return false } }
+
+        it 'runs callbacks' do
+          expect(subject).to receive(:run_callbacks).with(:allow_conversion, true, nil, variant, subject.participant, nil)
+          subject.allow_conversion?(variant)
+        end
+
+        it 'returns the result of callbacks' do
+          expect(subject.allow_conversion?(variant)).to be_falsey
+        end
+      end
     end
   end
 
@@ -1708,12 +1816,29 @@ RSpec.describe TrailGuide::Experiments::Base do
   end
 
   describe '#combined_experiments' do
-    context 'when the experiment is a combined experiment' do
-      it 'returns an array of child experiments'
+    trial_subject
+
+    it 'memoizes the combined experiments' do
+      expect { subject.combined_experiments }.to change { subject.instance_variable_get(:@combined_experiments) }
     end
 
     context 'when the experiment is not a combined experiment' do
-      it 'returns an empty array'
+      it 'returns an empty array' do
+        expect(subject.combined_experiments).to eq([])
+      end
+    end
+
+    context 'when the experiment is a combined experiment' do
+      combined
+      participant
+      subject { experiment.new(participant) }
+
+      it 'returns an array of child experiments' do
+        expect(subject.combined_experiments.count).to be(2)
+        subject.combined_experiments.each do |ce|
+          expect(ce.class).to be < TrailGuide::CombinedExperiment
+        end
+      end
     end
   end
 

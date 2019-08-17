@@ -64,8 +64,14 @@ module TrailGuide::GroupDSL
     before             { experiments << send(name) }
   end
 
+  def experiment_subject(name=nil, **opts, &block)
+    experiment(name, **opts, &block)
+    subject { experiment }
+  end
+
   def combined(name=nil, **opts, &block)
     name ||= [*('a'..'z'),*('0'..'9')].shuffle[0,8].join
+    opts[:combined] ||= [:first, :second]
     experiment(name, **opts, &block)
     let(:combined) { send(name).combined_experiments }
   end
@@ -89,10 +95,20 @@ module TrailGuide::GroupDSL
     let(:participant) { TrailGuide::Participant.new(context, adapter: adapter) }
   end
 
-  def trial(expmt=nil, ptcpt=nil)
-    expmt ||= experiment
-    ptcpt ||= participant
-    let(:trial) { expmt.new(ptcpt) }
+  def trial(**opts, &block)
+    name = opts.delete(:name)
+    name ||= [*('a'..'z'),*('0'..'9')].shuffle[0,8].join
+    context = opts.delete(:context)
+    adapter = opts.delete(:adapter)
+    adapter ||= TrailGuide::Adapters::Participants::Anonymous
+    experiment(name, **opts, &block)
+    participant(context, adapter: adapter)
+    let(:trial) { experiment.new(participant) }
+  end
+
+  def trial_subject(**opts, &block)
+    trial(**opts, &block)
+    subject { trial }
   end
 end
 

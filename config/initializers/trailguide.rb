@@ -377,7 +377,7 @@ TrailGuide::Experiment.configure do |config|
   #
   # must return an experiment variant
   #
-  # config.rollout_winner = -> (experiment, winner, participant) { ... return variant }
+  # config.rollout_winner = -> (experiment, winner, participant) { return winner }
 end
 
 # admin ui configuration

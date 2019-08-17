@@ -381,6 +381,7 @@ module TrailGuide
       def allow_conversion?(variant, checkpoint=nil, metadata=nil)
         if checkpoint.nil?
           return true if callbacks[:allow_conversion].empty?
+          # TODO why pass checkpoint through here if checkpoints are handled by their own method? it will always be nil here given current logic
           run_callbacks(:allow_conversion, true, checkpoint, variant, participant, metadata)
         else
           checkpoint.allow_conversion?(self, variant, metadata)
