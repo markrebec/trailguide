@@ -42,7 +42,7 @@ module TrailGuide
           keys = opts.keys.dup.concat(args).concat(DEFAULT_KEYS).concat(CALLBACK_KEYS).uniq
           opts = opts.merge(ancestor.to_h.slice(*keys))
           opts[:name] = nil
-          opts[:goals] = ancestor.goals.map { |gl| gl.dup(experiment) }
+          opts[:goals] = ancestor.goals.dup
           opts[:combined] = ancestor.combined.dup
           opts[:variants] = ancestor.variants.map { |var| var.dup(experiment) }
           opts = opts.merge(ancestor.callbacks.map { |k,v| [k,[v].flatten.compact] }.to_h)
