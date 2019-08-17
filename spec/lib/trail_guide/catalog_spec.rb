@@ -590,87 +590,191 @@ RSpec.describe TrailGuide::Catalog do
   end
 
   describe '#find' do
+    experiment(:named)
+    experiment(:unregistered)
+    combined(:combo, combined: [:first_combo, :last_combo])
+    experiment(:grouped, groups: [:first_group])
+    subject { described_class.new([named, combo, grouped], combo.combined_experiments) }
+
+    before do
+      Object.send(:remove_const, :ClassyExperiment) if defined?(ClassyExperiment)
+      ClassyExperiment = Class.new(TrailGuide::Experiment) do
+        configure do |config|
+          config.name = :classy
+          variant :control
+          variant :alternate
+        end
+      end
+      subject.register(ClassyExperiment)
+    end
+    let(:classy) { ClassyExperiment }
+
+    before do
+      Object.send(:remove_const, :UnclassyExperiment) if defined?(UnclassyExperiment)
+      UnclassyExperiment = Class.new(TrailGuide::Experiment) do
+        configure do |config|
+          config.name = :unclassy
+          variant :control
+          variant :alternate
+        end
+      end
+    end
+    let(:classy) { UnclassyExperiment }
+
     context 'when provided with an experiment class' do
-      it 'returns the experiment'
+      it 'returns the experiment' do
+        expect(subject.find(ClassyExperiment)).to eq(ClassyExperiment)
+      end
 
       context 'for an unregistered experiment' do
-        it 'returns nil'
+        it 'returns nil' do
+          expect(subject.find(UnclassyExperiment)).to be_nil
+        end
       end
     end
 
     context 'when provided with a symbol' do
-      it 'returns the experiment'
+      it 'returns the experiment' do
+        expect(subject.find(:named)).to eq(named)
+      end
 
       context 'for an unregistered experiment' do
-        it 'returns nil'
+        it 'returns nil' do
+          expect(subject.find(:unregistered)).to be_nil
+        end
       end
 
       context 'for a combined experiment' do
-        it 'returns the experiment'
+        it 'returns the experiment' do
+          expect(subject.find(:first_combo)).to eq(combo.combined_experiments.find { |ce| ce.experiment_name == :first_combo })
+        end
       end
 
       context 'for a group' do
-        it 'returns the first experiment in that group'
+        it 'returns the first experiment in that group' do
+          expect(subject.find(:first_group)).to be < TrailGuide::Experiment
+        end
       end
     end
 
     context 'when provided with a string' do
-      it 'returns the experiment'
+      it 'returns the experiment' do
+        expect(subject.find('named')).to eq(named)
+      end
 
       context 'for an unregistered experiment' do
-        it 'returns nil'
+        it 'returns nil' do
+          expect(subject.find('unregistered')).to be_nil
+        end
       end
 
       context 'for a combined experiment' do
-        it 'returns the experiment'
+        it 'returns the experiment' do
+          expect(subject.find('first_combo')).to eq(combo.combined_experiments.find { |ce| ce.experiment_name == :first_combo })
+        end
       end
 
       context 'for a group' do
-        it 'returns the first experiment in that group'
+        it 'returns the first experiment in that group' do
+          expect(subject.find('first_group')).to be < TrailGuide::Experiment
+        end
       end
     end
   end
 
   describe '#select' do
+    experiment(:named)
+    experiment(:other)
+    experiment(:unregistered)
+    combined(:combo, combined: [:first_combo, :last_combo])
+    experiment(:grouped, groups: [:first_group])
+    experiment(:also_grouped, groups: [:first_group])
+    subject { described_class.new([named, other, combo, grouped, also_grouped], combo.combined_experiments) }
+
+    before do
+      Object.send(:remove_const, :ClassyExperiment) if defined?(ClassyExperiment)
+      ClassyExperiment = Class.new(TrailGuide::Experiment) do
+        configure do |config|
+          config.name = :classy
+          variant :control
+          variant :alternate
+        end
+      end
+      subject.register(ClassyExperiment)
+    end
+    let(:classy) { ClassyExperiment }
+
+    before do
+      Object.send(:remove_const, :UnclassyExperiment) if defined?(UnclassyExperiment)
+      UnclassyExperiment = Class.new(TrailGuide::Experiment) do
+        configure do |config|
+          config.name = :unclassy
+          variant :control
+          variant :alternate
+        end
+      end
+    end
+    let(:classy) { UnclassyExperiment }
+
     it_behaves_like 'a catalog enumerator'
 
     context 'when provided with an experiment class' do
-      it 'returns an array of matching experiments'
+      it 'returns an array of matching experiments' do
+        expect(subject.select(ClassyExperiment).to_a).to eq([ClassyExperiment])
+      end
 
       context 'for an unregistered experiment' do
-        it 'returns an empty array'
+        it 'returns an empty array' do
+          expect(subject.select(UnclassyExperiment).to_a).to eq([])
+        end
       end
     end
 
     context 'when provided with a symbol' do
-      it 'returns an array of matching experiments'
+      it 'returns an array of matching experiments' do
+        expect(subject.select(:named).to_a).to eq([named])
+      end
 
       context 'for an unregistered experiment' do
-        it 'returns an empty array'
+        it 'returns an empty array' do
+          expect(subject.select(:unregistered).to_a).to eq([])
+        end
       end
 
       context 'for a combined experiment' do
-        it 'returns an array of matching experiments'
+        it 'returns an array of matching experiments' do
+          expect(subject.select(:first_combo).to_a).to eq(combo.combined_experiments.select { |ce| ce.experiment_name == :first_combo })
+        end
       end
 
       context 'for a group' do
-        it 'returns an array of matching experiments'
+        it 'returns an array of matching experiments' do
+          expect(subject.select(:first_group).to_a).to eq([grouped, also_grouped])
+        end
       end
     end
 
     context 'when provided with a string' do
-      it 'returns an array of matching experiments'
+      it 'returns an array of matching experiments' do
+        expect(subject.select('named').to_a).to eq([named])
+      end
 
       context 'for an unregistered experiment' do
-        it 'returns an empty array'
+        it 'returns an empty array' do
+          expect(subject.select('unregistered').to_a).to eq([])
+        end
       end
 
       context 'for a combined experiment' do
-        it 'returns an array of matching experiments'
+        it 'returns an array of matching experiments' do
+          expect(subject.select('first_combo').to_a).to eq(combo.combined_experiments.select { |ce| ce.experiment_name == :first_combo })
+        end
       end
 
       context 'for a group' do
-        it 'returns an array of matching experiments'
+        it 'returns an array of matching experiments' do
+          expect(subject.select('first_group').to_a).to eq([grouped, also_grouped])
+        end
       end
     end
   end
@@ -791,7 +895,17 @@ RSpec.describe TrailGuide::Catalog do
   end
 
   describe '#missing' do
-    pending
+    experiment(:named)
+    subject { described_class.new([named]) }
+    before {
+      named.save!
+      TrailGuide.redis.hsetnx('not_exist', 'name', 'not_exist')
+      TrailGuide.redis.set('unregistered:key', 'foobar')
+    }
+
+    it 'returns stored keys that do not match experiments in the catalog' do
+      expect(subject.missing).to eq(['not_exist', 'unregistered:key'])
+    end
   end
 
   describe '#orphaned' do
