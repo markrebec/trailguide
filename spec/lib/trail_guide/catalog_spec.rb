@@ -22,7 +22,19 @@ RSpec.describe TrailGuide::Catalog do
   end
 
   describe '.load_experiments!' do
-    pending
+    it 'resets the catalog singleton' do
+      expect { described_class.load_experiments! }.to change { described_class.instance_variable_get(:@catalog) }
+    end
+
+    it 'loads yaml experiments' do
+      expect(described_class).to receive(:load_yaml_experiments)
+      described_class.load_experiments!
+    end
+
+    it 'evals ruby experiments' do
+      expect(TrailGuide::Catalog::DSL).to receive(:instance_eval)
+      described_class.load_experiments!
+    end
   end
 
   describe '.load_yaml_experiments' do
@@ -30,7 +42,27 @@ RSpec.describe TrailGuide::Catalog do
   end
 
   describe '.combined_experiment' do
-    pending
+    combined(:combo, combined: [:first_combo]) { goals [:first_goal, :last_goal] }
+
+    it 'returns a combined experiment' do
+      expect(described_class.combined_experiment(combo, :first_combo)).to be < TrailGuide::CombinedExperiment
+    end
+
+    it 'uses the provided experiment as the parent' do
+      expect(described_class.combined_experiment(combo, :first_combo).configuration.parent).to eq(combo)
+    end
+
+    it 'clears the combined config' do
+      expect(described_class.combined_experiment(combo, :first_combo).configuration.combined).to eq([])
+    end
+
+    it 'duplicates the parent variants' do
+      expect(described_class.combined_experiment(combo, :first_combo).configuration.variants.map(&:name)).to eq(combo.variants.map(&:name))
+    end
+
+    it 'duplicates the parent goals' do
+      expect(described_class.combined_experiment(combo, :first_combo).configuration.goals.map(&:name)).to eq(combo.goals.map(&:name))
+    end
   end
 
   describe '#initialize' do
@@ -70,7 +102,37 @@ RSpec.describe TrailGuide::Catalog do
   end
 
   describe '#combined_experiment' do
-    pending
+    combined
+
+    context 'when the combined experiment has been memoized' do
+      subject { described_class.new([experiment], experiment.combined_experiments) }
+
+      it 'does not call the class method' do
+        expect(subject.class).to_not receive(:combined_experiment)
+        subject.combined_experiment(experiment, :first)
+      end
+
+      it 'returns the experiment' do
+        expect(subject.combined_experiment(experiment, :first)).to eq(experiment.combined_experiments.first)
+      end
+    end
+
+    context 'when the combined experiment has not been memoized' do
+      subject { described_class.new([experiment]) }
+
+      it 'calls the class method' do
+        expect(subject.class).to receive(:combined_experiment).with(experiment, :first)
+        subject.combined_experiment(experiment, :first)
+      end
+
+      it 'memoizes the experiment' do
+        expect { subject.combined_experiment(experiment, :first) }.to change { subject.instance_variable_get(:@combined) }
+      end
+
+      it 'returns the experiment' do
+        expect(subject.combined_experiment(experiment, :first).experiment_name).to eq(:first)
+      end
+    end
   end
 
   describe '#each' do
