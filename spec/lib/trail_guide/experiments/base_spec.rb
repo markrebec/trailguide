@@ -1687,6 +1687,23 @@ RSpec.describe TrailGuide::Experiments::Base do
   describe '#choose!' do
     trial_subject
 
+    it 'calls choose_variant! with the provided arguments' do
+      expect(subject).to receive(:choose_variant!).with(override: :control, metadata: {foo: :bar})
+      subject.choose!(override: :control, metadata: {foo: :bar})
+    end
+
+    it 'runs callbacks' do
+      allow(subject).to receive(:choose_variant!).with(any_args).and_return(experiment.variants.last)
+      allow(subject).to receive(:run_callbacks).with(:on_choose, any_args)
+      expect(subject).to receive(:run_callbacks).with(:on_use, experiment.variants.last, subject.participant, nil)
+      subject.choose!
+    end
+
+    it 'returns the variant' do
+      allow(subject).to receive(:choose_variant!).with(any_args).and_return(experiment.variants.last)
+      expect(subject.choose!).to eq(experiment.variants.last)
+    end
+
     context 'when trailguide is globally disabled' do
       before { TrailGuide.configuration.disabled = true }
       before { experiment.start! }
@@ -1697,20 +1714,29 @@ RSpec.describe TrailGuide::Experiments::Base do
       end
     end
 
-    it 'calls choose_variant! with the provided arguments' do
-      expect(subject).to receive(:choose_variant!).with(override: :control, metadata: {foo: :bar})
-      subject.choose!(override: :control, metadata: {foo: :bar})
-    end
+    context 'when redis is unavailable' do
+      before { allow(subject).to receive(:choose_variant!).and_raise(Errno::ECONNREFUSED) }
 
-    it 'runs callbacks' do
-      allow(subject).to receive(:run_callbacks).with(:on_choose, any_args)
-      expect(subject).to receive(:run_callbacks).with(:on_use, experiment.control, subject.participant, nil)
-      subject.choose!
-    end
+      it 'runs callbacks' do
+        expect(subject).to receive(:run_callbacks).with(:on_redis_failover, instance_of(Errno::ECONNREFUSED))
+        subject.choose!
+      end
 
-    it 'returns the variant' do
-      allow(subject).to receive(:choose_variant!).with(any_args).and_return(experiment.variants.last)
-      expect(subject.choose!).to eq(experiment.variants.last)
+      it 'returns control' do
+        expect(subject.choose!).to eq(experiment.control)
+      end
+
+      context 'and a valid override argument is present' do
+        it 'returns the override variant' do
+          expect(subject.choose!(override: :alternate)).to eq(experiment.variants.last)
+        end
+      end
+
+      context 'and an invalid override argument is present' do
+        it 'returns control' do
+          expect(subject.choose!(override: :invalid)).to eq(experiment.control)
+        end
+      end
     end
   end
 
