@@ -20,7 +20,9 @@ module TrailGuide
 
       def converted?(checkpoint=nil)
         @converted ||= {}
-        @converted[checkpoint || :converted] ||= participant.converted?(experiment, checkpoint)
+        converted_key = checkpoint || :converted
+        @converted[converted_key] = participant.converted?(experiment, checkpoint) unless @converted.key?(converted_key)
+        @converted[converted_key]
       end
 
       def converted!(variant, checkpoint, reset: false)
