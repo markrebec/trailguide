@@ -904,7 +904,7 @@ RSpec.describe TrailGuide::Catalog do
     }
 
     it 'returns stored keys that do not match experiments in the catalog' do
-      expect(subject.missing).to eq(['not_exist', 'unregistered:key'])
+      expect(subject.missing).to contain_exactly('not_exist', 'unregistered:key')
     end
   end
 
@@ -929,10 +929,8 @@ RSpec.describe TrailGuide::Catalog do
       }
 
       it 'returns all orphan keys as a hash' do
-        expect(subject.orphans).to eq({
-          'first' => ['also first', 'first orphan'],
-          'second' => ['second orphan']
-        })
+        expect(subject.orphans['first']).to contain_exactly('also first', 'first orphan')
+        expect(subject.orphans['second']).to contain_exactly('second orphan')
       end
     end
 
