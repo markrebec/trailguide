@@ -263,6 +263,10 @@ RSpec.describe TrailGuide::Variant do
     end
   end
 
+  describe '#measure' do
+    pending
+  end
+
   describe '#increment_participation!' do
     it 'increments the redis participants key by 1' do
       expect(TrailGuide.redis).to receive(:hincrby).with(subject.storage_key, 'participants', 1)
@@ -306,6 +310,16 @@ RSpec.describe TrailGuide::Variant do
           subject.increment_conversion!(:test_goal_one)
         end
       end
+    end
+  end
+
+  describe '#as_json' do
+    pending 'determine if this is being used (i.e. for exports) and either ditch it or cover it'
+  end
+
+  describe '#to_s' do
+    it 'returns the name as a string' do
+      expect(subject.to_s).to eq('test_variant_a')
     end
   end
 
