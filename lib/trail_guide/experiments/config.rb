@@ -36,7 +36,7 @@ module TrailGuide
 
       def initialize(experiment, *args, **opts, &block)
         @experiment = experiment
-        opts = opts.merge(default_config)
+        opts = default_config.merge(opts)
         ancestor = opts.delete(:inherit)
         if ancestor.present?
           keys = opts.keys.dup.concat(args).concat(DEFAULT_KEYS).concat(CALLBACK_KEYS).uniq
