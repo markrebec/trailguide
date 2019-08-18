@@ -252,35 +252,134 @@ RSpec.describe TrailGuide::Experiments::Config do
   end
 
   describe '#group' do
-    pending
+    before { subject[:groups] = [:first, :second] }
+
+    context 'without an argument' do
+      it 'returns the first group' do
+        expect(subject.group).to eq(:first)
+      end
+    end
+
+    context 'with an argument' do
+      it 'adds the group' do
+        expect { subject.group(:third) }.to change { subject.groups }.from([:first, :second]).to([:first, :second, :third])
+      end
+
+      it 'returns the group' do
+        expect(subject.group(:third)).to eq(:third)
+      end
+    end
   end
 
   describe '#group=' do
-    pending
+    before { subject[:groups] = [:first, :second] }
+
+    it 'adds the group to the front of the list' do
+      expect { subject.group = :third }.to change { subject.groups }.from([:first, :second]).to([:third, :first, :second])
+    end
+
+    it 'returns the group' do
+      expect(subject.send(:group=, :third)).to eq(:third)
+    end
   end
 
   describe '#groups' do
-    pending
+    before { subject[:groups] = [:first, :second] }
+
+    context 'without any arguments' do
+      it 'returns the array of groups' do
+        expect(subject.groups).to eq([:first, :second])
+      end
+    end
+
+    context 'with group arguments' do
+      it 'adds the groups to the list' do
+        expect { subject.groups(:third, :last) }.to change { subject.groups }.from([:first, :second]).to([:first, :second, :third, :last])
+      end
+
+      it 'returns the array of groups' do
+        expect(subject.groups(:third, :last)).to eq([:first, :second, :third, :last])
+      end
+    end
   end
 
   describe '#groups=' do
-    pending
+    it 'sets the list of groups' do
+      expect { subject.groups = :first, :second }.to change { subject.groups }.from([]).to([:first, :second])
+    end
+
+    context 'when groups have been set' do
+      before { subject[:groups] = [:first, :second] }
+
+      it 'clears the existing groups' do
+        expect { subject.groups = :third, :last }.to change { subject.groups }.from([:first, :second]).to([:third, :last])
+      end
+    end
   end
 
   describe '#goal' do
-    pending
+    let(:cfg) { {} }
+    let(:blk) { Proc.new {} }
+
+    it 'creates a new goal with the provided arguments' do
+      expect(TrailGuide::Metrics::Goal).to receive(:new).with(subject.experiment, :foobar, **cfg, &blk)
+      subject.goal(:foobar, **cfg, &blk)
+    end
+
+    it 'adds the goal to the list of goals' do
+      expect { subject.goal(:foobar, **cfg, &blk) }.to change { subject.goals }
+    end
   end
 
   describe '#goal=' do
-    pending
+    it 'creates a new goal with the provided arguments' do
+      expect(TrailGuide::Metrics::Goal).to receive(:new).with(subject.experiment, :foobar)
+      subject.goal = :foobar
+    end
+
+    it 'adds the goal to the list of goals' do
+      expect { subject.goal = :foobar }.to change { subject.goals }
+    end
   end
 
   describe '#goals' do
-    pending
+    before { subject.goals = :foo, :bar }
+
+    context 'without any arguments' do
+      it 'returns the array of goals' do
+        expect(subject.goals.map(&:name)).to eq([:foo, :bar])
+      end
+    end
+
+    context 'with goal arguments' do
+      it 'adds the goals to the list' do
+        expect { subject.goals(:third, :last) }.to change { subject.goals.map(&:name) }.from([:foo, :bar]).to([:foo, :bar, :third, :last])
+      end
+
+      it 'returns the array of goals' do
+        expect(subject.goals(:third, :last).map(&:name)).to eq([:foo, :bar, :third, :last])
+      end
+    end
   end
 
   describe '#goals=' do
-    pending
+    it 'creates new goals with the provided names' do
+      expect(TrailGuide::Metrics::Goal).to receive(:new).with(subject.experiment, :foo)
+      expect(TrailGuide::Metrics::Goal).to receive(:new).with(subject.experiment, :bar)
+      subject.goals = :foo, :bar
+    end
+
+    it 'sets the list of goals' do
+      expect { subject.goals = :foo, :bar }.to change { subject.goals }
+    end
+
+    context 'when goals have been set' do
+      before { subject.goal(:foo) }
+
+      it 'clears the existing groups' do
+        expect { subject.goals = :bar, :baz }.to change { subject.goals.map(&:name) }.from([:foo]).to([:bar, :baz])
+      end
+    end
   end
 
   describe '#metric' do

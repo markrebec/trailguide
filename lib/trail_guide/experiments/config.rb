@@ -90,31 +90,6 @@ module TrailGuide
         @name ||= (self[:name] || experiment.name).try(:to_s).try(:underscore).try(:to_sym)
       end
 
-      def groups(*grps)
-        self[:groups] ||= []
-        unless grps.empty?
-          self[:groups] = self[:groups].concat([grps].flatten.map { |g| g.to_s.underscore.to_sym })
-        end
-        self[:groups]
-      end
-
-      def groups=(*grps)
-        self[:groups] = [grps].flatten.map { |g| g.to_s.underscore.to_sym }
-      end
-
-      def group(grp=nil)
-        unless grp.nil?
-          groups << grp.to_s.underscore.to_sym
-          return groups.last
-        end
-        groups.first
-      end
-
-      def group=(grp)
-        groups.unshift(grp.to_s.underscore.to_sym)
-        groups.first
-      end
-
       def algorithm
         @algorithm ||= TrailGuide::Algorithms.algorithm(self[:algorithm])
       end
@@ -151,7 +126,32 @@ module TrailGuide
         variant
       end
 
-      # TODO rework the goals stuff to better handle hash config opts
+      def groups(*grps)
+        self[:groups] ||= []
+        self[:groups] = self[:groups].map { |g| g.to_s.underscore.to_sym }
+        unless grps.empty?
+          self[:groups] = self[:groups].concat([grps].flatten.map { |g| g.to_s.underscore.to_sym })
+        end
+        self[:groups]
+      end
+
+      def groups=(*grps)
+        self[:groups] = [grps].flatten.map { |g| g.to_s.underscore.to_sym }
+      end
+
+      def group(grp=nil)
+        unless grp.nil?
+          groups << grp.to_s.underscore.to_sym
+          return groups.last
+        end
+        groups.first
+      end
+
+      def group=(grp)
+        groups.unshift(grp.to_s.underscore.to_sym)
+        groups.first
+      end
+
       def goal(name, **config, &block)
         goals << Metrics::Goal.new(experiment, name, **config, &block)
       end
@@ -169,6 +169,7 @@ module TrailGuide
 
       def goals(*names, **config, &block)
         self[:goals] ||= []
+        self[:goals] = self[:goals].map { |g| g.is_a?(Metrics::Goal) ? g : Metrics::Goal.new(experiment, g) }
         unless names.empty?
           self[:goals] = self[:goals].concat([names].flatten.map { |g| Metrics::Goal.new(experiment, g, **config, &block) })
         end
