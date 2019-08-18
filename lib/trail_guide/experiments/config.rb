@@ -192,8 +192,8 @@ module TrailGuide
       end
 
       def metrics=(*names)
-        self.groups = *names
-        self.goals = *names
+        self.send(:groups=, *names.flatten)
+        self.send(:goals=, *names.flatten)
       end
 
       def combined

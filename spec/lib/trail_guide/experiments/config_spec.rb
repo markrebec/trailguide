@@ -216,7 +216,39 @@ RSpec.describe TrailGuide::Experiments::Config do
   end
 
   describe '#control=' do
-    pending
+    before {
+      subject.configure {
+        variant :first
+        variant :second
+      }
+    }
+
+    it 'resets all variants' do
+      subject.variants.each { |v| expect(v).to receive(:variant!) }
+      subject.control = :first
+    end
+
+    it 'returns the variant' do
+      expect(subject.send(:control=, :first).name).to eq(:first)
+    end
+
+    context 'when the variant exists' do
+      it 'flags the variant as the control' do
+        subject.control = :second
+        expect(subject.control.name).to eq(:second)
+      end
+    end
+
+    context 'when the variant does not exist' do
+      it 'adds the variant' do
+        expect { subject.control = :third }.to change { subject.variants.count }.from(2).to(3)
+      end
+
+      it 'flags the variant as the control' do
+        subject.control = :third
+        expect(subject.control.name).to eq(:third)
+      end
+    end
   end
 
   describe '#group' do
@@ -252,19 +284,57 @@ RSpec.describe TrailGuide::Experiments::Config do
   end
 
   describe '#metric' do
-    pending
+    let(:cfg) { {} }
+    let(:blk) { Proc.new {} }
+
+    it 'calls group with the name' do
+      expect(subject).to receive(:group).with(:foobar)
+      subject.metric(:foobar, **cfg, &blk)
+    end
+
+    it 'calls goal with the arguments' do
+      expect(subject).to receive(:goal).with(:foobar, **cfg, &blk)
+      subject.metric(:foobar, **cfg, &blk)
+    end
   end
 
   describe '#metric=' do
-    pending
+    it 'calls group with the name' do
+      expect(subject).to receive(:group=).with(:foobar)
+      subject.metric = :foobar
+    end
+
+    it 'calls goal with the arguments' do
+      expect(subject).to receive(:goal=).with(:foobar)
+      subject.metric = :foobar
+    end
   end
 
   describe '#metrics' do
-    pending
+    let(:cfg) { {} }
+    let(:blk) { Proc.new {} }
+
+    it 'calls groups with the names' do
+      expect(subject).to receive(:groups).with(:foo, :bar)
+      subject.metrics(:foo, :bar, **cfg, &blk)
+    end
+
+    it 'calls goals with the arguments' do
+      expect(subject).to receive(:goals).with(:foo, :bar, **cfg, &blk)
+      subject.metrics(:foo, :bar, **cfg, &blk)
+    end
   end
 
   describe '#metrics=' do
-    pending
+    it 'calls groups with the names' do
+      expect(subject).to receive(:groups=).with(:foo, :bar)
+      subject.metrics = :foo, :bar
+    end
+
+    it 'calls goals with the arguments' do
+      expect(subject).to receive(:goals=).with(:foo, :bar)
+      subject.metrics = :foo, :bar
+    end
   end
 
   describe '#combined' do
