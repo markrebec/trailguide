@@ -57,6 +57,12 @@ RSpec.shared_examples 'a callback method' do |meth|
     end
   end
 
+  context 'with no arguments' do
+    it 'raises an ArgumentError' do
+      expect { subject.send(meth) }.to raise_exception(ArgumentError)
+    end
+  end
+
   context 'when configured via hash arguments' do
     subject { described_class.new(create_experiment(:config), **{meth => [:dummy]}) }
 
@@ -122,14 +128,94 @@ RSpec.describe TrailGuide::Experiments::Config do
   end
 
   describe '#name' do
+    context 'when configured with a name' do
+      before { subject.name = 'TestName' }
+
+      it 'underscores and converts the name to a symbol' do
+        expect(subject.name).to eq(:test_name)
+      end
+    end
+
+    context 'when not configured with a name' do
+      context 'with a custom experiment class' do
+        before do
+          Object.send(:remove_const, :ClassyExperiment) if defined?(ClassyExperiment)
+          ClassyExperiment = Class.new(TrailGuide::Experiment) do
+            configure do |config|
+              config.name = :classy
+              variant :control
+              variant :alternate
+            end
+          end
+        end
+
+        it 'underscores and converts the experiment class name to a symbol' do
+          expect(described_class.new(ClassyExperiment).name).to eq(:classy_experiment)
+        end
+      end
+
+      it 'returns an empty string' do
+        expect(subject.name).to be_blank
+      end
+    end
+  end
+
+  describe '#algorithm' do
+    before { subject.algorithm = :random }
+
+    it 'maps the configured algorithm to the algorithm class' do
+      expect(subject.algorithm).to eq(TrailGuide::Algorithms::Random)
+    end
+
+    it 'calls TrailGuide::Algorithms.algorithm' do
+      expect(TrailGuide::Algorithms).to receive(:algorithm).with(:random)
+      subject.algorithm
+    end
+  end
+
+  describe '#variants' do
+    before {
+      subject.configure {
+        variant :control
+        variant :alternate
+      }
+    }
+
+    it 'returns the array of variants' do
+      expect(subject.variants).to eq(subject[:variants])
+    end
+  end
+
+  describe '#variant' do
     pending
   end
 
-  describe '#groups' do
-    pending
+  describe '#control' do
+    before {
+      subject.configure {
+        variant :first
+        variant :last
+      }
+    }
+
+    context 'when a control has been set' do
+      it 'returns the control' do
+        expect(subject.control.name).to eq(:first)
+      end
+    end
+
+    context 'when no control has been set' do
+      before {
+        subject[:variants].each(&:variant!)
+      }
+
+      it 'returns the first variant' do
+        expect(subject.control.name).to eq(:first)
+      end
+    end
   end
 
-  describe '#groups=' do
+  describe '#control=' do
     pending
   end
 
@@ -141,23 +227,11 @@ RSpec.describe TrailGuide::Experiments::Config do
     pending
   end
 
-  describe '#algorithm' do
+  describe '#groups' do
     pending
   end
 
-  describe '#variants' do
-    pending
-  end
-
-  describe '#variant' do
-    pending
-  end
-
-  describe '#control' do
-    pending
-  end
-
-  describe '#control=' do
+  describe '#groups=' do
     pending
   end
 
@@ -194,15 +268,49 @@ RSpec.describe TrailGuide::Experiments::Config do
   end
 
   describe '#combined' do
-    pending
+    before { subject.combined = [:combo] }
+
+    it 'returns the array of variants' do
+      expect(subject.combined).to eq([:combo])
+    end
   end
 
   describe '#combined?' do
-    pending
+    context 'when not configured as a combined experiment' do
+      it 'returns false' do
+        expect(subject.combined?).to be(false)
+      end
+    end
+
+    context 'when configured as a combined experiment' do
+      before { subject.combined = [:combo] }
+
+      it 'returns true' do
+        expect(subject.combined?).to be(true)
+      end
+    end
   end
 
   describe '#callbacks' do
-    pending
+    it 'returns a hash of callbacks' do
+      expect(subject.callbacks).to eq({
+        on_choose: [],
+        on_use: [],
+        on_convert: [],
+        on_start: [],
+        on_schedule: [],
+        on_stop: [],
+        on_pause: [],
+        on_resume: [],
+        on_winner: [],
+        on_reset: [],
+        on_delete: [],
+        on_redis_failover: [],
+        allow_participation: [],
+        allow_conversion: [],
+        rollout_winner: [],
+      })
+    end
   end
 
   describe '#on_choose' do

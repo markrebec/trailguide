@@ -213,76 +213,91 @@ module TrailGuide
       end
 
       def on_choose(meth=nil, &block)
+        raise ArgumentError if meth.nil? && !block_given?
         self[:on_choose] ||= []
         self[:on_choose] << (meth || block)
       end
 
       def on_use(meth=nil, &block)
+        raise ArgumentError if meth.nil? && !block_given?
         self[:on_use] ||= []
         self[:on_use] << (meth || block)
       end
 
       def on_convert(meth=nil, &block)
+        raise ArgumentError if meth.nil? && !block_given?
         self[:on_convert] ||= []
         self[:on_convert] << (meth || block)
       end
 
       def on_start(meth=nil, &block)
+        raise ArgumentError if meth.nil? && !block_given?
         self[:on_start] ||= []
         self[:on_start] << (meth || block)
       end
 
       def on_schedule(meth=nil, &block)
+        raise ArgumentError if meth.nil? && !block_given?
         self[:on_schedule] ||= []
         self[:on_schedule] << (meth || block)
       end
 
       def on_stop(meth=nil, &block)
+        raise ArgumentError if meth.nil? && !block_given?
         self[:on_stop] ||= []
         self[:on_stop] << (meth || block)
       end
 
       def on_pause(meth=nil, &block)
+        raise ArgumentError if meth.nil? && !block_given?
         self[:on_pause] ||= []
         self[:on_pause] << (meth || block)
       end
 
       def on_resume(meth=nil, &block)
+        raise ArgumentError if meth.nil? && !block_given?
         self[:on_resume] ||= []
         self[:on_resume] << (meth || block)
       end
 
       def on_winner(meth=nil, &block)
+        raise ArgumentError if meth.nil? && !block_given?
         self[:on_winner] ||= []
         self[:on_winner] << (meth || block)
       end
 
       def on_reset(meth=nil, &block)
+        raise ArgumentError if meth.nil? && !block_given?
         self[:on_reset] ||= []
         self[:on_reset] << (meth || block)
       end
 
       def on_delete(meth=nil, &block)
+        raise ArgumentError if meth.nil? && !block_given?
         self[:on_delete] ||= []
         self[:on_delete] << (meth || block)
       end
 
       def on_redis_failover(meth=nil, &block)
+        raise ArgumentError if meth.nil? && !block_given?
         self[:on_redis_failover] ||= []
         self[:on_redis_failover] << (meth || block)
       end
 
       def allow_participation(meth=nil, &block)
+        raise ArgumentError if meth.nil? && !block_given?
         self[:allow_participation] ||= []
         self[:allow_participation] << (meth || block)
       end
 
       def allow_conversion(meth=nil, &block)
+        raise ArgumentError if meth.nil? && !block_given?
         self[:allow_conversion] ||= []
         self[:allow_conversion] << (meth || block)
       end
 
       def rollout_winner(meth=nil, &block)
+        raise ArgumentError if meth.nil? && !block_given?
         self[:rollout_winner] ||= []
         self[:rollout_winner] << (meth || block)
       end
