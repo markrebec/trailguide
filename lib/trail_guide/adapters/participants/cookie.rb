@@ -35,6 +35,7 @@ module TrailGuide
           end
 
           def destroy!
+            @cookie = nil
             cookies.delete(config.cookie.to_s)
           end
 
