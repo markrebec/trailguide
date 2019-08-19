@@ -32,11 +32,13 @@ module TrailGuide
 
       # TODO do we allow a method here? do we call it on the experiment?
       def allow_conversion(meth=nil, &block)
+        raise ArgumentError if meth.nil? && !block_given?
         self[:allow_conversion] ||= []
         self[:allow_conversion] << (meth || block)
       end
 
       def on_convert(meth=nil, &block)
+        raise ArgumentError if meth.nil? && !block_given?
         self[:on_convert] ||= []
         self[:on_convert] << (meth || block)
       end
