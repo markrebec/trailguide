@@ -53,5 +53,11 @@ RSpec.describe TrailGuide::Adapters::Participants::Cookie do
         expect(subject.config.expiration).to eq(1.month.to_i)
       end
     end
+
+    context 'when the context does not support cookies' do
+      it 'raises an UnsupportedContextError' do
+        expect { described_class.new(nil) }.to raise_exception(TrailGuide::UnsupportedContextError)
+      end
+    end
   end
 end
