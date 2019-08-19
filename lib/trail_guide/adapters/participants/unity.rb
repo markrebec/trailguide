@@ -8,6 +8,10 @@ module TrailGuide
 
         def initialize(&block)
           configure do |config|
+            # TODO make visitor/user configuration more flexible, allow stuff like:
+            #
+            # config.visitor = -> (context) { context.cookies['visitor_id'] }
+            # config.user =    -> (context) { context.current_user.try(:id) }
             config.visitor_cookie = nil
             config.user_id_key = :id
 
@@ -17,6 +21,7 @@ module TrailGuide
               config.expiration = 1.year.seconds
             end
 
+            # TODO use cookie or session adapter by default instead?
             config.visitor_adapter = TrailGuide::Adapters::Participants::Redis.configure do |config|
               config.namespace = 'unity:visitors'
               config.lookup = -> (visitor_id) { visitor_id }
