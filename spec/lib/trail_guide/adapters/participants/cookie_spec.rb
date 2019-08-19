@@ -6,7 +6,7 @@ RSpec.describe TrailGuide::Adapters::Participants::Cookie do
   let(:context) do
     Class.new do
       def cookies
-        {}
+        @cookies ||= {}
       end
     end.new
   end
