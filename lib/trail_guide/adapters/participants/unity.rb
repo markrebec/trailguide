@@ -57,9 +57,12 @@ module TrailGuide
           end
         end
 
+        # TODO introduce Unity::Adapter class, which wraps BOTH/ALL of the configured adapters (either anonymous, visitor, user, or visitor+user) to keep everything in sync between them
+
         protected
 
         def context_type
+          # TODO allow a configuration.preference when both visitor and user context are available?
           if visitor_context?
             return :visitor
           end
@@ -74,10 +77,10 @@ module TrailGuide
         def merge!
           user_adapter = configuration.user_adapter.new(unity.user_id)
           visitor_adapter = configuration.visitor_adapter.new(unity.visitor_id)
-          visitor_adapter.keys.each do |key|
-            user_adapter[key] = visitor_adapter[key] unless user_adapter[key].present?
+          user_adapter.keys.each do |key|
+            visitor_adapter[key] = user_adapter[key] unless visitor_adapter[key].present?
           end
-          visitor_adapter.destroy!
+          user_adapter.destroy!
         end
 
         def trailguide_context?
