@@ -43,7 +43,7 @@ module TrailGuide
           end
 
           if logged_out_context?
-            unity.visitor_id ||= context.send(:cookies)[configuration.visitor_cookie].gsub(/(%22|")/, '')
+            unity.visitor_id ||= context.send(:cookies)[configuration.visitor_cookie]
           end
 
           unity.sync!
@@ -74,10 +74,10 @@ module TrailGuide
         def merge!
           user_adapter = configuration.user_adapter.new(unity.user_id)
           visitor_adapter = configuration.visitor_adapter.new(unity.visitor_id)
-          user_adapter.keys.each do |key|
-            visitor_adapter[key] = user_adapter[key] unless visitor_adapter[key].present?
+          visitor_adapter.keys.each do |key|
+            user_adapter[key] = visitor_adapter[key] unless user_adapter[key].present?
           end
-          user_adapter.destroy!
+          visitor_adapter.destroy!
         end
 
         def trailguide_context?
