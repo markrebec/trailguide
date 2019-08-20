@@ -102,6 +102,25 @@ RSpec.describe TrailGuide::Experiments::Config do
       expect(TrailGuide::Algorithms).to receive(:algorithm).with(:random)
       subject.algorithm
     end
+
+    context 'when configured with an array' do
+      let(:blk) { -> (var,mtd) { return true } }
+      before { subject.algorithm = :static, blk }
+
+      it 'maps the configured algorithm to the algorithm class' do
+        expect(subject.algorithm).to be_a(TrailGuide::Algorithms::Static)
+      end
+
+      it 'passes the last argument as a block' do
+        expect(TrailGuide::Algorithms::Static).to receive(:new).with(no_args) { |&block| expect(blk).to be(block) }
+        subject.algorithm
+      end
+
+      it 'calls TrailGuide::Algorithms.algorithm' do
+        expect(TrailGuide::Algorithms).to receive(:algorithm).with(:static).and_call_original
+        subject.algorithm
+      end
+    end
   end
 
   describe '#variants' do

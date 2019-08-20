@@ -91,7 +91,11 @@ module TrailGuide
       end
 
       def algorithm
-        @algorithm ||= TrailGuide::Algorithms.algorithm(self[:algorithm])
+        if self[:algorithm].is_a?(Array) && self[:algorithm].last.respond_to?(:call)
+          @algorithm ||= TrailGuide::Algorithms.algorithm(self[:algorithm].first).new(&self[:algorithm].last)
+        else
+          @algorithm ||= TrailGuide::Algorithms.algorithm(self[:algorithm])
+        end
       end
 
       def variants
