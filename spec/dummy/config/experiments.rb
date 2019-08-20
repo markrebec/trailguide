@@ -1,3 +1,15 @@
+experiment :static_algo do |config|
+  config.summary = "example content-based experiment"
+  config.algorithm = :static, -> (variant, metadata) { variant[:foo] == metadata[:foo] }
+  config.sticky_assignment = false
+
+  variant :control, metadata: {foo: :bar}
+  variant :other, metadata: {foo: :baz}
+
+  # usage
+  # trailguide.choose(:static_algo, metadata: {foo: :baz}) # returns :other
+end
+
 experiment :basic_experiment do |config|
   config.summary = "simple A/B test showing off some basic configuration"
   config.track_winner_conversions = true
