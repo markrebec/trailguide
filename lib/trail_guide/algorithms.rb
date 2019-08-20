@@ -1,3 +1,4 @@
+require "trail_guide/algorithms/algorithm"
 require "trail_guide/algorithms/weighted"
 require "trail_guide/algorithms/distributed"
 require "trail_guide/algorithms/bandit"

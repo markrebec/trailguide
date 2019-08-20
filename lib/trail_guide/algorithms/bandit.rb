@@ -2,17 +2,7 @@ require 'simple-random'
 
 module TrailGuide
   module Algorithms
-    class Bandit
-      attr_reader :experiment
-
-      def self.choose!(experiment, **opts)
-        new(experiment).choose!(**opts)
-      end
-
-      def initialize(experiment)
-        @experiment = experiment
-      end
-
+    class Bandit < Algorithm
       def choose!(**opts)
         guess = best_guess
         experiment.variants.find { |var| var == guess }

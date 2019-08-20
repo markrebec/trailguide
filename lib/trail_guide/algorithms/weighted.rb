@@ -1,16 +1,6 @@
 module TrailGuide
   module Algorithms
-    class Weighted
-      attr_reader :experiment
-
-      def self.choose!(experiment, **opts)
-        new(experiment).choose!(**opts)
-      end
-
-      def initialize(experiment)
-        @experiment = experiment
-      end
-
+    class Weighted < Algorithm
       def choose!(**opts)
         weights   = experiment.variants.map(&:weight)
         reference = rand * weights.inject(:+)
