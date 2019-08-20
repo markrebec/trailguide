@@ -1,13 +1,22 @@
 module TrailGuide
   class Unity
-    NAMESPACE = :unity
+    class << self
+      def configuration
+        @configuration ||= Canfig::Config.new(namespace: :unity)
+      end
 
-    def self.clear!
-      keys = TrailGuide.redis.keys("#{NAMESPACE}:*")
-      TrailGuide.redis.del *keys unless keys.empty?
+      def configure(*args, &block)
+        configuration.configure(*args, &block)
+      end
+
+      def clear!
+        keys = TrailGuide.redis.keys("#{configuration.namespace}:*")
+        TrailGuide.redis.del *keys unless keys.empty?
+      end
     end
 
     attr_reader :visitor_id, :user_id
+    delegate :configuration, to: :class
 
     def initialize(user_id: nil, visitor_id: nil)
       @user_id = user_id.to_s if user_id.present?
@@ -74,19 +83,19 @@ module TrailGuide
     protected
 
     def user_key
-      "#{NAMESPACE}:uids:#{user_id}"
+      "#{configuration.namespace}:uids:#{user_id}"
     end
 
     def visitor_key
-      "#{NAMESPACE}:vids:#{visitor_id}"
+      "#{configuration.namespace}:vids:#{visitor_id}"
     end
 
     def stored_user_key
-      "#{NAMESPACE}:uids:#{stored_user_id}"
+      "#{configuration.namespace}:uids:#{stored_user_id}"
     end
 
     def stored_visitor_key
-      "#{NAMESPACE}:vids:#{stored_visitor_id}"
+      "#{configuration.namespace}:vids:#{stored_visitor_id}"
     end
   end
 end

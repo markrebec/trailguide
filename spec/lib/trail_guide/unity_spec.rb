@@ -2,14 +2,59 @@ require 'rails_helper'
 require 'trail_guide/unity'
 
 RSpec.describe TrailGuide::Unity do
-  describe "clear!" do
-    let(:keys) { 5.times.map { |i| "#{TrailGuide::Unity::NAMESPACE}:test_key:#{i}" } }
+  describe ".clear!" do
+    let(:keys) { 5.times.map { |i| "#{described_class.configuration.namespace}:test_key:#{i}" } }
 
     before { keys.each { |key| TrailGuide.redis.set(key, "foobar") } }
 
     it "clears all keys under the namespace" do
-      expect(TrailGuide.redis).to receive(:del) { |*args| expect(args.sort).to eq(TrailGuide.redis.keys("#{TrailGuide::Unity::NAMESPACE}:*").sort) }
-      TrailGuide::Unity.clear!
+      expect(TrailGuide.redis).to receive(:del) { |*args| expect(args.sort).to eq(TrailGuide.redis.keys("#{described_class.configuration.namespace}:*").sort) }
+      described_class.clear!
+    end
+  end
+
+  describe '.configuration' do
+    it 'returns a configuration object' do
+      expect(described_class.configuration).to be_a(Canfig::Config)
+    end
+
+    it 'memoizes the configuration object' do
+      expect(described_class.instance_variable_get(:@configuration)).to be(described_class.configuration)
+    end
+  end
+
+  describe '.configure' do
+    let(:arg) { {} }
+    let(:blk) { -> (cfg) { } }
+
+    it 'calls configure on the configuration object with the provided arguments' do
+      expect(described_class.configuration).to receive(:configure).with(arg, &blk)
+      described_class.configure(arg, &blk)
+    end
+  end
+
+  describe '#initialize' do
+    context 'with a user_id' do
+      subject { described_class.new(user_id: 123) }
+
+      it 'sets the @user_id to a string' do
+        expect(subject.instance_variable_get(:@user_id)).to eq('123')
+      end
+    end
+
+    context 'with a visitor_id' do
+      subject { described_class.new(visitor_id: 321) }
+
+      it 'sets the @visitor_id to a string' do
+        expect(subject.instance_variable_get(:@visitor_id)).to eq('321')
+      end
+    end
+  end
+
+  describe '#configuration' do
+    it 'delegates to the class' do
+      expect(described_class).to receive(:configuration)
+      subject.configuration
     end
   end
 
