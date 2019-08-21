@@ -1,7 +1,7 @@
 module TrailGuide
   module Algorithms
     class Static < Algorithm
-      def self.choose!(experiment, metadata:, &block)
+      def self.choose!(experiment, metadata: nil, &block)
         new(experiment, &block).choose!(metadata: metadata)
       end
 
@@ -16,15 +16,17 @@ module TrailGuide
       end
 
       def choose!(metadata: nil)
-        return experiment.control unless metadata.present?
+        return control unless metadata.present?
 
-        experiment.variants.find do |variant|
+        variant = variants.find do |variant|
           @block.call(variant.metadata, metadata)
-        end || experiment.control
+        end
+        
+        variant || control
       rescue => e
         TrailGuide.logger.error "#{e.class.name}: #{e.message}"
         TrailGuide.logger.error e.backtrace.first
-        experiment.control
+        control
       end
     end
   end

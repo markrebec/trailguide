@@ -14,6 +14,16 @@ module TrailGuide
       def choose!(**opts)
         raise NotImplementedError, 'You must define a `#choose!(**opts)` method for your algorithm'
       end
+
+      protected
+
+      def control
+        experiment.control
+      end
+
+      def variants
+        experiment.variants
+      end
     end
   end
 end

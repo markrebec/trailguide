@@ -2,7 +2,7 @@ module TrailGuide
   module Algorithms
     class Random < Algorithm
       def choose!(**opts)
-        experiment.variants.sample
+        variants.sample
       end
     end
   end

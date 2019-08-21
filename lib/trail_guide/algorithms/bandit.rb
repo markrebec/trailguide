@@ -5,7 +5,7 @@ module TrailGuide
     class Bandit < Algorithm
       def choose!(**opts)
         guess = best_guess
-        experiment.variants.find { |var| var == guess }
+        variants.find { |var| var == guess }
       end
 
       private
@@ -13,7 +13,7 @@ module TrailGuide
       def best_guess
         @best_guess ||= begin
           guesses = {}
-          experiment.variants.each do |variant|
+          variants.each do |variant|
             guesses[variant.name] = arm_guess(variant.participants, variant.converted)
           end
           gmax = guesses.values.max
