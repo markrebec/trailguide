@@ -4,20 +4,21 @@ module TrailGuide
   module Algorithms
     class Bandit < Algorithm
       def choose!(**opts)
-        guess = best_guess
-        variants.find { |var| var == guess }
+        variants.find { |var| var == best_guess }
       end
 
       private
 
+      def guesses
+        @guesses ||= variants.map do |variant|
+          [variant.name, arm_guess(variant.participants, variant.converted)]
+        end.to_h
+      end
+
       def best_guess
         @best_guess ||= begin
-          guesses = {}
-          variants.each do |variant|
-            guesses[variant.name] = arm_guess(variant.participants, variant.converted)
-          end
           gmax = guesses.values.max
-          best = guesses.keys.select { |name| guesses[name] ==  gmax }
+          best = guesses.keys.select { |name| guesses[name] == gmax }
           best.sample
         end
       end

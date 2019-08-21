@@ -6,6 +6,7 @@ module TrailGuide
       end
 
       def initialize(experiment=nil, &block)
+        raise ArgumentError, 'You must provide a comparison block when using the static algorithm' unless block_given?
         @block = block
         super(experiment)
       end

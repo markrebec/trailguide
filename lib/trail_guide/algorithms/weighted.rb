@@ -2,12 +2,10 @@ module TrailGuide
   module Algorithms
     class Weighted < Algorithm
       def choose!(**opts)
-        weights   = variants.map(&:weight)
-        reference = rand * weights.inject(:+)
-
-        variants.zip(weights).each do |variant,weight|
-          return variant if weight >= reference
-          reference -= weight
+        reference = rand * variants.sum(&:weight)
+        variants.each do |variant|
+          return variant if variant.weight >= reference
+          reference -= variant.weight
         end
       end
     end
