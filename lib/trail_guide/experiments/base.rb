@@ -23,6 +23,10 @@ module TrailGuide
           configuration.configure(*args, &block)
         end
 
+        def adapter
+          @adapter ||= TrailGuide::Adapters::Experiments::Redis.new(self)
+        end
+
         # TODO alias name once specs have solid coverage
         def experiment_name
           configuration.name

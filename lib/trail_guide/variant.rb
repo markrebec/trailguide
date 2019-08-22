@@ -14,6 +14,10 @@ module TrailGuide
       @control = control
     end
 
+    def adapter
+      @adapter ||= TrailGuide::Adapters::Variants::Redis.new(self)
+    end
+
     def ==(other)
       if other.is_a?(self.class)
         # TODO eventually remove the experiment requirement here once we start

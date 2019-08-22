@@ -1,5 +1,5 @@
 require 'rails_helper'
-require 'shared_examples/participant_adapter'
+require 'shared_examples/adapters/participant'
 
 RSpec.describe TrailGuide::Adapters::Participants::Multi do
   subject { described_class.new(context) }
