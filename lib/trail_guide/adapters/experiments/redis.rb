@@ -20,10 +20,11 @@ module TrailGuide
 
         def set(attr, val)
           redis.hset(storage_key, attr.to_s, val.to_s)
+          val.to_s
         end
 
         def setnx(attr, val)
-          redis.hsetnx(storage_key, attr.to_s, val.to_s)
+          val.to_s if redis.hsetnx(storage_key, attr.to_s, val.to_s)
         end
 
         def delete(attr)

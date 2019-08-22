@@ -302,7 +302,7 @@ RSpec.describe TrailGuide::Experiments::Base do
       end
 
       it 'does not set the storage key' do
-        expect(TrailGuide.redis).to_not receive(:hset)
+        expect(subject.adapter).to_not receive(:set)
         subject.start!
       end
 
@@ -323,7 +323,7 @@ RSpec.describe TrailGuide::Experiments::Base do
       end
 
       it 'sets the storage key' do
-        expect(TrailGuide.redis).to receive(:hset).with(subject.storage_key, 'started_at', kind_of(Numeric))
+        expect(subject.adapter).to receive(:set).with(:started_at, kind_of(Numeric))
         subject.start!
       end
 
@@ -368,7 +368,7 @@ RSpec.describe TrailGuide::Experiments::Base do
       end
 
       it 'does not set the storage key' do
-        expect(TrailGuide.redis).to_not receive(:hset)
+        expect(subject.adapter).to_not receive(:set)
         subject.schedule!(start_time)
       end
 
@@ -389,7 +389,7 @@ RSpec.describe TrailGuide::Experiments::Base do
       end
 
       it 'sets the storage key' do
-        expect(TrailGuide.redis).to receive(:hset).with(subject.storage_key, 'started_at', start_time.to_i)
+        expect(subject.adapter).to receive(:set).with(:started_at, start_time.to_i)
         subject.schedule!(start_time)
       end
 
@@ -402,8 +402,8 @@ RSpec.describe TrailGuide::Experiments::Base do
         let(:stop_time) { Time.now + 2.hours }
 
         it 'sets the stop_at storage key' do
-          expect(TrailGuide.redis).to receive(:hset).with(subject.storage_key, 'started_at', start_time.to_i)
-          expect(TrailGuide.redis).to receive(:hset).with(subject.storage_key, 'stopped_at', stop_time.to_i)
+          expect(subject.adapter).to receive(:set).with(:started_at, start_time.to_i)
+          expect(subject.adapter).to receive(:set).with(:stopped_at, stop_time.to_i)
           subject.schedule!(start_time, stop_time)
         end
 
@@ -442,7 +442,7 @@ RSpec.describe TrailGuide::Experiments::Base do
       end
 
       it 'does not set the storage key' do
-        expect(TrailGuide.redis).to_not receive(:hset)
+        expect(subject.adapter).to_not receive(:set)
         subject.pause!
       end
 
@@ -460,7 +460,7 @@ RSpec.describe TrailGuide::Experiments::Base do
       end
 
       it 'sets the storage key' do
-        expect(TrailGuide.redis).to receive(:hset).with(subject.storage_key, 'paused_at', kind_of(Numeric))
+        expect(subject.adapter).to receive(:set).with(:paused_at, kind_of(Numeric))
         subject.pause!
       end
 
@@ -498,7 +498,7 @@ RSpec.describe TrailGuide::Experiments::Base do
       end
 
       it 'does not set the storage key' do
-        expect(TrailGuide.redis).to_not receive(:hset)
+        expect(subject.adapter).to_not receive(:set)
         subject.pause!
       end
 
@@ -529,7 +529,7 @@ RSpec.describe TrailGuide::Experiments::Base do
       end
 
       it 'deletes the paused_at storage key' do
-        expect(TrailGuide.redis).to receive(:hdel).with(subject.storage_key, 'paused_at')
+        expect(subject.adapter).to receive(:delete).with(:paused_at)
         subject.resume!
       end
 
@@ -553,7 +553,7 @@ RSpec.describe TrailGuide::Experiments::Base do
       end
 
       it 'does not delete the paused_at storage key' do
-        expect(TrailGuide.redis).to_not receive(:hdel)
+        expect(subject.adapter).to_not receive(:delete)
         subject.resume!
       end
 
@@ -581,7 +581,7 @@ RSpec.describe TrailGuide::Experiments::Base do
       end
 
       it 'does not set the storage key' do
-        expect(TrailGuide.redis).to_not receive(:hset)
+        expect(subject.adapter).to_not receive(:set)
         subject.stop!
       end
 
@@ -599,7 +599,7 @@ RSpec.describe TrailGuide::Experiments::Base do
       end
 
       it 'does not set the storage key' do
-        expect(TrailGuide.redis).to_not receive(:hset)
+        expect(subject.adapter).to_not receive(:set)
         subject.stop!
       end
 
@@ -617,7 +617,7 @@ RSpec.describe TrailGuide::Experiments::Base do
       end
 
       it 'sets the stopped_at storage key' do
-        expect(TrailGuide.redis).to receive(:hset).with(subject.storage_key, 'stopped_at', kind_of(Numeric))
+        expect(subject.adapter).to receive(:set).with(:stopped_at, kind_of(Numeric))
         subject.stop!
       end
 
@@ -1103,7 +1103,7 @@ RSpec.describe TrailGuide::Experiments::Base do
         end
 
         it 'stores the winning variant' do
-          expect(TrailGuide.redis).to receive(:hset).with(subject.storage_key, 'winner', subject.variants.first.name.to_s.underscore)
+          expect(subject.adapter).to receive(:set).with(:winner, subject.variants.first.name)
           subject.declare_winner!(subject.variants.first)
         end
 
@@ -1138,7 +1138,7 @@ RSpec.describe TrailGuide::Experiments::Base do
         end
 
         it 'does not store the winning variant' do
-          expect(TrailGuide.redis).to_not receive(:hset)
+          expect(subject.adapter).to_not receive(:set)
           subject.declare_winner!(other.variants.first)
         end
       end
@@ -1156,7 +1156,7 @@ RSpec.describe TrailGuide::Experiments::Base do
         end
 
         it 'stores the winning variant' do
-          expect(TrailGuide.redis).to receive(:hset).with(subject.storage_key, 'winner', subject.variants.first.name.to_s.underscore)
+          expect(subject.adapter).to receive(:set).with(:winner, subject.variants.first.name)
           subject.declare_winner!(:control)
         end
 
@@ -1181,7 +1181,7 @@ RSpec.describe TrailGuide::Experiments::Base do
         end
 
         it 'does not store the winning variant' do
-          expect(TrailGuide.redis).to_not receive(:hset)
+          expect(subject.adapter).to_not receive(:set)
           subject.declare_winner!(:nonexistent)
         end
       end
@@ -1200,7 +1200,7 @@ RSpec.describe TrailGuide::Experiments::Base do
     }
 
     it 'deletes the stored winner' do
-      expect(TrailGuide.redis).to receive(:hdel).with(subject.storage_key, 'winner')
+      expect(subject.adapter).to receive(:delete).with(:winner)
       subject.clear_winner!
     end
   end
@@ -1305,7 +1305,7 @@ RSpec.describe TrailGuide::Experiments::Base do
     }
 
     it 'checks if the storage key exists' do
-      expect(TrailGuide.redis).to receive(:exists).with(subject.storage_key)
+      expect(subject.adapter).to receive(:persisted?)
       subject.persisted?
     end
 
@@ -1341,8 +1341,8 @@ RSpec.describe TrailGuide::Experiments::Base do
     end
 
     it 'stores a hash with the name in the storage key' do
-      subject.variants.each { |var| allow(TrailGuide.redis).to receive(:hsetnx).with(var.storage_key, 'name', var.name) }
-      expect(TrailGuide.redis).to receive(:hsetnx).with(subject.storage_key, 'name', subject.experiment_name)
+      subject.variants.each { |var| allow(var.adapter).to receive(:setnx).with(:name, var.name) }
+      expect(subject.adapter).to receive(:setnx).with(:name, subject.experiment_name)
       subject.save!
     end
 
@@ -1383,8 +1383,8 @@ RSpec.describe TrailGuide::Experiments::Base do
     end
 
     it 'deletes the hash stored under the storage key' do
-      subject.variants.each { |var| allow(TrailGuide.redis).to receive(:del).with(var.storage_key) }
-      expect(TrailGuide.redis).to receive(:del).with(subject.storage_key)
+      subject.variants.each { |var| allow(var.adapter).to receive(:destroy) }
+      expect(subject.adapter).to receive(:destroy)
       subject.delete!
     end
 

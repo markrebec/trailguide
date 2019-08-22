@@ -64,7 +64,7 @@ module TrailGuide
         def start!(context=nil)
           return false if started?
           save! unless persisted?
-          started = TrailGuide.redis.hset(storage_key, 'started_at', Time.now.to_i)
+          started = adapter.set(:started_at, Time.now.to_i)
           run_callbacks(:on_start, context)
           started
         end
@@ -72,45 +72,45 @@ module TrailGuide
         def schedule!(start_at, stop_at=nil, context=nil)
           return false if started?
           save! unless persisted?
-          scheduled = TrailGuide.redis.hset(storage_key, 'started_at', start_at.to_i)
-          TrailGuide.redis.hset(storage_key, 'stopped_at', stop_at.to_i) if stop_at
+          scheduled = adapter.set(:started_at, start_at.to_i)
+          adapter.set(:stopped_at, stop_at.to_i) if stop_at
           run_callbacks(:on_schedule, start_at, stop_at, context)
           scheduled
         end
 
         def pause!(context=nil)
           return false unless running? && configuration.can_resume?
-          paused = TrailGuide.redis.hset(storage_key, 'paused_at', Time.now.to_i)
+          paused = adapter.set(:paused_at, Time.now.to_i)
           run_callbacks(:on_pause, context)
           paused
         end
 
         def stop!(context=nil)
           return false unless started? && !stopped?
-          stopped = TrailGuide.redis.hset(storage_key, 'stopped_at', Time.now.to_i)
+          stopped = adapter.set(:stopped_at, Time.now.to_i)
           run_callbacks(:on_stop, context)
           stopped
         end
 
         def resume!(context=nil)
           return false unless paused? && configuration.can_resume?
-          resumed = TrailGuide.redis.hdel(storage_key, 'paused_at')
+          resumed = adapter.delete(:paused_at)
           run_callbacks(:on_resume, context)
           !!resumed
         end
 
         def started_at
-          started = TrailGuide.redis.hget(storage_key, 'started_at')
+          started = adapter.get(:started_at)
           return Time.at(started.to_i) if started
         end
 
         def paused_at
-          paused = TrailGuide.redis.hget(storage_key, 'paused_at')
+          paused = adapter.get(:paused_at)
           return Time.at(paused.to_i) if paused
         end
 
         def stopped_at
-          stopped = TrailGuide.redis.hget(storage_key, 'stopped_at')
+          stopped = adapter.get(:stopped_at)
           return Time.at(stopped.to_i) if stopped
         end
 
@@ -150,16 +150,16 @@ module TrailGuide
           variant = variants.find { |var| var == variant } unless variant.is_a?(Variant)
           return false unless variant.present? && variant.experiment == self
           run_callbacks(:on_winner, variant, context)
-          TrailGuide.redis.hset(storage_key, 'winner', variant.name.to_s.underscore)
+          adapter.set(:winner, variant.name)
           variant
         end
 
         def clear_winner!
-          TrailGuide.redis.hdel(storage_key, 'winner')
+          adapter.delete(:winner)
         end
 
         def winner
-          winner = TrailGuide.redis.hget(storage_key, 'winner')
+          winner = adapter.get(:winner)
           return variants.find { |var| var == winner } if winner
         end
 
@@ -167,24 +167,24 @@ module TrailGuide
           if combined?
             combined.all? { |combo| TrailGuide.catalog.find(combo).winner? }
           else
-            TrailGuide.redis.hexists(storage_key, 'winner')
+            adapter.exists?(:winner)
           end
         end
 
         def persisted?
-          TrailGuide.redis.exists(storage_key)
+          adapter.persisted?
         end
 
         def save!
-          combined.each { |combo| TrailGuide.catalog.find(combo).save! }
+          combined_experiments.each(&:save!)
           variants.each(&:save!)
-          TrailGuide.redis.hsetnx(storage_key, 'name', experiment_name)
+          adapter.setnx(:name, experiment_name)
         end
 
         def delete!(context=nil)
           combined.each { |combo| TrailGuide.catalog.find(combo).delete! }
           variants.each(&:delete!)
-          deleted = TrailGuide.redis.del(storage_key)
+          deleted = adapter.destroy
           run_callbacks(:on_delete, context)
           true
         end

@@ -52,15 +52,15 @@ module TrailGuide
     end
 
     def persisted?
-      TrailGuide.redis.exists(storage_key)
+      adapter.persisted?
     end
 
     def save!
-      TrailGuide.redis.hsetnx(storage_key, 'name', name)
+      adapter.setnx(:name, name)
     end
 
     def delete!
-      TrailGuide.redis.del(storage_key)
+      adapter.destroy
     end
 
     def reset!
@@ -69,20 +69,20 @@ module TrailGuide
     end
 
     def participants
-      (TrailGuide.redis.hget(storage_key, 'participants') || 0).to_i
+      (adapter.get(:participants) || 0).to_i
     end
 
     def converted(checkpoint=nil)
       if experiment.goals.empty?
         raise InvalidGoalError, "You provided the checkpoint `#{checkpoint}` but the experiment `#{experiment.experiment_name}` does not have any goals defined." unless checkpoint.nil?
-        (TrailGuide.redis.hget(storage_key, 'converted') || 0).to_i
+        (adapter.get(:converted) || 0).to_i
       elsif !checkpoint.nil?
         goal = experiment.goals.find { |g| g == checkpoint }
         raise InvalidGoalError, "Invalid goal checkpoint `#{checkpoint}` for experiment `#{experiment.experiment_name}`." if goal.nil?
-        (TrailGuide.redis.hget(storage_key, goal.to_s) || 0).to_i
+        (adapter.get(goal.name) || 0).to_i
       else
         experiment.goals.sum do |goal|
-          (TrailGuide.redis.hget(storage_key, goal.to_s) || 0).to_i
+          (adapter.get(goal.name) || 0).to_i
         end
       end
     end
@@ -99,16 +99,16 @@ module TrailGuide
     end
 
     def increment_participation!
-      TrailGuide.redis.hincrby(storage_key, 'participants', 1)
+      adapter.increment(:participants)
     end
 
     def increment_conversion!(checkpoint=nil)
       if checkpoint.nil?
-        checkpoint = 'converted'
+        checkpoint = :converted
       else
-        checkpoint = experiment.goals.find { |g| g == checkpoint }.to_s
+        checkpoint = experiment.goals.find { |g| g == checkpoint }.name
       end
-      TrailGuide.redis.hincrby(storage_key, checkpoint, 1)
+      adapter.increment(checkpoint)
     end
 
     # export the variant state (not config) as json

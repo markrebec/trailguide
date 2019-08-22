@@ -136,22 +136,22 @@ RSpec.describe TrailGuide::Variant do
   end
 
   describe '#persisted?' do
-    it 'checks if the redis key exists' do
-      expect(TrailGuide.redis).to receive(:exists).with(subject.storage_key)
+    it 'checks if the adapter key exists' do
+      expect(subject.adapter).to receive(:persisted?)
       subject.persisted?
     end
   end
 
   describe '#save!' do
-    it 'saves the variant to redis' do
-      expect(TrailGuide.redis).to receive(:hsetnx).with(subject.storage_key, 'name', subject.name)
+    it 'saves the variant to the adapter' do
+      expect(subject.adapter).to receive(:setnx).with(:name, subject.name)
       subject.save!
     end
   end
 
   describe '#delete!' do
-    it 'deletes the variant from redis' do
-      expect(TrailGuide.redis).to receive(:del).with(subject.storage_key)
+    it 'deletes the variant from the adapter' do
+      expect(subject.adapter).to receive(:destroy)
       subject.delete!
     end
   end
@@ -268,8 +268,8 @@ RSpec.describe TrailGuide::Variant do
   end
 
   describe '#increment_participation!' do
-    it 'increments the redis participants key by 1' do
-      expect(TrailGuide.redis).to receive(:hincrby).with(subject.storage_key, 'participants', 1)
+    it 'increments the adapter participants key by 1' do
+      expect(subject.adapter).to receive(:increment).with(:participants)
       subject.increment_participation!
     end
   end
@@ -284,8 +284,8 @@ RSpec.describe TrailGuide::Variant do
         converted_count.times { subject.increment_conversion! }
       end
 
-      it 'increments the redis converted key by 1' do
-        expect(TrailGuide.redis).to receive(:hincrby).with(subject.storage_key, 'converted', 1)
+      it 'increments the adapter converted key by 1' do
+        expect(subject.adapter).to receive(:increment).with(:converted)
         subject.increment_conversion!
       end
     end
@@ -305,8 +305,8 @@ RSpec.describe TrailGuide::Variant do
       end
 
       context 'with a goal checkpoint' do
-        it 'increments the redis goal conversion key' do
-          expect(TrailGuide.redis).to receive(:hincrby).with(subject.storage_key, 'test_goal_one', 1)
+        it 'increments the adapter goal conversion key' do
+          expect(subject.adapter).to receive(:increment).with(:test_goal_one)
           subject.increment_conversion!(:test_goal_one)
         end
       end

@@ -25,12 +25,20 @@ RSpec.shared_examples 'an experiment adapter' do
     it 'sets the attribute to the value' do
       expect { subject.set(:foobar, :baz) }.to change { subject.get(:foobar) }.from(nil).to('baz')
     end
+
+    it 'returns the set value' do
+      expect(subject.set(:foobar, :baz)).to eq('baz')
+    end
   end
 
   describe '#setnx' do
     context 'when the attribute does not exist' do
       it 'sets the attribute to the value' do
         expect { subject.setnx(:foobar, :baz) }.to change { subject.get(:foobar) }.from(nil).to('baz')
+      end
+
+      it 'returns the set value' do
+        expect(subject.setnx(:foobar, :baz)).to eq('baz')
       end
     end
 
@@ -39,6 +47,10 @@ RSpec.shared_examples 'an experiment adapter' do
 
       it 'does not change the stored value' do
         expect { subject.setnx(:foobar, :qux) }.to_not change { subject.get(:foobar) }
+      end
+
+      it 'returns nil' do
+        expect(subject.setnx(:foobar, :qux)).to be_nil
       end
     end
   end
