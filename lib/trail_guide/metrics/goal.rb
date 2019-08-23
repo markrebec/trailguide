@@ -30,11 +30,12 @@ module TrailGuide
         elsif other.is_a?(String) || other.is_a?(Symbol)
           other = other.to_s.underscore
           return name == other.to_sym || to_s == other
-        elsif other.is_a?(Array)
-          return to_s == other.flatten.map { |o| o.to_s.underscore }.join('/')
-        elsif other.is_a?(Hash)
-          # TODO "flatten" it out and compare it to_s
-          return false
+        # Currently unused placeholder for future functionality
+        #elsif other.is_a?(Array)
+        #  return to_s == other.flatten.map { |o| o.to_s.underscore }.join('/')
+        #elsif other.is_a?(Hash)
+        #  # TODO "flatten" it out and compare it to_s
+        #  return false
         end
       end
 
@@ -58,16 +59,17 @@ module TrailGuide
               trial.send(callback, trial, result, self, *args)
             end
           end
-        else
-          args.unshift(self)
-          args.unshift(trial)
-          callbacks[hook].each do |callback|
-            if callback.respond_to?(:call)
-              callback.call(*args)
-            else
-              trial.send(callback, *args)
-            end
-          end
+        # Currently unused placeholder for future functionality
+        #else
+        #  args.unshift(self)
+        #  args.unshift(trial)
+        #  callbacks[hook].each do |callback|
+        #    if callback.respond_to?(:call)
+        #      callback.call(*args)
+        #    else
+        #      trial.send(callback, *args)
+        #    end
+        #  end
         end
       end
 
