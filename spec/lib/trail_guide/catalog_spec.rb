@@ -491,6 +491,14 @@ RSpec.describe TrailGuide::Catalog do
       end
     end
 
+    context 'when the other experiment is fresh' do
+      before { foo.start! }
+
+      it 'sorts fresh experiments above others' do
+        expect(subject.by_started.to_a).to eq([bar, foo])
+      end
+    end
+
     context 'when neither experiment is fresh' do
       before { experiments.each(&:start!) }
 
@@ -507,6 +515,14 @@ RSpec.describe TrailGuide::Catalog do
 
         it 'sorts experiments with winners below others' do
           expect(subject.by_started.to_a).to eq([foo, bar])
+        end
+      end
+
+      context 'and the other has a winner defined' do
+        before { foo.declare_winner!(foo.variants.sample) }
+
+        it 'sorts experiments with winners below others' do
+          expect(subject.by_started.to_a).to eq([bar, foo])
         end
       end
 
@@ -539,6 +555,14 @@ RSpec.describe TrailGuide::Catalog do
 
           it 'sorts running experiments above others' do
             expect(subject.by_started.to_a).to eq([foo, bar])
+          end
+        end
+
+        context 'and the other is running' do
+          before { foo.stop! }
+
+          it 'sorts running experiments above others' do
+            expect(subject.by_started.to_a).to eq([bar, foo])
           end
         end
 
@@ -582,6 +606,17 @@ RSpec.describe TrailGuide::Catalog do
             end
           end
 
+          context 'and the other is paused' do
+            before {
+              bar.pause!
+              foo.stop!
+            }
+
+            it 'sorts paused experiments above others' do
+              expect(subject.by_started.to_a).to eq([bar, foo])
+            end
+          end
+
           context 'and neither is paused' do
             context 'and both are scheduled' do
               before {
@@ -617,6 +652,18 @@ RSpec.describe TrailGuide::Catalog do
 
               it 'sorts scheduled experiments above others' do
                 expect(subject.by_started.to_a).to eq([foo, bar])
+              end
+            end
+
+            context 'and the other is scheduled' do
+              before {
+                foo.stop!
+                bar.reset!
+                bar.schedule!(2.hours.from_now)
+              }
+
+              it 'sorts scheduled experiments above others' do
+                expect(subject.by_started.to_a).to eq([bar, foo])
               end
             end
 
@@ -984,6 +1031,14 @@ RSpec.describe TrailGuide::Catalog do
       expect(TrailGuide.redis).to receive(:expire).with('orphans:testkey', 15.minutes.seconds)
       subject.orphaned('testkey', 'dummy trace')
     end
+
+    context 'when redis is unavailable' do
+      before { allow(TrailGuide.redis).to receive(:sadd).and_raise(SocketError) }
+
+      it 'returns false' do
+        expect(subject.orphaned('testkey', 'dummy trace')).to be_falsey
+      end
+    end
   end
 
   describe '#orphans' do
@@ -1005,12 +1060,57 @@ RSpec.describe TrailGuide::Catalog do
         expect(subject.orphans).to eq({})
       end
     end
+
+    context 'when redis is unavailable' do
+      before { allow(TrailGuide.redis).to receive(:keys).and_raise(SocketError) }
+
+      it 'returns an empty hash' do
+        expect(subject.orphans).to eq({})
+      end
+    end
   end
 
   describe '#adopted' do
     it 'deletes the provided key under the orphans namespace' do
       expect(TrailGuide.redis).to receive(:del).with('orphans:testkey')
       subject.adopted('testkey')
+    end
+
+    context 'when redis is unavailable' do
+      before { allow(TrailGuide.redis).to receive(:del).and_raise(SocketError) }
+
+      it 'returns false' do
+        expect(subject.adopted('testkey')).to be_falsey
+      end
+    end
+  end
+
+  describe '#method_missing' do
+    context 'when the experiments array responds to the method' do
+      it 'proxies the method to the experiments array' do
+        expect(subject.experiments).to receive(:slice).with(0,1)
+        subject.slice(0,1)
+      end
+    end
+
+    context 'when the experiments array does not respond to the method' do
+      it 'raises a NoMethodError' do
+        expect { subject.foobar }.to raise_exception(NoMethodError)
+      end
+    end
+  end
+
+  describe '#respond_to_missing?' do
+    context 'when the experiments array responds to the method' do
+      it 'returns true' do
+        expect(subject.respond_to?(:slice)).to be_truthy
+      end
+    end
+
+    context 'when the experiments array does not respond to the method' do
+      it 'returns false' do
+        expect(subject.respond_to?(:foobar)).to be_falsey
+      end
     end
   end
 end
