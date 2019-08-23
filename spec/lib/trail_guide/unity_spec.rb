@@ -14,6 +14,8 @@ RSpec.describe TrailGuide::Unity do
   end
 
   describe '.configuration' do
+    let!(:config) { described_class.configuration }
+
     it 'returns a configuration object' do
       expect(described_class.configuration).to be_a(Canfig::Config)
     end
