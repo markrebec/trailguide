@@ -198,7 +198,7 @@ module TrailGuide
           locals = { locals: locals } if context_type == :controller
 
           template = templates[variant.name] if templates
-          prefix ||= (context.try(:view_context) || context).lookup_context.prefixes.first + '/'
+          prefix ||= (context.try(:view_context) || context).lookup_context.prefixes.first + '/' rescue ''
           template ||= "#{prefix.to_s}#{variant.experiment.experiment_name.to_s.underscore}/#{variant.name.to_s.underscore}"
 
           context.send(:render, template.to_s, **locals)
