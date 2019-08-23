@@ -8,18 +8,49 @@ RSpec.describe TrailGuide::Calculators::Bayesian do
   let(:probability) { TrailGuide::Calculators::DEFAULT_PROBABILITY }
   let(:base) { :default }
 
-  # TODO cover requirements: integration, rubystats, distribution
-  #before {
-  #  if defined?(Integration)
-  #    TmpInt = Integration
-  #    Object.send(:remove_const, :Integration)
-  #    Integration = TmpInt
-  #    Object.send(:remove_const, :TmpInt)
-  #  end
-  #}
+  context 'when the integration gem is not available' do
+    experiment
+    before {
+      TmpIntegration = Integration
+      Object.send(:remove_const, :Integration)
+    }
+    after {
+      Integration = TmpIntegration
+      Object.send(:remove_const, :TmpIntegration)
+    }
+
+    it 'raises a NoIntegrationLibrary error' do
+      expect { described_class.new(experiment) }.to raise_exception(TrailGuide::Calculators::NoIntegrationLibrary)
+    end
+  end
+
+  context 'when using an unknown beta distribution library' do
+    experiment
+    let(:beta) { :foobar }
+
+    it 'raises an UnknownBetaDistributionLibrary error' do
+      expect { described_class.new(experiment, beta: beta) }.to raise_exception(TrailGuide::Calculators::UnknownBetaDistributionLibrary)
+    end
+  end
 
   context 'when using rubystats' do
     let(:beta) { :rubystats }
+
+    context 'when the rubystats gem is not available' do
+      experiment
+      before {
+        TmpRubystats = Rubystats
+        Object.send(:remove_const, :Rubystats)
+      }
+      after {
+        Rubystats = TmpRubystats
+        Object.send(:remove_const, :TmpRubystats)
+      }
+
+      it 'raises a NoBetaDistributionLibrary error' do
+        expect { described_class.new(experiment, beta: beta) }.to raise_exception(TrailGuide::Calculators::NoBetaDistributionLibrary)
+      end
+    end
 
     context 'with multiple variants' do
       experiment {
@@ -176,6 +207,22 @@ RSpec.describe TrailGuide::Calculators::Bayesian do
 
   context 'when using distribution' do
     let(:beta) { :distribution }
+
+    context 'when the distribution gem is not available' do
+      experiment
+      before {
+        TmpDistribution = Distribution
+        Object.send(:remove_const, :Distribution)
+      }
+      after {
+        Distribution = TmpDistribution
+        Object.send(:remove_const, :TmpDistribution)
+      }
+
+      it 'raises a NoBetaDistributionLibrary error' do
+        expect { described_class.new(experiment, beta: beta) }.to raise_exception(TrailGuide::Calculators::NoBetaDistributionLibrary)
+      end
+    end
 
     context 'with multiple variants' do
       experiment {
