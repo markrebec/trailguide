@@ -183,7 +183,37 @@ RSpec.describe TrailGuide::Metrics::Goal do
   end
 
   describe '#run_callbacks' do
-    pending
+    participant
+    let(:trial) { experiment.new(participant) }
+    variant(:control)
+
+    context 'with an unsupported callback' do
+      it 'returns false' do
+        expect(subject.run_callbacks(:foobar, trial)).to be_falsey
+      end
+    end
+
+    context 'when the callback is a block' do
+      let(:block) { -> (trial,result,goal,var,ptcpt,metadata) { } }
+      before { subject.configuration.allow_conversion = [block] }
+
+      it 'executes the block' do
+        expect(block).to receive(:call).with(trial, true, subject, control, trial.participant, {foo: :bar})
+        subject.run_callbacks(:allow_conversion, trial, true, control, trial.participant, {foo: :bar})
+      end
+    end
+
+    context 'when the callback is a method symbol' do
+      before {
+        trial.define_singleton_method(:foobar) { |*args| nil }
+        subject.configuration.allow_conversion = [:foobar]
+      }
+
+      it 'calls the method on the trial' do
+        expect(trial).to receive(:foobar).with(trial, true, subject, control, trial.participant, {foo: :bar})
+        subject.run_callbacks(:allow_conversion, trial, true, control, trial.participant, {foo: :bar})
+      end
+    end
   end
 
   describe '#to_s' do
