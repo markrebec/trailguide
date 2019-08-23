@@ -16,6 +16,7 @@ module TrailGuide
       @trailguide_participant
     end
 
+    # TODO maybe move this to the experiment proxy so it can be configured per-experiment
     def trailguide_excluded_request?
       @trailguide_excluded_request ||= instance_exec(self, &TrailGuide.configuration.request_filter)
     end
