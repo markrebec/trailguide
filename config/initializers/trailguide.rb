@@ -4,6 +4,11 @@ TrailGuide.configure do |config|
   # logger object
   config.logger = Rails.logger
 
+  # paths where trailguide will look for experiment configs and classes, each
+  # can be configured with multiple paths
+  config.paths.configs << 'config/experiments'
+  config.paths.classes << 'app/experiments'
+
   # url string or initialized Redis object
   config.redis = ENV['REDIS_URL']
 

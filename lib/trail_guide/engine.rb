@@ -9,7 +9,7 @@ module TrailGuide
     paths["config/routes.rb"] = "config/routes/engine.rb"
 
     initializer "trailguide" do |app|
-      TrailGuide::Catalog.load_experiments!
+      TrailGuide::Catalog.load_experiments!(**TrailGuide.configuration.paths.to_h)
       if TrailGuide.configuration.include_helpers
         ActionController::Base.send :include, TrailGuide::Helper
         ActionController::Base.helper TrailGuide::Helper

@@ -1,6 +1,24 @@
 require 'rails_helper'
 
 RSpec.describe TrailGuide::Config do
+  describe '#paths' do
+    it 'returns a struct' do
+      expect(subject.paths).to be_a(Struct)
+    end
+
+    describe '#configs' do
+      it 'returns an array' do
+        expect(subject.paths.configs).to be_a(Array)
+      end
+    end
+
+    describe '#classes' do
+      it 'returns an array' do
+        expect(subject.paths.classes).to be_a(Array)
+      end
+    end
+  end
+
   describe '#redis' do
     context 'when configured with a redis client' do
       let(:redis) { Redis.new }

@@ -13,11 +13,8 @@ module TrailGuide
       super(*args, **opts, &block)
     end
 
-    # TODO is this still needed? I think this is legacy from before experiment configs were expanded
-    def configure(*args, &block)
-      super(*args) do |config|
-        yield(config, TrailGuide::Experiment.configuration) if block_given?
-      end
+    def paths
+      @paths ||= Struct.new(:configs, :classes).new([],[])
     end
 
     def redis
