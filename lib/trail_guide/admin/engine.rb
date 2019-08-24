@@ -8,6 +8,7 @@ module TrailGuide
       end
 
       paths["config/routes.rb"] = "config/routes/admin.rb"
+      paths["config/initializers"] = ["config/initializers/admin.rb", "config/initializers/assets.rb"]
     end
   end
 end

@@ -7,6 +7,7 @@ module TrailGuide
     end
 
     paths["config/routes.rb"] = "config/routes/engine.rb"
+    paths["config/initializers"] = ["config/initializers/trailguide.rb", "config/initializers/experiment.rb"]
 
     initializer "trailguide" do |app|
       TrailGuide::Catalog.load_experiments!(**TrailGuide.configuration.paths.to_h)
