@@ -2197,7 +2197,355 @@ RSpec.describe TrailGuide::Experiments::Base do
   end
 
   describe '#convert!' do
-    pending
+    trial
+    variant(:control)
+    variant(:alternate)
+    let(:assigned) { alternate }
+    subject { trial }
+    before { experiment.start! }
+    before { participant.participating!(assigned) }
+
+    context 'when the experiment is not started' do
+      before { experiment.reset! }
+
+      context 'and is not calibrating' do
+        it 'does not convert' do
+          expect(participant).to_not receive(:converted!)
+          expect(assigned).to_not receive(:increment_conversion!)
+          subject.convert!
+        end
+
+        it 'returns false' do
+          expect(subject.convert!).to be_falsey
+        end
+      end
+
+      context 'and is calibrating' do
+        trial { |cfg| cfg.enable_calibration = true }
+
+        context 'and the user is not participating' do
+          before { participant.exit!(experiment) }
+
+          it 'does not convert' do
+            expect(participant).to_not receive(:converted!)
+            expect(assigned).to_not receive(:increment_conversion!)
+            subject.convert!
+          end
+
+          it 'returns false' do
+            expect(subject.convert!).to be_falsey
+          end
+        end
+
+        context 'and the user is participating' do
+          context 'but the assigned variant is not control' do
+            it 'does not convert' do
+              expect(participant).to_not receive(:converted!)
+              expect(assigned).to_not receive(:increment_conversion!)
+              subject.convert!
+            end
+
+            it 'returns false' do
+              expect(subject.convert!).to be_falsey
+            end
+          end
+
+          context 'and the assigned variant is control' do
+            let(:assigned) { control }
+
+            it 'stores participant conversion' do
+              expect(participant).to receive(:converted!).with(assigned, nil, reset: false)
+              subject.convert!
+            end
+
+            it 'increments variant conversion' do
+              expect(assigned).to receive(:increment_conversion!)
+              subject.convert!
+            end
+
+            it 'runs callbacks' do
+              expect(subject).to receive(:run_callbacks).with(:on_convert, nil, assigned, subject.participant, nil)
+              subject.convert!
+            end
+
+            it 'returns the variant' do
+              expect(subject.convert!).to be(assigned)
+            end
+          end
+        end
+      end
+    end
+
+    context 'when the experiment is started' do
+      context 'but not running' do
+        before { experiment.stop! }
+
+        it 'does not convert' do
+          expect(participant).to_not receive(:converted!)
+          expect(assigned).to_not receive(:increment_conversion!)
+          subject.convert!
+        end
+
+        it 'returns false' do
+          expect(subject.convert!).to be_falsey
+        end
+      end
+
+      context 'and the participant is not participating' do
+        before { participant.exit!(experiment) }
+
+        it 'does not convert' do
+          expect(participant).to_not receive(:converted!)
+          expect(assigned).to_not receive(:increment_conversion!)
+          subject.convert!
+        end
+
+        it 'returns false' do
+          expect(subject.convert!).to be_falsey
+        end
+      end
+
+      context 'and a winner has been selected' do
+        let(:winner) { alternate }
+        before { experiment.declare_winner!(winner) }
+
+        context 'and the experiment is not configured to track winner conversions' do
+          it 'does not convert' do
+            expect(participant).to_not receive(:converted!)
+            expect(assigned).to_not receive(:increment_conversion!)
+            subject.convert!
+          end
+
+          it 'returns false' do
+            expect(subject.convert!).to be_falsey
+          end
+        end
+
+        context 'and the experiment is configured to track winner conversions' do
+          trial { |cfg| cfg.track_winner_conversions = true }
+
+          context 'but the participant is not assigned to the winning variant' do
+            let(:assigned) { control }
+
+            it 'does not convert' do
+              expect(participant).to_not receive(:converted!)
+              expect(assigned).to_not receive(:increment_conversion!)
+              subject.convert!
+            end
+
+            it 'returns false' do
+              expect(subject.convert!).to be_falsey
+            end
+          end
+        end
+      end
+    end
+
+    context 'when the experiment has defined goals' do
+      trial { |cfg| cfg.goals = [:first, :last] }
+
+      context 'but no checkpoint was provided' do
+        it 'does not convert' do
+          expect(participant).to_not receive(:converted!)
+          expect(assigned).to_not receive(:increment_conversion!)
+          subject.convert! rescue nil
+        end
+
+        it 'raises an InvalidGoalError' do
+          expect { subject.convert! }.to raise_exception(TrailGuide::InvalidGoalError)
+        end
+      end
+
+      context 'and a valid goal was provided' do
+        let(:goal) { experiment.goals.first }
+
+        context 'and the participant has already converted the goal' do
+          before { participant.converted!(assigned, goal) }
+
+          context 'but the goal allows multiple conversions' do
+            trial { |cfg|
+              goal(:first) { |g| g.allow_multiple_conversions = true }
+              goal(:last)
+            }
+
+            it 'stores participant conversion' do
+              expect(participant).to receive(:converted!).with(assigned, goal, reset: false)
+              subject.convert!(goal.name)
+            end
+
+            it 'increments variant conversion' do
+              expect(assigned).to receive(:increment_conversion!)
+              subject.convert!(goal.name)
+            end
+
+            it 'runs callbacks' do
+              expect(goal).to receive(:run_callbacks).with(:on_convert, subject, assigned, subject.participant, nil)
+              subject.convert!(goal.name)
+            end
+
+            it 'returns the variant' do
+              expect(subject.convert!(goal.name)).to be(assigned)
+            end
+          end
+
+          context 'and the goal does not allow multiple conversions' do
+            it 'does not convert' do
+              expect(participant).to_not receive(:converted!)
+              expect(assigned).to_not receive(:increment_conversion!)
+              subject.convert!(goal.name)
+            end
+
+            it 'returns false' do
+              expect(subject.convert!(goal.name)).to be_falsey
+            end
+          end
+        end
+
+        context 'and the participant has not already converted the goal' do
+          context 'but has already converted another goal' do
+            before { participant.converted!(assigned, experiment.goals.last) }
+
+            context 'and the experiment allows multiple goals' do
+              trial { |cfg|
+                cfg.goals = [:first, :last]
+                cfg.allow_multiple_goals = true
+              }
+
+              it 'stores participant conversion' do
+                expect(participant).to receive(:converted!).with(assigned, goal, reset: false)
+                subject.convert!(goal.name)
+              end
+
+              it 'increments variant conversion' do
+                expect(assigned).to receive(:increment_conversion!)
+                subject.convert!(goal.name)
+              end
+
+              it 'runs callbacks' do
+                expect(goal).to receive(:run_callbacks).with(:on_convert, subject, assigned, subject.participant, nil)
+                subject.convert!(goal.name)
+              end
+
+              it 'returns the variant' do
+                expect(subject.convert!(goal.name)).to be(assigned)
+              end
+            end
+
+            context 'and the experiment does not allow multiple goals' do
+              it 'does not convert' do
+                expect(participant).to_not receive(:converted!)
+                expect(assigned).to_not receive(:increment_conversion!)
+                subject.convert!(goal.name)
+              end
+
+              it 'returns false' do
+                expect(subject.convert!(goal.name)).to be_falsey
+              end
+            end
+          end
+        end
+      end
+
+      context 'and an invalid goal was provided' do
+        it 'does not convert' do
+          expect(participant).to_not receive(:converted!)
+          expect(assigned).to_not receive(:increment_conversion!)
+          subject.convert!(:foobar) rescue nil
+        end
+
+        it 'raises an InvalidGoalError' do
+          expect { subject.convert!(:foobar) }.to raise_exception(TrailGuide::InvalidGoalError)
+        end
+      end
+    end
+
+    context 'when the experiment does not have defined goals' do
+      context 'but a checkpoint was provided' do
+        it 'does not convert' do
+          expect(participant).to_not receive(:converted!)
+          expect(assigned).to_not receive(:increment_conversion!)
+          subject.convert!(:foobar) rescue nil
+        end
+
+        it 'raises an InvalidGoalError' do
+          expect { subject.convert!(:foobar) }.to raise_exception(TrailGuide::InvalidGoalError)
+        end
+      end
+
+      context 'and no checkpoint was provided' do
+        context 'and the participant has already converted' do
+          before { participant.converted!(assigned) }
+
+          context 'but the experiment allows multiple conversions' do
+            trial { |cfg| cfg.allow_multiple_conversions = true }
+
+            it 'stores participant conversion' do
+              expect(participant).to receive(:converted!).with(assigned, nil, reset: false)
+              subject.convert!
+            end
+
+            it 'increments variant conversion' do
+              expect(assigned).to receive(:increment_conversion!)
+              subject.convert!
+            end
+
+            it 'runs callbacks' do
+              expect(subject).to receive(:run_callbacks).with(:on_convert, nil, assigned, subject.participant, nil)
+              subject.convert!
+            end
+
+            it 'returns the variant' do
+              expect(subject.convert!).to be(assigned)
+            end
+          end
+
+          context 'and the experiment does not allow multiple conversions' do
+            it 'does not convert' do
+              expect(participant).to_not receive(:converted!)
+              expect(assigned).to_not receive(:increment_conversion!)
+              subject.convert!
+            end
+
+            it 'returns false' do
+              expect(subject.convert!).to be_falsey
+            end
+          end
+        end
+      end
+    end
+
+    context 'when the experiment is configured not to allow conversion' do
+      trial { allow_conversion { |exp,rslt,var,goal,ptcpt,mtdt| false } }
+
+      it 'does not convert' do
+        expect(participant).to_not receive(:converted!)
+        expect(assigned).to_not receive(:increment_conversion!)
+        subject.convert!
+      end
+
+      it 'returns false' do
+        expect(subject.convert!).to be_falsey
+      end
+    end
+
+    it 'stores participant conversion' do
+      expect(participant).to receive(:converted!).with(assigned, nil, reset: false)
+      subject.convert!
+    end
+
+    it 'increments variant conversion' do
+      expect(assigned).to receive(:increment_conversion!)
+      subject.convert!
+    end
+
+    it 'runs callbacks' do
+      expect(subject).to receive(:run_callbacks).with(:on_convert, nil, assigned, subject.participant, nil)
+      subject.convert!
+    end
+
+    it 'returns the variant' do
+      expect(subject.convert!).to be(assigned)
+    end
   end
 
   describe '#allow_participation?' do
