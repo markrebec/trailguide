@@ -50,7 +50,7 @@ module TrailGuide
 
             expgoals.each do |expgoal|
               goal expgoal
-            end
+            end if expgoals.present?
 
             config.control                    = options[:control] if options[:control]
             config.groups                     = options[:groups] if options[:groups]
