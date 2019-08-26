@@ -2276,7 +2276,69 @@ RSpec.describe TrailGuide::Experiments::Base do
   end
 
   describe '#run_callbacks' do
-    pending
+    trial
+    variant(:control)
+    subject { trial }
+
+    context 'with an unsupported callback' do
+      it 'returns false' do
+        expect(subject.run_callbacks(:foobar)).to be_falsey
+      end
+    end
+
+    context 'when the callback is a block' do
+      let(:block) { -> (trial,result,goal,var,ptcpt,metadata) { } }
+
+      context 'and is a normal callback' do
+        before { subject.configuration.on_choose = [block] }
+
+        it 'executes the block' do
+          expect(block).to receive(:call).with(subject, control, subject.participant, {foo: :bar})
+          subject.run_callbacks(:on_choose, control, subject.participant, {foo: :bar})
+        end
+      end
+
+      context 'and is a reduced callback' do
+        before { subject.configuration.allow_participation = [block] }
+
+        it 'reduces the results' do
+          subject.configuration.allow_participation = [-> (trl,rslt,ptcpt,mtdt) { rslt + 1 } ]
+          expect(subject.run_callbacks(:allow_participation, 1, subject.participant, {foo: :bar})).to eq(2)
+        end
+
+        it 'executes the block' do
+          expect(block).to receive(:call).with(subject, true, subject.participant, {foo: :bar})
+          subject.run_callbacks(:allow_participation, true, subject.participant, {foo: :bar})
+        end
+      end
+    end
+
+    context 'when the callback is a method symbol' do
+      before { trial.define_singleton_method(:foobar) { |*args| nil } }
+
+      context 'and is a normal callback' do
+        before { subject.configuration.on_choose = [:foobar] }
+
+        it 'executes the block' do
+          expect(subject).to receive(:foobar).with(subject, control, subject.participant, {foo: :bar})
+          subject.run_callbacks(:on_choose, control, subject.participant, {foo: :bar})
+        end
+      end
+
+      context 'and is a reduced callback' do
+        before { subject.configuration.allow_participation = [:foobar] }
+
+        it 'reduces the results' do
+          subject.define_singleton_method(:foobar) { |trl,rslt,ptcpt,mtdt| rslt + 1 }
+          expect(subject.run_callbacks(:allow_participation, 1, subject.participant, {foo: :bar})).to eq(2)
+        end
+
+        it 'calls the method on the trial' do
+          expect(subject).to receive(:foobar).with(subject, true, subject.participant, {foo: :bar})
+          subject.run_callbacks(:allow_participation, true, subject.participant, {foo: :bar})
+        end
+      end
+    end
   end
 
   describe '#combined_experiments' do
