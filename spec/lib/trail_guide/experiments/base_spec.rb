@@ -1741,7 +1741,445 @@ RSpec.describe TrailGuide::Experiments::Base do
   end
 
   describe '#choose_variant!' do
-    pending
+    experiment(:other)
+    trial
+    variant(:control)
+    variant(:alternate)
+    before { trial.start! }
+    subject { trial }
+
+    context 'when trailguide is globally disabled' do
+      before { TrailGuide.configuration.disabled = true }
+      after  { TrailGuide.configuration.disabled = false }
+
+      it 'returns control' do
+        expect(subject.choose_variant!).to eq(control)
+      end
+
+      it 'does not increment variant participation' do
+        expect(control).to_not receive(:increment_participation!)
+        subject.choose_variant!
+      end
+
+      it 'does not store participant assignment' do
+        expect(participant).to_not receive(:participating!)
+        subject.choose_variant!
+      end
+    end
+
+    context 'when an override argument is present' do
+      context 'and the experiment is running' do
+        context 'and the experiment is not combined' do
+          context 'and the experiment is configured to track overrides' do
+            trial { |cfg| cfg.track_override = true }
+
+            it 'increments variant participation' do
+              expect(alternate).to receive(:increment_participation!)
+              subject.choose_variant!(override: :alternate)
+            end
+          end
+
+          context 'and the experiment is not configured to track overrides' do
+            it 'does not increment variant participation' do
+              expect(alternate).to_not receive(:increment_participation!)
+              subject.choose_variant!(override: :alternate)
+            end
+          end
+
+          context 'and the experiment is configured to store overrides' do
+            trial { |cfg| cfg.store_override = true }
+
+            context 'and configured with sticky assignment' do
+              it 'stores participant assignment' do
+                expect(participant).to receive(:participating!).with(alternate)
+                subject.choose_variant!(override: :alternate)
+              end
+            end
+
+            context 'and configured without sticky assignment' do
+              trial { |cfg|
+                cfg.store_override = true
+                cfg.sticky_assignment = false
+              }
+
+              it 'does not store participant assignment' do
+                expect(participant).to_not receive(:participating!)
+                subject.choose_variant!(override: :alternate)
+              end
+            end
+          end
+
+          context 'and the experiment is not configured to store overrides' do
+            it 'does not store participant assignment' do
+              expect(participant).to_not receive(:participating!)
+              subject.choose_variant!(override: :alternate)
+            end
+          end
+        end
+      end
+
+      it 'returns the override variant' do
+        expect(subject.choose_variant!(override: :alternate)).to be(alternate)
+      end
+    end
+
+    context 'when a winner has been selected' do
+      before { experiment.declare_winner!(alternate) }
+
+      context 'and the experiment is configured to track winner conversions' do
+        trial { |cfg| cfg.track_winner_conversions = true }
+
+        context 'and the experiment is running' do
+          context 'and the participant is not already assigned to the winner' do
+            it 'increments variant participation' do
+              expect(alternate).to receive(:increment_participation!)
+              subject.choose_variant!
+            end
+          end
+
+          context 'and the participant is already assigned to the winner' do
+            before { participant.participating!(alternate) }
+
+            it 'does not increment variant participation' do
+              expect(alternate).to_not receive(:increment_participation!)
+              subject.choose_variant!
+            end
+          end
+
+          context 'and the participant is participating but their assigned variant does not match the winner' do
+            before { participant.participating!(control) }
+
+            it 'exits the experiment for reassignment' do
+              expect(participant).to receive(:exit!).with(subject)
+              subject.choose_variant!
+            end
+          end
+
+          context 'and configured with sticky assignment' do
+            it 'stores participant assignment' do
+              expect(participant).to receive(:participating!).with(alternate)
+              subject.choose_variant!
+            end
+          end
+
+          context 'and configured without sticky assignment' do
+            trial { |cfg|
+              cfg.track_winner_conversions = true
+              cfg.sticky_assignment = false
+            }
+
+            it 'does not store participant assignment' do
+              expect(participant).to_not receive(:participating!)
+              subject.choose_variant!
+            end
+          end
+        end
+      end
+
+      it 'returns the winning variant' do
+        expect(subject.choose_variant!).to be(alternate)
+      end
+    end
+
+    context 'when the excluded argument is true' do
+      it 'returns control' do
+        expect(subject.choose_variant!(excluded: true)).to eq(control)
+      end
+
+      it 'does not increment variant participation' do
+        expect(control).to_not receive(:increment_participation!)
+        subject.choose_variant!(excluded: true)
+      end
+
+      it 'does not store participant assignment' do
+        expect(participant).to_not receive(:participating!)
+        subject.choose_variant!(excluded: true)
+      end
+    end
+
+    context 'when the experiment has been stopped' do
+      before { experiment.stop! }
+
+      it 'returns control' do
+        expect(subject.choose_variant!).to eq(control)
+      end
+
+      it 'does not increment variant participation' do
+        expect(control).to_not receive(:increment_participation!)
+        subject.choose_variant!
+      end
+
+      it 'does not store participant assignment' do
+        expect(participant).to_not receive(:participating!)
+        subject.choose_variant!
+      end
+    end
+
+    context 'when the experiment has not been started' do
+      before { experiment.reset! }
+
+      context 'and is configured to start manually' do
+        context 'and is configured to enable calibration' do
+          trial { |cfg| cfg.enable_calibration = true }
+
+          context 'and the participant is not already assigned to control' do
+            it 'increments variant participation' do
+              expect(control).to receive(:increment_participation!)
+              subject.choose_variant!
+            end
+
+            context 'and it is a combined experiment' do
+              trial { |cfg|
+                cfg.enable_calibration = true
+                cfg.combined = [:first, :last]
+              }
+              let(:combo) { trial.combined_experiments.first }
+              subject { combo }
+
+              it 'increments parent experiment variant participation' do
+                expect(control).to receive(:increment_participation!)
+                subject.choose_variant!
+              end
+            end
+          end
+
+          context 'and the participant is participating but their assigned variant is not the control' do
+            before { allow(subject.participant).to receive(:variant).and_return(alternate) }
+
+            it 'exits the experiment for reassignment' do
+              expect(participant).to receive(:exit!).with(subject)
+              subject.choose_variant!
+            end
+
+            context 'and it is a combined experiment' do
+              trial { |cfg|
+                cfg.enable_calibration = true
+                cfg.combined = [:first, :last]
+              }
+              let(:combo) { trial.combined_experiments.first }
+              let(:alternate) { combo.variants.last }
+              subject { combo }
+
+              it 'exits the parent experiment for reassignment' do
+                allow(participant).to receive(:exit!).with(subject)
+                expect(participant).to receive(:exit!).with(subject.parent)
+                subject.choose_variant!
+              end
+            end
+          end
+
+          context 'when configured with sticky assignment' do
+            it 'stores participant assignment' do
+              expect(participant).to receive(:participating!).with(control)
+              subject.choose_variant!
+            end
+          end
+
+          context 'when configured without sticky assignment' do
+            trial { |cfg|
+              cfg.enable_calibration = true
+              cfg.sticky_assignment = false
+            }
+
+            it 'does not store participant assignment' do
+              expect(participant).to_not receive(:participating!)
+              subject.choose_variant!
+            end
+          end
+
+          context 'and it is a combined experiment' do
+            trial { |cfg|
+              cfg.enable_calibration = true
+              cfg.combined = [:first, :last]
+            }
+            let(:combo) { trial.combined_experiments.first }
+            subject { combo }
+
+            context 'when configured with sticky assignment' do
+              it 'stores parent experiment participant assignment' do
+                allow(participant).to receive(:participating!).with(combo.control)
+                expect(participant).to receive(:participating!).with(control)
+                subject.choose_variant!
+              end
+            end
+
+            context 'when configured without sticky assignment' do
+              trial { |cfg|
+                cfg.enable_calibration = true
+                cfg.sticky_assignment = false
+                cfg.combined = [:first, :last]
+              }
+
+              it 'does not store parent experiment participant assignment' do
+                expect(participant).to_not receive(:participating!).with(control)
+                subject.choose_variant!
+              end
+            end
+          end
+        end
+
+        it 'returns control' do
+          expect(subject.choose_variant!).to be(control)
+        end
+      end
+
+      context 'and is not scheduled to start in the future' do
+        trial { |cfg| cfg.start_manually = false }
+
+        it 'starts the experiment' do
+          expect(experiment).to receive(:start!)
+          subject.choose_variant!
+        end
+      end
+    end
+
+    context 'when the experiment is not running' do
+      before { experiment.reset! }
+
+      it 'returns control' do
+        expect(subject.choose_variant!).to be(control)
+      end
+    end
+
+    context 'when the experiment is configured with sticky assignment' do
+      context 'and the participant is assigned' do
+        before { participant.participating!(alternate) }
+
+        it 'reinforces the assigned variant' do
+          expect(participant).to receive(:participating!).with(alternate)
+          subject.choose_variant!
+        end
+
+        it 'does not increment variant participation' do
+          expect(alternate).to_not receive(:increment_participation!)
+          subject.choose_variant!
+        end
+
+        it 'returns the assigned variant' do
+          expect(subject.choose_variant!).to be(alternate)
+        end
+      end
+    end
+
+    context 'when the experiment is not combined' do
+      context 'and trailguide is configured to not allow multiple experiments' do
+        context 'and the participant is participating in other experiments' do
+          before {
+            other.start!
+            participant.participating!(other.control)
+          }
+
+          it 'returns control' do
+            expect(subject.choose_variant!).to be(control)
+          end
+        end
+
+        it 'includes control when checking participation' do
+          expect(participant).to receive(:participating_in_active_experiments?).with(true)
+          subject.choose_variant!
+        end
+      end
+
+      context 'and trailguide is configured to only allow multiple experiments in control groups' do
+        before { TrailGuide.configuration.allow_multiple_experiments = :control }
+        after  { TrailGuide.configuration.allow_multiple_experiments = false }
+
+        context 'and the participant is participating in other experiments control groups' do
+          before {
+            other.start!
+            participant.participating!(other.control)
+          }
+
+          it 'chooses a variant' do
+            expect(subject).to receive(:algorithm_choose!).and_call_original
+            subject.choose_variant!
+          end
+        end
+
+        context 'and the participant is participating in other experiments variant groups' do
+          before {
+            other.start!
+            participant.participating!(other.variants.last)
+          }
+
+          it 'returns control' do
+            expect(subject).to_not receive(:algorithm_choose!)
+            expect(subject.choose_variant!).to be(control)
+          end
+        end
+
+        it 'excludes control when checking participation' do
+          expect(participant).to receive(:participating_in_active_experiments?).with(false)
+          subject.choose_variant!
+        end
+      end
+
+      context 'and trailguide is configured to allow multiple experiments' do
+        before { TrailGuide.configuration.allow_multiple_experiments = true }
+        after  { TrailGuide.configuration.allow_multiple_experiments = false }
+
+        context 'and the participant is participating in other experiments variant groups' do
+          before {
+            other.start!
+            participant.participating!(other.variants.last)
+          }
+
+          it 'chooses a variant' do
+            expect(subject).to receive(:algorithm_choose!).and_call_original
+            subject.choose_variant!
+          end
+        end
+      end
+    end
+
+    context 'when configured not to allow participation for the participant' do
+      trial { |cfg| cfg.allow_participation = -> (exp, all, ptc, mtd) { return false } }
+
+      it 'returns control' do
+        expect(subject).to_not receive(:algorithm_choose!)
+        expect(subject.choose_variant!).to be(control)
+      end
+    end
+
+    it 'uses the algorithm to choose a variant' do
+      expect(subject).to receive(:algorithm_choose!).and_call_original
+      subject.choose_variant!
+    end
+
+    it 'increments variant participation' do
+      allow(subject).to receive(:algorithm_choose!).and_return(alternate)
+      expect(alternate).to receive(:increment_participation!)
+      subject.choose_variant!
+    end
+
+    context 'when configured with sticky assignment' do
+      it 'stores participant assignment' do
+        allow(subject).to receive(:algorithm_choose!).and_return(alternate)
+        expect(participant).to receive(:participating!).with(alternate)
+        subject.choose_variant!
+      end
+    end
+
+    context 'when configured without sticky assignment' do
+      trial { |cfg| cfg.sticky_assignment = false }
+
+      it 'does not store participant assignment' do
+        allow(subject).to receive(:algorithm_choose!).and_return(alternate)
+        expect(participant).to_not receive(:participating!).with(alternate)
+        subject.choose_variant!
+      end
+    end
+
+    it 'runs callbacks' do
+      allow(subject).to receive(:algorithm_choose!).and_return(alternate)
+      expect(subject).to receive(:run_callbacks).with(:on_choose, alternate, subject.participant, nil)
+      subject.choose_variant!
+    end
+
+    it 'returns the chosen variant' do
+      allow(subject).to receive(:algorithm_choose!).and_return(alternate)
+      expect(subject.choose_variant!).to be(alternate)
+    end
   end
 
   describe '#algorithm_choose!' do
