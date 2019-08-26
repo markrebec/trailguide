@@ -11,20 +11,18 @@ module TrailGuide
         @catalog = nil
 
         # Load experiments from YAML configs if any exists
-        load_yaml_experiments(Rails.root.join("config/experiments.yml")) if File.exists?(Rails.root.join("config/experiments.yml"))
         [configs].flatten.each do |path|
-          Dir[Rails.root.join("#{path}/**/*.yml")].each { |f| load_yaml_experiments(f) }
+          Dir[Rails.root.join(path)].each { |f| load_yaml_experiments(f) if ['.yml', '.yaml'].include?(File.extname(f)) }
         end
 
         # Load experiments from ruby configs if any exist
-        DSL.instance_eval(File.read(Rails.root.join("config/experiments.rb"))) if File.exists?(Rails.root.join("config/experiments.rb"))
         [configs].flatten.each do |path|
-          Dir[Rails.root.join("#{path}/**/*.rb")].each { |f| DSL.instance_eval(File.read(f)) }
+          Dir[Rails.root.join(path)].each { |f| DSL.instance_eval(File.read(f)) if File.extname(f) == '.rb' }
         end
 
         # Load any experiment classes defined in the app
         [classes].flatten.each do |path|
-          Dir[Rails.root.join("#{path}/**/*.rb")].each { |f| load f }
+          Dir[Rails.root.join(path)].each { |f| load f }
         end
       end
 

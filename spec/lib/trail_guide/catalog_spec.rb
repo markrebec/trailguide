@@ -22,18 +22,75 @@ RSpec.describe TrailGuide::Catalog do
   end
 
   describe '.load_experiments!' do
+    let(:ruby_config) { Rails.root.join("tmp/ruby_config.rb") }
+    let(:yaml_config) { Rails.root.join("tmp/yaml_config.yml") }
+
+    before {
+      FileUtils.touch(ruby_config)
+      FileUtils.touch(yaml_config)
+    }
+    after  {
+      FileUtils.rm_f(ruby_config)
+      FileUtils.rm_f(yaml_config)
+    }
+
     it 'resets the catalog singleton' do
       expect { described_class.load_experiments! }.to change { described_class.instance_variable_get(:@catalog) }
     end
 
-    it 'loads yaml experiments' do
-      expect(described_class).to receive(:load_yaml_experiments)
-      described_class.load_experiments!
+    context 'when loading configs' do
+      context 'with a file path' do
+        it 'loads yaml experiments' do
+          expect(described_class).to receive(:load_yaml_experiments)
+          described_class.load_experiments!(configs: [yaml_config])
+        end
+
+        it 'evals ruby experiments' do
+          expect(TrailGuide::Catalog::DSL).to receive(:instance_eval)
+          described_class.load_experiments!(configs: [ruby_config])
+        end
+      end
+
+      context 'with a glob pattern' do
+        it 'loads yaml experiments' do
+          expect(described_class).to receive(:load_yaml_experiments).with(yaml_config.to_s)
+          described_class.load_experiments!(configs: ["tmp/**/*"])
+        end
+
+        it 'evals ruby experiments' do
+          expect(File).to receive(:read).with(ruby_config.to_s)
+          expect(TrailGuide::Catalog::DSL).to receive(:instance_eval)
+          described_class.load_experiments!(configs: ["tmp/**/*"])
+        end
+      end
     end
 
-    it 'evals ruby experiments' do
-      expect(TrailGuide::Catalog::DSL).to receive(:instance_eval)
-      described_class.load_experiments!
+    context 'when loading classes' do
+      let(:ruby_class) { Rails.root.join("tmp/ruby_class.rb") }
+
+      before {
+        File.open(ruby_class, 'w') { |f|
+          f.write("class KlassExperiment < TrailGuide::Experiment; end")
+        }
+      }
+      after  {
+        Object.send(:remove_const, :KlassExperiment) if defined?(KlassExperiment)
+        FileUtils.rm_f(ruby_class)
+      }
+
+      context 'with a file path' do
+        it 'loads the experiment class' do
+          described_class.load_experiments!(classes: [ruby_class])
+          expect(defined?(KlassExperiment)).to be_truthy
+        end
+      end
+
+      context 'with a glob pattern' do
+        it 'loads the experiment class' do
+          described_class.load_experiments!(classes: ["tmp/**/*.rb"])
+          expect(defined?(KlassExperiment)).to be_truthy
+        end
+      end
     end
   end
 
