@@ -20,14 +20,6 @@ RSpec.describe TrailGuide::Participant do
       end
     end
 
-    context 'without an adapter argument' do
-      subject { described_class.new(nil) }
-
-      it 'does not initialize an adapter' do
-        expect(subject.send(:instance_variable_get, :@adapter)).to be_nil
-      end
-    end
-
     context 'when configured to clean up inactive experiments' do
       before { TrailGuide.configuration.cleanup_participant_experiments = true }
       after  { TrailGuide.configuration.cleanup_participant_experiments = false }
