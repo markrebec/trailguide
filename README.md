@@ -542,8 +542,13 @@ end
 
 When you want to render the experiment and choose a variant, just pass in the relevant metadata, and if the state matches a variant (based on your block) it will be returned:
 
-```
+```ruby
 case trailguide(:my_experiment, metadata: {state: @thing.state})
+  when :alpha
+    # ...
+  when :bravo
+    # ...
+end
 ```
 
 #### Custom
