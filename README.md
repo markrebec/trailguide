@@ -1,14 +1,17 @@
 # TrailGuide
 
-TrailGuide is a rails engine providing a framework for running user experiments, A/B tests and content/SEO experiments in rails applications.
+[![Build Status](https://travis-ci.org/markrebec/trailguide.svg?branch=master)](https://travis-ci.org/markrebec/trailguide)
+[![Coverage Status](https://coveralls.io/repos/github/markrebec/trailguide/badge.svg?branch=master)](https://coveralls.io/github/markrebec/trailguide?branch=master)
+
+TrailGuide is a framework to enable running A/B tests, user experiments and content experiments in rails applications. It is backed by redis making it extremely fast, and provides configuration options allowing for flexible, robust experiments.
 
 ## Getting Started
 
 ### Requirements
 
-Currently only rails 5.x is officially tested/supported, and TrailGuide requires redis to store experiment metadata and (optionally) participants.
+Currently only rails 5.x is officially tested/supported, and TrailGuide requires redis to store experiment metadata and (optionally) participants' assignment.
 
-`docker-compose` is a great way to run redis in development. Take a look at the `docker-compose.yml` in the root of this repo for an example.
+`docker-compose` is a great way to run redis in development. Take a look at the [`docker-compose.yml` in the root of this repo](https://github.com/markrebec/trailguide/blob/master/docker-compose.yml) for an example.
 
 In production I recommend configuring redis as a persistent datastore (rather than a cache), in order to avoid evicting experiment or participant keys unexpectedly. You can [read more about key eviction and policies here](https://redis.io/topics/lru-cache).
 
@@ -59,18 +62,18 @@ experiment :simple_ab do |config|
 end
 ```
 
-Start your experiment either via the admin UI or from a rails console with `TrailGuide.catalog.find(:simple_ab).start!`.
-
 Then use it in controller:
 
 ```ruby
+# app/controllers/things_controller.rb
+
 def show
   # enroll in the experiment and do something based on the assigned variant group
   case trailguide(:simple_ab)
     when :alpha
-      # perform logic for group "alpha"
+      # perform your logic for group "alpha"
     when :bravo
-      # perform logic for group "bravo"
+      # perform your logic for group "bravo"
   end
 
   # ...
@@ -87,19 +90,25 @@ end
 Or a view:
 
 ```erb
+# app/views/things/show.html.erb
+
 <% if trailguide(:simple_ab) == :alpha %>
-  <div>...</div>
+  <div>...render alpha...</div>
 <% else %>
-  <div>...</div>
+  <div>...render bravo...</div>
 <% end %>
 ```
+
+TODO link to examples of `run`, `render`, etc.
+
+Until your experiment is started, only the "control" group (in this case `:alpha`) will be served to visitors. Start your experiment either via the admin UI or from a rails console with `TrailGuide.catalog.find(:simple_ab).start!` to begin enrolling participants and serving variants.
 
 ### API / JavaScript Client
 
 If you plan on using the included javascript client, or if you just want an API to interact with experiments in other ways, you can mount the engine in your route config:
 
 ```ruby
-# /config/routes.rb
+# config/routes.rb
 
 Rails.application.routes.draw do
 
@@ -114,7 +123,7 @@ end
 You can also mount the admin engine to manage and analyze your experiments via the built-in admin UI. You'll probably want to wrap this in some sort of authentication, although the details will vary between applications. If you're already mounting other admin engines (i.e. something like `sidekiq` or `flipper`), you should be able to apply the same technique to trailguide.
 
 ```ruby
-# /config/routes.rb
+# config/routes.rb
 
 Rails.application.routes.draw do
 
