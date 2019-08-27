@@ -2,6 +2,110 @@
 
 TrailGuide is a rails engine providing a framework for running user experiments, A/B tests and content/SEO experiments in rails applications.
 
+## Getting Started
+
+### Requirements
+
+Currently only rails 5.x is officially tested/supported, and TrailGuide requires redis to store experiment metadata and (optionally) participants.
+
+`docker-compose` is a great way to run redis in development. Take a look at the `docker-compose.yml` in the root of this repo for an example.
+
+In production I recommend configuring redis as a persistent datastore (rather than a cache), in order to avoid evicting experiment or participant keys unexpectedly. You can [read more about key eviction and policies here](https://redis.io/topics/lru-cache).
+
+### Installation
+
+Add this line to your Gemfile:
+
+```
+gem 'trailguide'
+```
+
+Then run `bundle install`.
+
+### Quick Start
+
+Create and configure an experiment:
+
+```ruby
+# config/experiments.rb
+
+experiment :simple_ab do |config|
+  config.summary = "This is a simple A/B test" # optional
+
+  variant :alpha # the first variant is always the "control" group unless declared otherwise
+  variant :bravo
+end
+```
+
+Start your experiment either via the admin UI or from a rails console with `TrailGuide.catalog.find(:simple_ab).start!`.
+
+Then use it in controller:
+
+```ruby
+def show
+  # enroll in the experiment and do something based on the assigned variant group
+  case trailguide(:simple_ab)
+    when :alpha
+      # perform logic for group "alpha"
+    when :bravo
+      # perform logic for group "bravo"
+  end
+
+  # ...
+end
+
+def update
+  # mark this participant as having converted when they take a certain action
+  trailguide.convert(:simple_ab)
+
+  # ...
+end
+```
+
+Or a view:
+
+```erb
+- if trailguide(:simple_ab) == :alpha
+  <div>...</div>
+- else
+  <div>...</div>
+```
+
+### API / JavaScript Client
+
+If you plan on using the included javascript client, or if you just want an API to interact with experiments in other ways, you can mount the engine in your route config:
+
+```ruby
+# /config/routes.rb
+
+Rails.application.routes.draw do
+
+  mount TrailGuide::Engine => 'api/experiments'
+
+  # ...
+end
+```
+
+### Admin UI
+
+You can also mount the admin engine to manage and analyze your experiments via the built-in admin UI. You'll probably want to wrap this in some sort of authentication, although the details will vary between applications. If you're already mounting other admin engines (i.e. something like `sidekiq` or `flipper`), you should be able to apply the same technique to trailguide.
+
+```ruby
+# /config/routes.rb
+
+Rails.application.routes.draw do
+
+  mount TrailGuide::Engine => 'api/experiments'
+
+  # example auth route helper
+  authenticate :user, lambda { |u| u.admin? } do
+    mount TrailGuide::Admin::Engine => 'admin/trailguide'
+  end
+
+  # ...
+end
+```
+
 ## Concepts
 
 ### Experiments
@@ -39,103 +143,6 @@ A/B tests are the most common form of user experiment, and the main use-case for
 ### Content Experiments
 
 Unlike user experiments, content-based experiments serve variants assigned to the *content being served* (via metadata), rather than the *user who is requesting it*. The most common form of content experiments are probably **SEO Experiments** and **Market Experiments**. These are cases where you want to test a new page layout, product feature, etc. based on a specific regional market or similar content bucket. You might want to test conversion against a new page design in your Los Angeles market before rolling it out to others, or monitor what happens to your SEO page rankings over time if you add more relevant content and keywords to a small statically defined list of pages/content.
-
-## Getting Started
-
-### Requirements
-
-Currently only rails 5.x is officially tested/supported, and TrailGuide requires redis to store experiment metadata and (optionally) participants.
-
-`docker-compose` is a great way to run redis in development. Take a look at the `docker-compose.yml` in the root of this repo for an example.
-
-In production I recommend configuring redis as a persistent datastore (rather than a cache), in order to avoid evicting experiment or participant keys unexpectedly. You can [read more about key eviction and policies here](https://redis.io/topics/lru-cache).
-
-### Installation
-
-Add this line to your Gemfile:
-
-```
-gem 'trailguide'
-```
-
-Then run `bundle install`.
-
-### Engine & Admin Routes
-
-If you plan on using the included javascript client, or if you just want an API to interact with experiments in other ways, you can mount the engine in your route config:
-
-```ruby
-# /config/routes.rb
-
-Rails.application.routes.draw do
-  # ...
-
-  mount TrailGuide::Engine => 'api/experiments'
-
-  # ...
-end
-```
-
-You can also mount the admin engine to manage and analyze your experiments via the built-in admin UI. You'll probably want to wrap this in some sort of authentication, though the details will vary between applications. If you're already mounting other admin engines (i.e. something like `sidekiq` or `flipper`), you should be able to apply the same technique to trailguide.
-
-```ruby
-# /config/routes.rb
-
-Rails.application.routes.draw do
-  # ...
-
-  mount TrailGuide::Engine => 'api/experiments'
-
-  # example auth route helper
-  authenticate :user, lambda { |u| u.admin? } do
-    mount TrailGuide::Admin::Engine => 'admin/trailguide'
-  end
-
-  # ...
-end
-```
-
-### Quick Start
-
-Create and configure an experiment:
-
-```ruby
-# config/experiments.rb
-
-experiment :simple_ab do |config|
-  config.summary = "This is a simple A/B test" # optional
-
-  variant :a
-  variant :b
-end
-```
-
-Start your experiment either via the admin UI or from a rails console with `TrailGuide.catalog.find(:simple_ab).start!` to enable enrollment.
-
-Then use it (in controller actions for this example):
-
-```ruby
-def show
-  # enroll in the experiment and do something based on the assigned variant group
-  case trailguide.choose(:simple_ab)
-    when :a
-      # perform logic for group "a"
-    when :b
-      # perform logic for group "b"
-  end
-
-  # ...
-end
-
-def update
-  # mark this participant as having converted when they take a certain action
-  trailguide.convert(:simple_ab)
-
-  # ...
-end
-```
-
-If you've mounted the admin engine, you can view your experiment's participants and conversions there.
 
 ## Configuration
 
