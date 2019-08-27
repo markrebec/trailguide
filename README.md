@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/markrebec/trailguide.svg?branch=master)](https://travis-ci.org/markrebec/trailguide)
 [![Coverage Status](https://coveralls.io/repos/github/markrebec/trailguide/badge.svg?branch=master)](https://coveralls.io/github/markrebec/trailguide?branch=master)
 
-TrailGuide is a framework to enable running A/B tests, user experiments and content experiments in rails applications. It is backed by redis making it extremely fast, and provides configuration options allowing for flexible, robust experiments.
+TrailGuide is a framework to enable running A/B tests, user experiments and content experiments in rails applications. It is backed by redis making it extremely fast, and provides configuration options allowing for flexible, robust experiments and behavior.
 
 ## Getting Started
 
@@ -138,47 +138,9 @@ Rails.application.routes.draw do
 end
 ```
 
-## Concepts
-
-### Experiments
-
-Experiments are the core component of TrailGuide. They're defined and configured via the TrailGuide experiment DSL and are represented by ruby classes. When using the DSL meta classes will be created at runtime, inheriting from `TrailGuide::Experiment`, but you can also take full control and define your own experiment classes (i.e. `class MyExperiment < TrailGuide::Experiment`).
-
-### Variants
-
-Variants represent the different behavior paths available in your **experiments** - i.e. your *control* and *alternative* groups in a standard A/B test. A variant as defined within your experiments is just a simple name and some optional configuration/metadata. The actual logic and behavior associated with each variant should be defined separately, allowing you to use whatever patterns you prefer (service objects, etc.). There are built-in helpers for common patterns like inline blocks, calling named methods within a context, and rendering templates or partials automatically depending on the assigned variant.
-
-### Participants
-
-Participants are the users/visitors/requests to whom you'll serve **variants** based on your **experiment** configurations. A participant will generally have their assigned variant stored via the configured adapter, and that same variant will always be returned for that participant for the duration of the experiment.
-
-#### Participant Adapters
-
-There are multiple adapters available for storing **participants'** assignment, allowing you to keep them in a cookie, rails sessions, redis or elsewhere depending on your needs. Different adapters have different requirements - for example, if you're using redis you'll probably need a unique identifier for visitors in order to generate a storage key and provide a consistent experience. See the adapters and configuration sections below for more details.
-
-#### Unity
-
-TrailGuide includes a small utility called Unity which can be used to link two identifiers, for example when a "logged out visitor" logs in and becomes identified as a "registered user" (i.e. a `user_id` and a `visitor_cookie_id`). In the context of TrailGuide, this allows you to serve a consistent experience with the same variants across logins and devices. There is a built-in `UnityAdapter` to make taking advantage of Unity in your experiments as easy as possible, but you can also use Unity directly, even outside of TrailGuide.
-
-### Trials
-
-The idea of a Trial is is represented by an *instance* of an **experiment** class, initialized with a **participant**, and is responsible for assigning, selecting and returning the appropriate **variant**.
-
-### Algorithms
-
-All **experiments** are configured with an algorithm, which selects and assigns a **variant** to the current **participant** on enrollment. There are a few built-in algorithms for common patterns like weighted variants, evenly distributed participation, and [multi-armed bandit](http://stevehanov.ca/blog/index.php?id=132), but you can also provide your own algorithm class as long as it conforms to a simple interface.
-
-### User Experiments
-
-A/B tests are the most common form of user experiment, and the main use-case for this library. TrailGuide has full support for building A/B tests (as well as multi-variant experiments) using a variety of built-in **algorithms** or your own custom algorithms. You can define your control vs. alternative variant groups, and configure all kinds of experiment options and lifecycle behavior - things like whether to reset a participant assignment when they convert a metric, allow conversion against single vs. multiple metrics in a funnel, specifically (dis)allow robots or other types of requests, or perform custom tracking callbacks when lifecycle events are triggered.
-
-### Content Experiments
-
-Unlike user experiments, content-based experiments serve variants assigned to the *content being served* (via metadata), rather than the *user who is requesting it*. The most common form of content experiments are probably **SEO Experiments** and **Market Experiments**. These are cases where you want to test a new page layout, product feature, etc. based on a specific regional market or similar content bucket. You might want to test conversion against a new page design in your Los Angeles market before rolling it out to others, or monitor what happens to your SEO page rankings over time if you add more relevant content and keywords to a small statically defined list of pages/content.
-
 ## Configuration
 
-The core engine and base experiment class have a number of configuration options available to customize behavior and hook into various pieces of functionality. The best way to configure trailguide is via a config initializer, and this gem configures it's own defaults the same way.
+The core engine and base experiment class have a number of configuration options available to customize behavior and hook into various pieces of functionality with callbacks. The best way to configure trailguide is via a config initializer, and this gem configures it's own defaults the same way.
 
 ```ruby
 # config/initializers/trailguide.rb
@@ -189,6 +151,9 @@ TrailGuide.configure do |config|
 end
 
 TrailGuide::Experiment.configure do |config|
+  # all experiments inherit from the top-level experiment class,
+  # which allows you to provide global experiment configuration
+  # here, and override custom behavior on a per-experiment basis
   config.algorithm = :weighted
   # ...
 end
@@ -200,9 +165,29 @@ Take a look at [`the config initializers in this repo`](https://github.com/markr
 
 Before you can start running experiments in your app you'll need to define and configure them. There are a few options for defining experiments - YAML files, a ruby DSL, or custom classes - and they all inherit the base `TrailGuide::Experiment.configuration` for defaults, which can be overridden per-experiment.
 
+#### Experiments Paths
+
+By default, TrailGuide will look for experiment configs in `config/experiments.*` and `config/experiments/**/*`, and will load custom experiment classes from `app/experiments/**/*`. You can override this behavior with the `TrailGuide.configuration.paths` object in your config initializer.
+
+```ruby
+# config/initializers/trailguide.rb
+
+TrailGuide.configure do |config|
+  # you can append a single file or a glob pattern onto the experiment config loadpaths
+  config.paths.configs << 'foo/bar/experiments/**/*
+
+  # or you can explicitly override the values with your own
+  config.paths.configs = ['foo/bar/baz.rb', 'other/path/**/*']
+
+  # you can also append or override the path(s) from which custom experiment classes are loaded
+  config.paths.classes = ['lib/experiments/**/*']
+end
+
+```
+
 #### YAML
 
-YAML files are an easy way to configure simple experiments. They can be put in `config/experiments.yml` or `config/experiments/**/*.yml`:
+YAML files are an easy way to configure simple experiments. They will be loaded based on your path configurations above, and by default can be put in `config/experiments.yml` or `config/experiments/**/*.yml`:
 
 ```yaml
 # config/experiments.yml
@@ -227,7 +212,7 @@ search_widget:
 
 #### Ruby DSL
 
-The ruby DSL provides a more dynamic and flexible way to configure your experiments, and allows you to define custom behavior via callbacks and options. You can put these experiments in `config/experiments.rb` or `config/experiments/**/*.rb`:
+The ruby DSL provides a more dynamic and robust way to configure your experiments, allowing you to define custom behavior via callbacks and other options. Like YAML experiments, they're loaded based on your path configurations, and by default You can put these experiments in `config/experiments.rb` or `config/experiments/**/*.rb`:
 
 ```ruby
 # config/experiments.rb
@@ -257,9 +242,9 @@ end
 
 #### Custom Classes
 
-You can also take it a step further and define your own custom experiment classes, inheriting from `TrailGuide::Experiment`. This allows you to add or override all sorts of additional behavior on top of all the standard configuration provided by the DSL. In fact, the YAML and ruby DSL configs both use this to parse experiments into anonmymous classes extending `TrailGuide::Experiment`.
+You can also take it a step further and define your own custom experiment classes, inheriting from `TrailGuide::Experiment`. This allows you to add or override all sorts of additional behavior on top of all the standard configuration provided by the DSL. In fact, the YAML and ruby DSL configs both use this to parse experiments into anonmymous classes inheriting from `TrailGuide::Experiment`.
 
-You can put these classes anywhere rails will autoload them (or require them yourself), but I recommend `app/experiments/**/*.rb`:
+You can put these classes anywhere rails will autoload them (i.e. `app/whatever`), or you can put them somewhere like `lib/experiments` and require them yourself, but TrailGuide will also attempt to load them for you based on your path configurations, which by default looks in `app/experiments/**/*.rb`:
 
 ```ruby
 # app/experiments/my_complex_experiment.rb
@@ -328,6 +313,10 @@ You can even use these in your DSL-defined experiments by specifying a `class:` 
 # config/experiments.rb
 
 experiment :my_inheriting_experiment, class: ApplicationExperiment do |config|
+  # you can configure this experiment just like any other DSL-based experiment,
+  # the only difference is that the resulting anonymous class will inherit from
+  # ApplicationExperiment rather than directly from TrailGuide::Experiment
+
   # ...
 end
 ```
@@ -482,14 +471,24 @@ There are a few common assignment algorithms included in trailguide, and it's ea
 
 The following algorithms are available:
 
-* `:weighted` (default) - allows favoring variants by assigning them weights
-* `:distributed` - totally even distribution across variants
+* `:distributed` (default) - totally even distribution across variants
+* `:weighted` - allows favoring variants by assigning them weights
 * `:random` - truly random sampling of variants on assignment
 * `:bandit` - a "multi-armed bandit" approach to assignment
 
+#### Distributed
+
+This is the default algorithm, which ensures completely even distribution across all variants by always selecting from the variant(s) with the lowest number of participants.
+
+```ruby
+experiment :my_experiment do |config|
+  config.algorithm = :distributed
+end
+```
+
 #### Weighted
 
-This is the default algorithm, which allows weighted assignment to variants based on each variant's configuration. All things being equal (all variants having equal weights), it's essentially a random sampling that will provide mostly even distribution across a large enough sample size. The default weight for all variants is 1.
+The weighted algorithm allows weighted assignment to variants based on each variant's configuration. All things being equal (all variants having equal weights), it's essentially a random sampling that will provide mostly even distribution across a large enough sample size. The default weight for all variants is 1.
 
 ```ruby
 experiment :my_experiment do |config|
@@ -502,16 +501,6 @@ end
 ```
 
 Note that the weighted algorithm is the only one that takes variant weight into account, and the other algorithms will simply ignore it if it's defined.
-
-#### Distributed
-
-The distributed algorithm ensures completely even distribution across all variants by always selecting from the variant(s) with the lowest number of participants.
-
-```ruby
-experiment :my_experiment do |config|
-  config.algorithm = :distributed
-end
-```
 
 #### Random
 
