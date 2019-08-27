@@ -321,245 +321,6 @@ experiment :my_inheriting_experiment, class: ApplicationExperiment do |config|
 end
 ```
 
-### Participant Adapters
-
-While all experiment configuration, metadata and metrics are stored in redis, there are various adapters available for participants to control where individual assignments are stored for each user. These adapters are configurable and extensible, so you can customize them or even create your own by following a simple interface.
-
-The following participant adapters are included with trailguide:
-
-* `:cookie` (default) - stores participant assignments in a cookie in their browser
-* `:session` - stores participant assignments in a hash in their rails session
-* `:redis` - stores participant assignments in redis, under a configurable key identifier (usually `current_user.id` or a cookie storing some sort of tracking/visitor ID for logged out users)
-* `:anonymous` - temporary storage, in a local hash, that only exists for as long as you have a handle on the participant object (usually a last resort fallback)
-* `:multi` - attempts to use the "best" available adapter based on the current context
-* `:unity` - uses `TrailGuide::Unity` to attempt to unify visitor/user sessions based on your configuration
-
-#### Cookie
-
-This is the default adapter, which stores participation details in a cookie in the user's browser. If you want to configure the cookie name, path or expiration, you can do so directly in your initializer:
-
-```ruby
-TrailGuide.configure do |config|
-  # config.adapter = :cookie
-  config.adapter = TrailGuide::Adapters::Participants::Cookie.configure do |config|
-    config.cookie = :trailguide
-    config.path = '/'
-    config.expiration = 1.year.to_i
-  end
-end
-```
-
-#### Session
-
-The session adapter will store participation in a hash under a configurable key within the user's rails session.
-
-```ruby
-TrailGuide.configure do |config|
-  # use the symbol shortcut for defaults
-  config.adapter = :session
-
-  # or configure it
-  config.adapter = TrailGuide::Adapters::Participants::Session.configure do |config|
-    config.key = :trailguide
-  end
-end
-```
-
-#### Redis
-
-The redis adapter stores participation details in a configurable redis key, which makes it great for ensuring consistency across visits and even devices. While the cookie and session adapters are restricted to a single browser or even a single browsing session, the redis adapter is more persistent and controllable, with the tradeoff being that you'll need to be able to identify your users in some way (i.e. `current_user.id`).
-
-```ruby
-TrailGuide.configure do |config|
-  # use the symbol shortcut for defaults
-  config.adapter = :redis
-
-  # or configure it
-  config.adapter = TrailGuide::Adapters::Participants::Redis.configure do |config|
-    config.namespace = :participants
-    config.expiration = nil
-    config.lookup = -> (context) { # context is wherever you're invoking trailguide, usually a controller or view
-      context.try(:trailguide_user).try(:id) ||
-        context.try(:current_user).try(:id)
-    }
-  end
-end
-```
-
-#### Anonymous
-
-The anonymous adapter is a simple, ephemeral ruby hash that only exists for as long as you have a reference to that local participant object. It's generally only used as a last resort when there's no way to identify a participant who is enrolling in an experiment, because there's no way to get a new reference later on (for example to track conversion).
-
-#### Multi
-
-The multi adapter will attempt to use the "best" available adapter, depending on the context from which trailguide is being invoked (controller, view, background job, etc.). It comes with a default configuration that prefers to use redis if a `trailguide_user` or `current_user` is available, otherwise tries to use cookies if possible, then session if possible, falling back to anonymous as a last resort.
-
-You can use the multi adapter to wrap any adapter selection logic you like, the only requirement is that you return one of the other adapters:
-
-```ruby
-TrailGuide.configure do |config|
-  # use the symbol shortcut for defaults
-  config.adapter = :multi
-
-  # or configure it
-  config.adapter = TrailGuide::Adapters::Participants::Multi.configure do |config|
-    # should be a proc that returns another adapter to be used
-    config.adapter = -> (context) do
-      if (context.respond_to?(:trailguide_user, true) && context.send(:trailguide_user).present?) ||
-          (context.respond_to?(:current_user, true) && context.send(:current_user).present?)
-        TrailGuide::Adapters::Participants::Redis
-      elsif context.respond_to?(:cookies, true)
-        TrailGuide::Adapters::Participants::Cookie
-      elsif context.respond_to?(:session, true)
-        TrailGuide::Adapters::Participants::Session
-      else
-        TrailGuide::Adapters::Participants::Anonymous
-      end
-    end
-  end
-end
-```
-
-#### Unity
-
-The unity adapter is a wrapper around `TrailGuide::Unity`, which attempts to unify user/visitor sessions, then selects and configures the appropriate adapter. It looks for an available, configurable "user ID" (`current_user`) and "visitor ID" (from a cookie) and configures the redis adapter appropriately. If there is no identifying information available it falls back to the anonymous adapter.
-
-You can configure the visitor cookie and the user id attribute, as well as the adapters to be used in each case:
-
-```ruby
-TrailGuide.configure do |config|
-  config.adapter = TrailGuide::Adapters::Participants::Unity.configure do |config|
-    # setup the visitor ID cookie and user ID attribute
-    config.visitor_cookie = :visitor_id # uses a cookie called visitor_id, must be set and managed by you separately
-    config.user_id_key = :uuid # uses current_user.uuid, defaults to current_user.id
-
-    # uses redis adapter for identified users
-    config.user_adapter = TrailGuide::Adapters::Participants::Redis.configure do |config|
-      config.namespace = 'unity:users'
-      config.lookup = -> (user_id) { user_id }
-      config.expiration = 1.year.seconds
-    end
-
-    # uses redis adapter for identified visitors
-    config.visitor_adapter = TrailGuide::Adapters::Participants::Redis.configure do |config|
-      config.namespace = 'unity:visitors'
-      config.lookup = -> (visitor_id) { visitor_id }
-      config.expiration = 1.year.seconds
-    end
-
-    # uses anonymous adapter for unidentified
-    config.anonymous_adapter = TrailGuide::Adapters::Participants::Anonymous
-  end
-end
-```
-
-See the unity documentation for more info about unifying sessions.
-
-#### Custom Adapters
-
-**TODO** - In the meantime, checkout the cookie or session adapters for simple examples as a starting point.
-
-```ruby
-TrailGuide.configure do |config|
-  config.adapter = MyCustom::AdapterClass
-end
-```
-
-### Algorithms
-
-There are a few common assignment algorithms included in trailguide, and it's easy to define your own and configure your experiments to use them. Algorithms can either be configured globally for all experiments in your initializer, or overridden individually per-experiment.
-
-The following algorithms are available:
-
-* `:distributed` (default) - totally even distribution across variants
-* `:weighted` - allows favoring variants by assigning them weights
-* `:random` - truly random sampling of variants on assignment
-* `:bandit` - a "multi-armed bandit" approach to assignment
-
-#### Distributed
-
-This is the default algorithm, which ensures completely even distribution across all variants by always selecting from the variant(s) with the lowest number of participants.
-
-```ruby
-experiment :my_experiment do |config|
-  config.algorithm = :distributed
-end
-```
-
-#### Weighted
-
-The weighted algorithm allows weighted assignment to variants based on each variant's configuration. All things being equal (all variants having equal weights), it's essentially a random sampling that will provide mostly even distribution across a large enough sample size. The default weight for all variants is 1.
-
-```ruby
-experiment :my_experiment do |config|
-  config.algorithm = :weighted
-
-  variant :a, weight: 2 # would be assigned roughly 40% of the time
-  variant :b, weight: 2 # would be assigned roughly 40% of the time
-  variant :c, weight: 1 # would be assigned roughly 20% of the time
-end
-```
-
-Note that the weighted algorithm is the only one that takes variant weight into account, and the other algorithms will simply ignore it if it's defined.
-
-#### Random
-
-The random algorithm provides totally random distribution by sampling from all variants on assignment.
-
-```ruby
-experiment :my_experiment do |config|
-  config.algorithm = :random
-end
-```
-
-#### Multi-Armed Bandit
-
-The bandit algorithm in trailguide was heavily inspired by [the split gem](https://github.com/splitrb/split#algorithms), and will automatically weight variants based on their performance over time. You can [read more about this approach](http://stevehanov.ca/blog/index.php?id=132) if you're interested.
-
-```ruby
-experiment :my_experiment do |config|
-  config.algorithm = :bandit
-end
-```
-
-#### Static
-
-The static algorithm is intended to be used for content-based experiments alongside the `sticky_assignment = false` experiment configuration. The algorithm will select a variant based on a match between configured metadata and the contextual metadata provided when choosing a variant. You must configure the static algorithm with a block, which will be provided with both sets of metadata, that provides the matching logic.
-
-For example, to render a specific variant based on geographic location (in this case state):
-
-```ruby
-experiment :my_experiment do |config|
-  config.sticky_assignment = false # content-based experiments should not store/assign variants to participants
-  config.algorithm = :static, -> (varmeta,ctxmeta) { varmeta[:states].include?(ctxmeta[:state]) }
-
-  variant :alpha
-  variant :bravo, metadata: {states: ['CA', 'OR', 'WA']}
-  variant :charlie, metadata: {states: ['NV', 'NM', 'UT']}
-end
-```
-
-When you want to render the experiment and choose a variant, just pass in the relevant metadata, and if the state matches a variant (based on your block) it will be returned:
-
-```ruby
-case trailguide(:my_experiment, metadata: {state: @thing.state})
-  when :alpha
-    # ...
-  when :bravo
-    # ...
-end
-```
-
-#### Custom
-
-**TODO** - In the meantime, take a look at the included algorithms as a starting point. Essentially as long as you accept an experiment and return a variant, the rest is up to you.
-
-```ruby
-experiment :my_experiment do |config|
-  config.algorithm = MyCustom::AlgorithmClass
-end
-```
-
 ## Usage
 
 ### Helpers
@@ -583,7 +344,7 @@ trailguide.run!(:experiment_name)
 trailguide.render(:experiment_name)
 trailguide.render!(:experiment_name)
 
-# tracks a conversion for the participant's currently assigned variant
+# tracks a conversion only if participating, for the participant's currently assigned variant
 trailguide.convert(:experiment_name)
 trailguide.convert!(:experiment_name)
 ```
@@ -592,7 +353,7 @@ As a general rule of thumb, the bang (`!`) methods will loudly raise exceptions 
 
 #### Enrollment
 
-The `choose` method will either enroll a participant into an experiment for the first time or return their previously assigned variant if they've already been enrolled. It can accept a block to execute and returns a `TrailGuide::Variant` object, but can be compared directly to strings or symbols.
+The `choose` method will either enroll a participant into an experiment for the first time or return their previously assigned variant if they've already been enrolled. It can accept an optional block to execute, and returns a `TrailGuide::Variant` object, *which can be compared directly to strings or symbols* or access it's properties directly (i.e. `variant.metadata[:foo]`).
 
 ```ruby
 class MyController < ApplicationController
@@ -629,7 +390,7 @@ class MyController < ApplicationController
 end
 ```
 
-You can also call `trailguide.choose` from your view templates, though you probably want to keep any complex logic in your controllers (or maybe helpers). This would print out the variant name into an `h1`:
+You can also call `trailguide.choose` from your view templates and partials, though you probably want to keep any complex logic in your controllers (or maybe helpers). This would print out the variant name into an `h1`:
 
 ```erb
 <% variant = trailguide.choose(:experiment_name) %>
@@ -638,7 +399,7 @@ You can also call `trailguide.choose` from your view templates, though you proba
 
 #### Running Methods
 
-If you prefer, you can encapsulate your logic into methods for each variant and ask trailguide to execute the appropriate one for you automatically.
+If you prefer, you can encapsulate your logic into methods for each variant and ask trailguide to execute the appropriate one for you automatically within the given context.
 
 ```ruby
 class MyController < ApplicationController
@@ -659,25 +420,26 @@ class MyController < ApplicationController
 end
 ```
 
-By default the above will attempt to call methods with a name matching your variant name, but you can configure custom methods via the `methods:` keyword argument.
+By default the above will attempt to call methods with a name matching your assigned variant name, but you can configure custom methods via the `methods:` keyword argument.
 
 ```ruby
 class MyController < ApplicationController
   def index
     # this would call one of the methods below depending on assignment
-    trailguide.run(:experiment_name, methods: {
-      variant_one: :my_first_method,
-      variant_two: :my_second_method
-    },
-    metadata: {
-      # you can also optionally pass custom metadata through to choose
-    })
+    trailguide.run(:experiment_name,
+      methods: {
+        variant_one: :my_first_method,
+        variant_two: :my_second_method
+      },
+      metadata: {
+        # you can also optionally pass custom metadata through
+      })
   end
 
   private
 
   def my_first_method(**metadata)
-    # ... do whatever, maybe use these almost like a `before_filter` to setup instance vars
+    # ... do whatever - you could use these almost like a `before_filter` to setup different instance vars depending on assignment
   end
 
   def my_second_method(**metadata)
@@ -690,7 +452,7 @@ You **can** use `trailguide.run` in your views, but the methods you're calling m
 
 #### Rendering
 
-Many experiments include some sort of UI component, and trailguide provides a handy shortcut to render different paths when that pattern suits your needs. The `trailguide.render` method can be used in controllers to render templates or in views to render partials, and uses rails' underlying render logic for each context.
+Many experiments include some sort of UI component, and trailguide provides a handy shortcut to automatically render different templates/partials when that pattern suits your needs. The `trailguide.render` method can be used in controllers to render templates or in views to render partials, and uses rails' underlying render logic for each context.
 
 ```ruby
 # config/experiments/homepage_ab.rb
@@ -771,7 +533,7 @@ trailguide.convert(:experiment_name, :goal_name)
 
 The way you use trailguide outside of a request context will mostly depend on the participant adapter being used. To get started, you'll need to include the `TrailGuide::Helper` module into whatever class or context you're working with.
 
-The `:cookie` and `:session` adapters **will not work** in a background context, but the default `:redis`, `:multi` and `:unity` adapters will work if provided with a `trailguide_user`. This assumes that the `trailguide_user` matches whatever user you're assigning within your request contexts (which is commonly `current_user`) if you want assignments to match up and be consistent, and the default configurations for these supported adapters all look for either a `trailguide_user` or a `current_user` so they should work in most contexts.
+The `:cookie` and `:session` adapters **will not work** in a background context, but the default `:redis`, `:multi` and `:unity` adapters will work if provided with a `trailguide_user`. This assumes that the `trailguide_user` matches the same user elsewhere in your request contexts (like in your controllers and views), which is commonly `current_user`. The default configurations for these supported adapters all look for either a `trailguide_user` or a `current_user` so they should work in most contexts.
 
 A simple example might be sending a welcome email in a background job with a variable discount amount depending on what variant the user was enrolled into during signup.
 
@@ -835,11 +597,7 @@ client.convert('experiment_name', 'optional_goal');
 client.active();
 ```
 
-## Experiment Lifecycle
-
-**TODO**
-
-## Goals
+## Conversion Goals
 
 You can configure experiment goals if a single experiment requires multiple conversion goals, or if you just want to define a single named goal to be more explicit.
 
@@ -853,8 +611,8 @@ experiment :button_color do |config|
   goal :checked_out
 
   # if this is false (default), once a participant converts to one of the defined goals, they will not be able to convert to any of the others unless the experiment is reset
-  # if this is true, a single participant may convert to more than one goal, but only once each
-  config.allow_multiple_goals = false
+  # if this is true, a single participant may convert to more than one goal, but only once each, which allows for simple conversion funnels
+  config.allow_multiple_goals = true
 end
 ```
 
@@ -864,7 +622,7 @@ When you define one or more named goals for an experiment, you must pass one of 
 trailguide.convert(:button_color, :signed_up)
 ```
 
-## Groups
+## Conversion Groups
 
 If you have multiple experiments that share a relevant conversion point, you can configure them with a shared group. This allows you to reference and convert multiple experiments at once using that shared group, and only experiments in which participants have been enrolled will be converted.
 
@@ -907,15 +665,15 @@ end
 
 ### Orphaned Groups
 
-Sometimes in the real world, you might accidentally remove all the experiments that were sharing a given group, but miss one of the conversion calls that used one of it's groups. Maybe you forgot to search through your code for references to the group, or maybe you just didn't know you were removing the last experiment in that group. Ideally you'd be testing your code thoroughly, and you'd catch the problem before hitting production, but trailguide has a built-in safe guard just in case.
+Sometimes in the real world, you might accidentally remove all the experiments that were sharing a given group, but miss one of the conversion calls that used one of those groups. Maybe you forgot to search through your code for references to the group, or maybe you just didn't know you were removing the last experiment in that group. Ideally you'd be testing your code thoroughly, and you'd catch the problem before hitting production, but trailguide has a built-in safe guard just in case.
 
-Instead of raising a `TrailGuide::NoExperimentsError` when no experiments match your arguments like `trailguide.choose` and related methods do, the `trailguide.convert` method will log a warning and return `false` as if no conversion happened.
+Instead of raising a `TrailGuide::NoExperimentsError` when no experiments match your arguments like the `trailguide.choose` and related methods do, the `trailguide.convert` method will log a warning and return `false` as if no conversion happened.
 
 After a failed conversion for an orphaned group, the next time you visit the trailguide admin dashboard you'll see an alert with the details of any logged orphaned groups. If you wish to ignore orphaned groups entirely, perhaps so you can leave conversion calls in your application while you regularly rotate experiments into and out of those groups, you can set the `TrailGuide.configuration.ignore_orphaned_groups = true` config option in your initializer.
 
 ### Groups with Goals
 
-Since grouping is only useful when converting, and experiments with defined goals require a goal to be passed in when converting, **any experiments that are sharing a group must define the same goals in order to be converted together.** Not all goals need to overlap, but you will only be able to convert goals that are shared when referencing a group.
+Since grouping is primarily useful when converting, and experiments with defined goals require a goal to be passed in when converting, **any experiments that are sharing a group must define the same goals in order to be converted together.** Not all goals need to overlap, but you will only be able to convert goals that are shared when referencing a group.
 
 If you're grouping your experiments, that probably means you have multiple experiments that are all being used in the same area of your app and therefore are likely sharing the same (or similar) conversion goals. You can assign your groups and goals the same names to make converting easier by referencing a single key:
 
@@ -924,8 +682,8 @@ experiment :first_search_experiment do |config|
   variant :alpha
   variant :bravo
 
-  config.groups = [:click_search, :click_banner, :search_experiments]
-  config.goals  = [:click_search, :click_banner, :custom_goal]
+  groups :click_search, :click_banner, :search_experiments
+  goals  :click_search, :click_banner, :custom_goal
 end
 
 experiment :second_search_experiment do |config|
@@ -933,24 +691,24 @@ experiment :second_search_experiment do |config|
   variant :two
   variant :three
 
-  config.groups = [:click_search, :click_banner, :search_experiments]
-  config.goals  = [:click_search, :click_banner, :some_other_goal]
+  groups :click_search, :click_banner, :search_experiments
+  goals  :click_search, :click_banner, :some_other_goal
 end
 
 experiment :third_search_experiment do |config|
   variant :red
   variant :blue
 
-  config.groups = [:click_search, :click_banner, :search_experiments]
-  config.goals  = [:click_search, :click_banner]
+  groups :click_search, :click_banner, :search_experiments
+  goals  :click_search, :click_banner
 end
 
 # then to convert all three experiments for the click_search group, against the
 # click_search goal
 trailguide.convert(:click_search)
 
-# the above is the equivalent of calling their group name (in this case not
-# matching the goal name) and the goal name
+# the above is the equivalent of calling them by a shared group name (in this example
+# the :search_experiments group) and the conversion goal name
 trailguide.convert(:search_experiments, :click_search)
 
 # or the equivalent of converting each of the three experiments individually
@@ -962,6 +720,39 @@ trailguide.convert(:third_search_experiment, :click_search)
 # and you can still convert the individual experiments with goals that are not
 # shared by their group
 trailguide.convert(:first_search_experiment, :custom_goal)
+```
+
+### Metrics
+
+Metrics are a quick way to combine groups and goals and remove some of the boilerplate when sharing them between experiments. Using the `metrics` config, we can simplify the above examples a bit:
+
+```ruby
+experiment :first_search_experiment do |config|
+  variant :alpha
+  variant :bravo
+
+  metrics :click_search, :click_banner  # this configures a group and a goal for each metric
+  group   :search_experiments           # add another group (without a goal)
+  goal    :custom_goal                  # add another goal (without a group)
+end
+
+experiment :second_search_experiment do |config|
+  variant :one
+  variant :two
+  variant :three
+
+  metrics :click_search, :click_banner  # this configures a group and a goal for each metric
+  group   :search_experiments           # add another group (without a goal)
+  goal    :some_other_goal              # add another goal (without a group)
+end
+
+experiment :third_search_experiment do |config|
+  variant :red
+  variant :blue
+
+  metrics :click_search, :click_banner  # this configures a group and a goal for each metric
+  group   :search_experiments           # add another group (without a goal)
+end
 ```
 
 ## Combined Experiments
