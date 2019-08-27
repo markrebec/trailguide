@@ -5,6 +5,17 @@
 
 TrailGuide is a framework to enable running A/B tests, user experiments and content experiments in rails applications. It is backed by redis making it extremely fast, and provides configuration options allowing for flexible, robust experiments and behavior.
 
+## Features
+
+* **Fast** - TrailGuide makes efficient use of redis, storing a few simple metadata key/value pairs for experiments. Combined with ruby class-based experiments, efficient built-in algorithms, and participant adapters, enrolling in an experiment takes only a few milliseconds.
+* **Flexible** - Core behavior, participant assignment and individual experiments are highly configurable and can be used in almost any context, with options to control everything from variant options and metrics, to enrollment, conversion behavior, request filtering and more.
+* **Hooks and Callbacks** - There are a number of hooks available to handle things like failover cases or filtering participation/conversion, as well as callbacks to enable logging/tracking/whatever when lifecycle or enrollment events occur. (TODO wiki link to callbacks page)
+* **Algorithms** - TrailGuide comes with a few built-in algorithms for common use cases, or you can create your own algorithm class by following a simple interface. (TODO wiki link to algorithm page)
+* **Conversion Goals** - Define simple conversion goals or more complex funnels, and track how your variants are performing against those goals.
+* **Experiment Groups** - If you're running a large number of experiments, it can be helpful to organize them into logical groups, which can also be referenced when converting multiple experiments against shared conversion goals.
+* **Combined Experiments** - Combined experiments are a way to share configuration (variants, goals, groups, flags, etc.), lifecycle (running, paused, etc.) and participation between two or more experiments, while tracking conversion and managing winning variants individually.
+* **Analysis** - Once your experiment is complete TrailGuide can provide you with results using the built-in analyzers, either z-score (default) or bayesian. (TODO wiki link to analysis)
+
 ## Getting Started
 
 ### Requirements
@@ -325,16 +336,16 @@ end
 
 ### Helpers
 
-The `TrailGuide::Helper` module is available to be mixed into just about any context, and provides a helper proxy with an easy API to interact with trailguide. These helpers are mixed into controllers and views as helper methods by default. You can disable this behavior by setting the `config.include_helpers` option to `false` if you'd rather explicitly include it where you want to use it.
+The `TrailGuide::Helper` module is available to be mixed into just about any context, and provides an easy way to interact with TrailGuide experiments. These helpers are mixed into controllers and views as helper methods by default, but you can disable this behavior by setting the `config.include_helpers` option to `false` if you'd rather explicitly include it where you want to use it.
 
-When mixed in, the `trailguide` method provides a reference to the helper proxy, which in turn provides a few methods to perform your experiments.
+When mixed in, the `trailguide` method provides a reference to the helper proxy, which in turn provides a few methods to interact with your experiments.
 
 ```ruby
 # enroll in an experiment or reuse previous assignment
 trailguide.choose(:experiment_name)
 trailguide.choose!(:experiment_name)
 
-# choose, then automatically calls a method within the current context based on
+# chooses, then automatically calls a method within the current context based on
 # the selected variant
 trailguide.run(:experiment_name)
 trailguide.run!(:experiment_name)
