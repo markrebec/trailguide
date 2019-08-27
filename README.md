@@ -87,10 +87,11 @@ end
 Or a view:
 
 ```erb
-- if trailguide(:simple_ab) == :alpha
+<% if trailguide(:simple_ab) == :alpha %>
   <div>...</div>
-- else
+<% else %>
   <div>...</div>
+<% end %>
 ```
 
 ### API / JavaScript Client
