@@ -174,7 +174,7 @@ By default, TrailGuide will look for experiment configs in `config/experiments.*
 
 TrailGuide.configure do |config|
   # you can append a single file or a glob pattern onto the experiment config loadpaths
-  config.paths.configs << 'foo/bar/experiments/**/*
+  config.paths.configs << 'foo/bar/experiments/**/*'
 
   # or you can explicitly override the values with your own
   config.paths.configs = ['foo/bar/baz.rb', 'other/path/**/*']
