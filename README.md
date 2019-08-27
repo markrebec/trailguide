@@ -184,7 +184,7 @@ TrailGuide::Experiment.configure do |config|
 end
 ```
 
-Take a look at [`config/initializers/trailguide.rb`](https://github.com/markrebec/trailguide/blob/master/config/initializers/trailguide.rb) in this repo for a full list of defaults and examples of the available configuration options.
+Take a look at [`the config initializers in this repo`](https://github.com/markrebec/trailguide/blob/master/config/initializers) for a full list of defaults and examples of the available configuration options.
 
 ### Configuring Experiments
 
@@ -521,6 +521,29 @@ The bandit algorithm in trailguide was heavily inspired by [the split gem](https
 experiment :my_experiment do |config|
   config.algorithm = :bandit
 end
+```
+
+#### Static
+
+The static algorithm is intended to be used for content-based experiments alongside the `sticky_assignment = false` experiment configuration. The algorithm will select a variant based on a match between configured metadata and the contextual metadata provided when choosing a variant. You must configure the static algorithm with a block, which will be provided with both sets of metadata, that provides the matching logic.
+
+For example, to render a specific variant based on geographic location (in this case state):
+
+```ruby
+experiment :my_experiment do |config|
+  config.sticky_assignment = false # content-based experiments should not store/assign variants to participants
+  config.algorithm = :static, -> (varmeta,ctxmeta) { varmeta[:states].include?(ctxmeta[:state]) }
+
+  variant :alpha
+  variant :bravo, metadata: {states: ['CA', 'OR', 'WA']}
+  variant :charlie, metadata: {states: ['NV', 'NM', 'UT']}
+end
+```
+
+When you want to render the experiment and choose a variant, just pass in the relevant metadata, and if the state matches a variant (based on your block) it will be returned:
+
+```
+case trailguide(:my_experiment, metadata: {state: @thing.state})
 ```
 
 #### Custom
