@@ -22,6 +22,28 @@ gem 'trailguide'
 
 Then run `bundle install`.
 
+### Configuration
+
+By default the redis client will attempt to connect to redis on `localhost:6379`, which is usually fine for development/testing but won't work in other environments.
+
+Configure redis by either setting a `REDIS_URL` environment variable:
+
+```
+REDIS_URL=redis://127.0.0.1:6379
+```
+
+Or you can create a config initializer, which is useful if you plan on configuring TrailGuide further:
+
+```ruby
+# config/initializers/trailguide.rb
+
+TrailGuide.configure do |config|
+  config.redis = 'redis://127.0.0.1:6379'
+  # or you can also use your own client
+  # config.redis = Redis.new(url: 'redis://127.0.0.1:6379')
+end
+```
+
 ### Quick Start
 
 Create and configure an experiment:
