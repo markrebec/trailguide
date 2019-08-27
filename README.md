@@ -5,6 +5,8 @@
 
 TrailGuide is a framework to enable running A/B tests, user experiments and content experiments in rails applications. It is backed by redis making it extremely fast, and provides configuration options allowing for flexible, robust experiments and behavior.
 
+**NOTE**: I'm currently working towards an official release, refactoring a few things and filling in additional spec coverage and documentation. The current release is stable, however there may be slight changes to the API and usage between now and 1.0.0. In the meantime any feedback, issues or pull requests are welcome!
+
 ## Features
 
 * **Fast** - TrailGuide makes efficient use of redis, storing a few simple metadata key/value pairs for experiments. Combined with ruby class-based experiments, efficient built-in algorithms, and participant adapters, enrolling in an experiment takes only a few milliseconds.
