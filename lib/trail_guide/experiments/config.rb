@@ -19,11 +19,7 @@ module TrailGuide
       def default_config
         DEFAULT_KEYS.map do |key|
           [key, nil]
-        end.to_h.merge({
-          variants: [],
-          goals: [],
-          combined: []
-        }).merge(callback_config)
+        end.to_h.merge(callback_config)
       end
 
       def callback_config
@@ -44,7 +40,7 @@ module TrailGuide
           opts[:name] = nil
           opts[:goals] = ancestor.goals.dup
           opts[:combined] = ancestor.combined.dup
-          opts[:variants] = ancestor.variants.map { |var| var.dup(experiment) }
+          opts[:variants] = ancestor.variants.dup(experiment)
           opts = opts.merge(ancestor.callbacks.map { |k,v| [k,[v].flatten.compact] }.to_h)
         end
         super(*args, **opts, &block)
@@ -99,7 +95,7 @@ module TrailGuide
       end
 
       def variants
-        self[:variants]
+        self[:variants] ||= TrailGuide::Variants.new
       end
 
       def variant(varname, metadata: {}, weight: 1, control: false)
@@ -202,7 +198,7 @@ module TrailGuide
       end
 
       def combined
-        self[:combined]
+        self[:combined] ||= []
       end
 
       def combined?

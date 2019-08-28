@@ -130,9 +130,15 @@ RSpec.describe TrailGuide::Experiments::Config do
         variant :alternate
       }
     }
+    variant(:control)
+    variant(:alternate)
 
-    it 'returns the array of variants' do
-      expect(subject.variants).to eq(subject[:variants])
+    it 'returns a variant collection' do
+      expect(subject.variants).to be_a(TrailGuide::Variants)
+    end
+
+    it 'contains the experiment variants' do
+      expect(subject.variants.to_a).to contain_exactly(control, alternate)
     end
   end
 
