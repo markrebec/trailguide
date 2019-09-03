@@ -2,7 +2,7 @@ require 'rails_helper'
 
 # TODO should probably use timecop for some of the lifecycle stuff (started_at, paused_at, etc.)
 
-RSpec.describe TrailGuide::Experiments::Base do
+RSpec.describe TrailGuide::Experiment do
 
   describe '.configuration' do
     subject {
