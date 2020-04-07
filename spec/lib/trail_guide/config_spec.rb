@@ -42,15 +42,15 @@ RSpec.describe TrailGuide::Config do
       before { subject.redis = 'redis://localhost:6379' }
 
       it 'returns a redis client configured with the url' do
-        expect(subject.redis._client.host).to eq('localhost')
-        expect(subject.redis._client.port).to eq(6379)
+        expect(subject.redis_client.host).to eq('localhost')
+        expect(subject.redis_client.port).to eq(6379)
       end
     end
 
     context 'when not configured' do
       it 'returns a default redis client' do
-        expect(subject.redis._client.host).to eq('127.0.0.1')
-        expect(subject.redis._client.port).to eq(6379)
+        expect(subject.redis_client.host).to eq('127.0.0.1')
+        expect(subject.redis_client.port).to eq(6379)
       end
     end
   end

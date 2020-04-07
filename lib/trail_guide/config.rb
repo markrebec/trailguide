@@ -27,6 +27,10 @@ module TrailGuide
       end
     end
 
+    def redis_client
+      redis.try(:_client) || redis.try(:client)
+    end
+
     def ignore_orphaned_groups?
       !!self[:ignore_orphaned_groups]
     end

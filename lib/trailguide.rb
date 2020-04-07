@@ -24,6 +24,6 @@ module TrailGuide
   SCHEDULE_DATE_FORMAT = "%m/%d/%Y %I:%M %p %Z"
 
   class << self
-    delegate :logger, :redis, to: :configuration
+    delegate :logger, :redis, :redis_client, to: :configuration
   end
 end

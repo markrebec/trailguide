@@ -16,7 +16,7 @@
       <span class="fas fa-flask" data-toggle="tooltip" title="experiments"></span>
     </div>
     <div class="col-sm-3 text-right">
-      <small class="text-muted"><%= TrailGuide.redis._client.id %><%= "/#{TrailGuide.redis.namespace}" if TrailGuide.redis.respond_to?(:namespace) %></small>
+      <small class="text-muted"><%= TrailGuide.redis_client.id %><%= "/#{TrailGuide.redis.namespace}" if TrailGuide.redis.respond_to?(:namespace) %></small>
       <button type="button" class="btn btn-link text-muted" style="font-size: 80%; margin: 0; padding: 0;" data-toggle="modal" data-target="#import-modal" data-tooltip="tooltip" title="Import/Export">
         <span class="fas fa-file-download"></span>
       </button>
