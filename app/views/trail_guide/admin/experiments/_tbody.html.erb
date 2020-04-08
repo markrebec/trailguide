@@ -14,7 +14,7 @@
         <% end %>
 
         <% if experiment.configuration.preview_url? %>
-          <%= link_to preview_url(variant), target: :blank, class: "text-#{variant_analysis_color(vcalc, calculator)}", data: {toggle: :tooltip}, title: "preview this variant (without affecting metrics)" do %>
+          <%= link_to preview_url(variant), target: :_blank, class: "text-#{variant_analysis_color(vcalc, calculator)}", data: {toggle: :tooltip}, title: "preview this variant (without affecting metrics)" do %>
             <span><%= variant.name.to_s.humanize.titleize %></span>
             <small><span class="fas fa-external-link-alt"></span></small>
           <% end %>
