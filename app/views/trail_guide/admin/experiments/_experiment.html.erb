@@ -4,7 +4,7 @@
       <h4 id="<%= experiment.experiment_name %>">
         <%= experiment.experiment_name.to_s.humanize.titleize %>
       </h4>
-      <p style="margin: 0; padding: 0;"><%= experiment.configuration.summary %></p>
+      <p style="margin: 0; padding: 0;"><%= raw experiment.configuration.summary %></p>
     </div>
     <div class="col-10 col-md-6 col-lg-6 text-center text-md-right">
       <div class="row align-items-center">
