@@ -16,7 +16,7 @@ module TrailGuide
       @trailguide_participant
     rescue => e
       TrailGuide.logger.error e
-      @trailguide_participant = TrailGuide::Participant.new(self, adapter: :anonymous)
+      @trailguide_participant = TrailGuide::Participant.new(self, adapter: Adapters::Participants::Anonymous)
     end
 
     # TODO maybe move this to the experiment proxy so it can be configured per-experiment
