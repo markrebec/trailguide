@@ -14,6 +14,9 @@ module TrailGuide
       @trailguide_participant ||= TrailGuide::Participant.new(self)
       @trailguide_participant = TrailGuide::Participant.new(self) if @trailguide_participant.context != self
       @trailguide_participant
+    rescue => e
+      TrailGuide.logger.error e
+      @trailguide_participant = TrailGuide::Participant.new(self, adapter: :anonymous)
     end
 
     # TODO maybe move this to the experiment proxy so it can be configured per-experiment
