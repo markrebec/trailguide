@@ -141,8 +141,8 @@ module TrailGuide
       end
 
       def override_variant
-        return unless context.respond_to?(:params, true)
-        params = context.send(:params)
+        return unless context.respond_to?(:trailguide_params, true) || context.respond_to?(:params, true)
+        params = context.try(:trailguide_params) || context.try(:params)
         return unless params.key?(TrailGuide.configuration.override_parameter)
         experiment_params = params[TrailGuide.configuration.override_parameter]
         return unless experiment_params.key?(experiment.experiment_name.to_s)
