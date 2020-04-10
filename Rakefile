@@ -21,19 +21,37 @@ load 'rails/tasks/statistics.rake'
 
 require 'bundler/gem_tasks'
 
+task :bump do
+  TrailGuide.send(:remove_const, :Version)
+  load 'lib/trail_guide/version.rb'
+  major = ENV.fetch('MAJOR', TrailGuide::Version::MAJOR)
+  minor = ENV.fetch('MINOR', TrailGuide::Version::MINOR)
+  patch = ENV.fetch('PATCH', 'true')
+  major = TrailGuide::Version::MAJOR + 1 if major == 'true'
+  minor = TrailGuide::Version::MINOR + 1 if minor == 'true'
+  patch = TrailGuide::Version::PATCH + 1 if patch == 'true'
+  version = "#{major}.#{minor}.#{patch}"
+
+  File.write('package.json', File.read('package.json').gsub(/"version": "[\d\.]*"/, "\"version\": \"#{version}\""))
+
+  File.write('lib/trail_guide/version.rb', File.read('lib/trail_guide/version.rb').gsub(/MAJOR = \d*/, "MAJOR = #{major}").gsub(/MINOR = \d*/, "MINOR = #{minor}").gsub(/PATCH = \d*/, "PATCH = #{patch}"))
+
+  system "git commit -am '#{version}'"
+end
+
 task :build do
-  # TODO auto-bump version
-  puts `gem build trailguide.gemspec`
-  puts `yarn build:rails`
-  puts `yarn build:node`
+  system 'gem build trailguide.gemspec'
+  system 'yarn build:rails'
+  system 'yarn build:node'
 end
 
 task :push do
-  require 'trail_guide/version'
-  puts `gem push trailguide-#{TrailGuide::Version::VERSION}.gem`
-  puts `yarn publish --no-git-tag-version --new-version #{TrailGuide::Version::VERSION} --message "bumps npm package to #{TrailGuide::Version::VERSION}"`
+  TrailGuide.send(:remove_const, :Version)
+  load 'lib/trail_guide/version.rb'
+  system "gem push trailguide-#{TrailGuide::Version::VERSION}.gem"
+  system "yarn publish --no-git-tag-version --new-version #{TrailGuide::Version::VERSION} --non-interactive"
 end
 
 task release: [:build, :push] do
-  puts `rm -f trailguide*.gem`
+  system 'rm -f trailguide*.gem'
 end
