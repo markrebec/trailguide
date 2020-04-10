@@ -1,6 +1,6 @@
 {
   "name": "trailguide",
-  "version": "0.3.6",
+  "version": "0.3.11",
   "description": "TrailGuide javascript client",
   "main": "dist/index.js",
   "scripts": {
