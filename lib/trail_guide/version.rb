@@ -2,7 +2,7 @@ module TrailGuide
   module Version
     MAJOR = 0
     MINOR = 3
-    PATCH = 8
+    PATCH = 9
     VERSION = "#{MAJOR}.#{MINOR}.#{PATCH}"
 
     class << self
