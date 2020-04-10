@@ -1,6 +1,6 @@
 {
   "name": "trailguide",
-  "version": "0.3.13",
+  "version": "0.3.14",
   "description": "TrailGuide javascript client",
   "main": "dist/index.js",
   "scripts": {
@@ -10,7 +10,7 @@
     "watch:node": "webpack --mode production --config webpack.node.config.js --watch",
     "build": "concurrently \"yarn build:rails\" \"yarn build:node\"",
     "watch": "concurrently \"yarn watch:rails\" \"yarn watch:node\"",
-    "release": "bundle exec rake release"
+    "release": "bundle exec rake bump && bundle exec rake release"
   },
   "devDependencies": {
     "@babel/core": "^7.3.3",
