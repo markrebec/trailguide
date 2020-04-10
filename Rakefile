@@ -30,6 +30,11 @@ task :push do
   puts `gem push trailguide-#{TrailGuide::Version::VERSION}.gem`
 end
 
+task :yarn do
+  require 'trail_guide/version'
+  puts `yarn publish --no-git-tag-version --new-version #{TrailGuide::Version::VERSION} --message "bumps npm package to #{TrailGuide::Version::VERSION}"`
+end
+
 task release: [:build, :push] do
   puts `rm -f trailguide*.gem`
 end
