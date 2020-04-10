@@ -6,8 +6,13 @@ export const client = (axiosConfig) => {
 
   const axiosClient = axios.create(axiosConfig)
   return {
-    active: () => axiosClient.get('/'),
-    choose: (experiment, metadata={}) => axiosClient.post(`/${experiment}`, { metadata }),
-    convert: (experiment, checkpoint=undefined, metadata={}) => axiosClient.put(`/${experiment}`, { checkpoint, metadata })
+    active: (requestConfig=undefined) =>
+      axiosClient.get('/', requestConfig),
+
+    choose: (experiment, metadata={}, requestConfig=undefined) =>
+      axiosClient.post(`/${experiment}`, { metadata }, requestConfig),
+
+    convert: (experiment, checkpoint=undefined, metadata={}, requestConfig=undefined) =>
+      axiosClient.put(`/${experiment}`, { checkpoint, metadata }, requestConfig),
   }
 }
