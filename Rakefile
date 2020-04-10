@@ -22,16 +22,15 @@ load 'rails/tasks/statistics.rake'
 require 'bundler/gem_tasks'
 
 task :build do
+  # TODO auto-bump version
   puts `gem build trailguide.gemspec`
+  puts `yarn build:rails`
+  puts `yarn build:node`
 end
 
 task :push do
   require 'trail_guide/version'
   puts `gem push trailguide-#{TrailGuide::Version::VERSION}.gem`
-end
-
-task :yarn do
-  require 'trail_guide/version'
   puts `yarn publish --no-git-tag-version --new-version #{TrailGuide::Version::VERSION} --message "bumps npm package to #{TrailGuide::Version::VERSION}"`
 end
 
