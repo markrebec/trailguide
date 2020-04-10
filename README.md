@@ -590,24 +590,114 @@ If you're using a custom adapter, you'll need to make sure that your adapter is 
 
 ## JavaScript Client
 
-There is a simple javascript client available that mimics the ruby usage as closely as possible, and is ready to be used with the rails asset pipeline. This client uses axios to hit the API, and requires that you mount it in your routes.
+There is a simple javascript client available that mimics the ruby usage as closely as possible, and is ready to be used with the rails asset pipeline or via webpack. This client uses axios to hit the API, and requires that you mount it in your routes.
+
+```ruby
+# config/routes.rb
+
+Rails.application.routes.draw do
+
+  mount TrailGuide::Engine => 'api/experiments'
+
+  # ...
+end
+```
+
+### Rails Asset Pipeline
+
+If you're using the rails asset pipeline, just require trailguide in your `application.js` and instantiate a client.
 
 ```javascript
-// require the trailguide client in your application.js or wherever makes sense
+// require the trailguide client in your application.js or wherever makes sense for your project
 //= require trailguide
 
 // create a client instance
 // make sure to pass in the route path where you've mounted the trailguide engine
 var client = TrailGuide.client('/api/experiments');
+```
 
+The client is just a wrapper around `axios`, so you can provide any of their [request configuration options](https://github.com/axios/axios#request-config).
+
+```javascript
+var client = TrailGuide.client({
+  baseURL: '/api/experiments',
+  headers: {...},
+  transformRequest: (data,headers) => (...)
+});
+```
+
+### Webpack
+
+If you're using webpack, you can install the corresponding `trailguide` npm package with `yarn` or `npm`:
+
+```
+yarn add trailguide
+```
+
+```
+npm install trailguide
+```
+
+Then use it in your project:
+
+```javascript
+import { client } from 'trailguide'
+
+// create a client instance
+// make sure to pass in the route path where you've mounted the trailguide engine
+export default client('/api/experiments')
+```
+
+```javascript
+var TrailGuide = require('trailguide');
+
+module.exports = {
+  // create a client instance
+  // make sure to pass in the route path where you've mounted the trailguide engine
+  client: TrailGuide.client('/api/experiments')
+};
+```
+
+The client is just a wrapper around `axios`, so you can provide any of their [request configuration options](https://github.com/axios/axios#request-config).
+
+```javascript
+client({
+  baseURL: '/api/experiments',
+  headers: {...},
+  transformRequest: (data,headers) => (...)
+})
+```
+
+### Usage
+
+Once you have a handle on a client, the usage is the same. All methods return a promise with the `response` as a payload.
+
+```javascript
 // enroll in an experiment
-client.choose('experiment_name');
+client.choose('experiment_name', {...optional_metadata...}).then(response => {
+ // response.data will be:
+ // { experiment: "experiment_name", variant: "assigned_variant_name", metadata: {...} }
+})
 
 // convert for an experiment with an optional goal
-client.convert('experiment_name', 'optional_goal');
+client.convert('experiment_name', 'optional_goal', {...optional_metadata...}).then(response => {
+  // response.data will be:
+  // { experiment: "experiment_name", checkpoint: "optional_goal", metadata: {...} }
+})
 
 // return the participant's active experiments and their assigned variant group
-client.active();
+client.active().then(response => {
+  // response.data will be:
+  // { experiments: { experiment_name: "assigned_variant_name" } }
+})
+```
+
+The client is just a wrapper around `axios`, and all the client methods support any of their [request configuration options](https://github.com/axios/axios#request-config) as the last argument.
+
+```javascript
+client.active({ headers: {...}, transformRequest: (data,headers) => (...) }).then(...)
+client.choose('experiment_name', {...optional_metadata...}, { headers: {...}, transformRequest: (data,headers) => (...) }).then(...)
+client.convert('experiment_name', 'optional_goal', {...optional_metadata...}, { headers: {...}, transformRequest: (data,headers) => (...) }).then(...)
 ```
 
 ## Conversion Goals
