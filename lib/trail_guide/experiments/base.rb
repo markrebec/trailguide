@@ -71,6 +71,7 @@ module TrailGuide
         :storage_key, :combined?, :start_manually?, :reset_manually?,
         :allow_multiple_conversions?, :allow_multiple_goals?, :is_combined?,
         :enable_calibration?, :track_winner_conversions?, :callbacks, to: :class
+      delegate :context, to: :participant
 
       def initialize(participant)
         @participant = Experiments::Participant.new(self, participant)

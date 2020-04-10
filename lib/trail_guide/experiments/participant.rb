@@ -2,6 +2,7 @@ module TrailGuide
   module Experiments
     class Participant
       attr_reader :experiment, :participant
+      delegate :context, to: :participant
 
       def initialize(experiment, participant)
         @experiment = experiment
