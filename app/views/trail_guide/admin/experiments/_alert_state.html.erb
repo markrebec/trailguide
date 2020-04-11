@@ -27,16 +27,16 @@
       <% end %>
     <% elsif experiment.started? %>
       <% if experiment.stopped? %>
-        This experiment has been stopped and he control variant will be returned to all participants until it is restarted or a winner is selected. It ran from <strong><%= experiment.started_at.strftime(TrailGuide::Admin::DISPLAY_DATE_FORMAT) %></strong> to <strong><%= experiment.stopped_at.strftime(TrailGuide::Admin::DISPLAY_DATE_FORMAT) %></strong>.
+        This experiment has been stopped and he control variant will be returned to all participants until it is restarted or a winner is selected. It ran from <strong><%= format_time(experiment.started_at) %></strong> to <strong><%= format_time(experiment.stopped_at) %></strong>.
       <% elsif experiment.paused? %>
-        This experiment was paused on <strong><%= experiment.paused_at.strftime(TrailGuide::Admin::DISPLAY_DATE_FORMAT) %></strong> paused. The control variant will be returned to all participants until it is resumed, restarted or a winner is selected.
+        This experiment was paused on <strong><%= format_time(experiment.paused_at) %></strong> paused. The control variant will be returned to all participants until it is resumed, restarted or a winner is selected.
       <% else %>
-        This experiment was started on <strong><%= experiment.started_at.strftime(TrailGuide::Admin::DISPLAY_DATE_FORMAT) %></strong> and is currently running. Participants will be enrolled and served a variant based on the configured alrogithm.
+        This experiment was started on <strong><%= format_time(experiment.started_at) %></strong> and is currently running. Participants will be enrolled and served a variant based on the configured alrogithm.
       <% end %>
     <% elsif experiment.scheduled? %>
-      This experiment has been scheduled to start on <strong><%= experiment.started_at.strftime(TrailGuide::Admin::DISPLAY_DATE_FORMAT) %></strong>
+      This experiment has been scheduled to start on <strong><%= format_time(experiment.started_at) %></strong>
       <% if experiment.stopped_at.present? %>
-        and stop on <strong><%= experiment.stopped_at.strftime(TrailGuide::Admin::DISPLAY_DATE_FORMAT) %></strong>
+        and stop on <strong><%= format_time(experiment.stopped_at) %></strong>
       <% end %>
     <% else %>
       This experiment is not running, and the control variant will be returned to all participants until it is started. You may use the controls above to start or schedule your experiment.

@@ -61,7 +61,7 @@ module TrailGuide
       def schedule
         experiment.schedule!(schedule_params[:start_at], schedule_params[:stop_at], self)
 
-        flash[:success] = "Experiment scheduled for <strong>#{experiment.started_at.strftime(TrailGuide::Admin::DISPLAY_DATE_FORMAT)}</strong>"
+        flash[:success] = "Experiment scheduled for <strong>#{format_time(experiment.started_at)}</strong>"
         redirect_to_experiment experiment
       rescue => e
         flash[:danger] = e.message
