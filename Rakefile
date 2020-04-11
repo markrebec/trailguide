@@ -40,16 +40,10 @@ task :bump do
 end
 
 task :build do
-  TrailGuide.send(:remove_const, :Version)
-  load 'lib/trail_guide/version.rb'
-  system 'gem build trailguide.gemspec'
   system 'yarn build:rails'
   system 'yarn build:node'
 end
 
 task :release do
-  TrailGuide.send(:remove_const, :Version)
-  load 'lib/trail_guide/version.rb'
   system "yarn publish --no-git-tag-version --new-version #{TrailGuide::Version::VERSION} --non-interactive"
-  system 'rm -f trailguide*.gem'
 end
