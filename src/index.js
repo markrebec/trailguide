@@ -1,31 +1,46 @@
 import axios from 'axios'
 
+const mergeConfig = (config) => {
+  if (config == undefined)
+    return config
+
+  if (config.transformRequest)
+    config.transformRequest = [
+      ...config.transformRequest,
+      ...axios.defaults.transformRequest
+    ]
+
+  if (config.transformResponse)
+    config.transformResponse = [
+      ...axios.defaults.transformResponse,
+      ...config.transformResponse
+    ]
+
+  return config
+}
+
 export const client = (axiosConfig) => {
   if (typeof axiosConfig == "string")
     axiosConfig = { baseURL: axiosConfig }
 
-  if (axiosConfig.transformRequest)
-    axiosConfig.transformRequest = [
-      ...axiosConfig.transformRequest,
-      ...axios.defaults.transformRequest
-    ]
-
-  if (axiosConfig.transformResponse)
-    axiosConfig.transformResponse = [
-      ...axios.defaults.transformResponse,
-      ...axiosConfig.transformResponse
-    ]
-
-  const axiosClient = axios.create(axiosConfig)
+  const axiosClient = axios.create(mergeConfig(axiosConfig))
 
   return {
     active: (requestConfig=undefined) =>
-      axiosClient.get('/', requestConfig),
+      axiosClient.get('/', mergeConfig(requestConfig)),
 
     choose: (experiment, metadata={}, requestConfig=undefined) =>
-      axiosClient.post(`/${experiment}`, { metadata }, requestConfig),
+      axiosClient.post(`/${experiment}`, { metadata }, mergeConfig(requestConfig)),
 
     convert: (experiment, checkpoint=undefined, metadata={}, requestConfig=undefined) =>
-      axiosClient.put(`/${experiment}`, { checkpoint, metadata }, requestConfig),
+      axiosClient.put(`/${experiment}`, { checkpoint, metadata }, mergeConfig(requestConfig)),
+
+    run: (experiment, metadata={}, callbacks={}, requestConfig=undefined) => {
+      axiosClient.post(`/${experiment}`, { metadata }, mergeConfig(requestConfig))
+        .then(({ data, ...request }) => {
+          if (callbacks[data.variant])
+            callbacks[data.variant](data)
+        })
+    },
   }
 }
