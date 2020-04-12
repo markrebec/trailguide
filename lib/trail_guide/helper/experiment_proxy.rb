@@ -115,7 +115,7 @@ module TrailGuide
         end
       rescue NoExperimentsError => e
         unless TrailGuide.configuration.ignore_orphaned_groups?
-          trace = e.backtrace.find { |t| !t.match?(Regexp.new(__FILE__)) }
+          trace = e.backtrace.find { |t| !t.match?(Regexp.new(File.dirname(__FILE__))) }
             .to_s.split(Rails.root.to_s).last
             .split(':').first(2).join(':')
           TrailGuide.catalog.orphaned(key, trace)
