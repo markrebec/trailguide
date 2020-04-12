@@ -2,7 +2,7 @@ module TrailGuide
   module Admin
     class Config < Canfig::Config
       DEFAULT_KEYS = [
-        :title, :subtitle, :peek_parameter, :date_format, :time_zone
+        :title, :subtitle, :experiment_user, :peek_parameter, :date_format, :time_zone
       ].freeze
 
       def initialize(*args, **opts, &block)

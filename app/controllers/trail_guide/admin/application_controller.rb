@@ -17,6 +17,13 @@ module TrailGuide
       end
       helper_method :preview_url
 
+      def subtitle(context=self)
+        subtitle = TrailGuide::Admin.configuration.subtitle
+        subtitle = context.instance_exec(&subtitle) if subtitle.respond_to?(:call)
+        subtitle
+      end
+      helper_method :subtitle
+
       def experiment_peekable?(experiment)
         return false unless TrailGuide::Admin.configuration.peek_parameter
         return false unless experiment.started? && !experiment.stopped? && !experiment.winner?
@@ -104,6 +111,12 @@ module TrailGuide
         ActiveSupport::TimeWithZone.new(time.utc, TrailGuide::Admin.configuration.time_zone).strftime(format)
       end
       helper_method :format_time
+
+      if TrailGuide::Admin.configuration.experiment_user.present?
+        def trailguide_user
+          send TrailGuide::Admin.configuration.experiment_user.to_sym
+        end
+      end
     end
   end
 end

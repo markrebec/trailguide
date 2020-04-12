@@ -123,7 +123,7 @@
       <span class="fas fa-calculator"></span>
     </button>
   </div>
-  <span class="navbar-brand d-none d-md-inline-block"><small class="text-muted"><%= TrailGuide::Admin.configuration.subtitle %></small></span>
+  <span class="navbar-brand d-none d-md-inline-block"><%= raw subtitle(self) %></span>
 </nav>
 
 <%= render partial: 'layouts/trail_guide/admin/calculator' %>

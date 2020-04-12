@@ -7,7 +7,20 @@ TrailGuide::Admin.configure do |config|
 
   # display subtitle for admin UI
   #
-  config.subtitle = 'Experiments and A/B Tests'
+  # can be a string or a block, and may contain raw html.
+  #
+  # if a block is given, it will be executed within the view context, so you can use
+  # all available helpers, route helpers, etc.
+  #
+  config.subtitle = '<small class="text-muted">Experiments and A/B Tests</small>'
+
+  # specify a custom method to call when looking for a trailguide user/participant
+  # within the admin UI.
+  #
+  # this can be useful if you have separate admin and application user models, and
+  # allows you to specify the application user who will be enrolled on behalf of the
+  # admin user within the admin UI, to more easily facilitate enrollment and testing
+  config.experiment_user = nil
 
   # request parameter can be used to "peek" at results even before an
   # experiment's target_sample_size has been hit if one is configured
