@@ -9,6 +9,13 @@ module TrailGuide
         args = args.concat(DEFAULT_KEYS)
         super(*args, **opts, &block)
       end
+
+      def time_zone
+        self[:time_zone] ||= 'UTC'
+        self[:time_zone] = self[:time_zone].call if self[:time_zone].respond_to?(:call)
+        self[:time_zone] = ActiveSupport::TimeZone[self[:time_zone]] unless self[:time_zone].is_a?(ActiveSupport::TimeZone)
+        self[:time_zone]
+      end
     end
   end
 end

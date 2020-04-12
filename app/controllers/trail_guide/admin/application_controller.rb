@@ -100,15 +100,8 @@ module TrailGuide
       end
       helper_method :experiment_color
 
-      def time_zone
-        zone = TrailGuide::Admin.configuration.time_zone || ActiveSupport::TimeZone['UTC']
-        zone = zone.call if zone.respond_to?(:call)
-        zone = ActiveSupport::TimeZone[zone] unless zone.is_a?(ActiveSupport::TimeZone)
-        zone
-      end
-
       def format_time(time, format=TrailGuide::Admin.configuration.date_format)
-        ActiveSupport::TimeWithZone.new(time.utc, time_zone).strftime(format)
+        ActiveSupport::TimeWithZone.new(time.utc, TrailGuide::Admin.configuration.time_zone).strftime(format)
       end
       helper_method :format_time
     end
