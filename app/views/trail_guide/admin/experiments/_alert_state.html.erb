@@ -27,7 +27,7 @@
       <% end %>
     <% elsif experiment.started? %>
       <% if experiment.stopped? %>
-        This experiment has been stopped and he control variant will be returned to all participants until it is restarted or a winner is selected. It ran from <strong><%= format_time(experiment.started_at) %></strong> to <strong><%= format_time(experiment.stopped_at) %></strong>.
+        This experiment has been stopped and the control variant will be returned to all participants until it is restarted or a winner is selected. It ran from <strong><%= format_time(experiment.started_at) %></strong> to <strong><%= format_time(experiment.stopped_at) %></strong>.
       <% elsif experiment.paused? %>
         This experiment was paused on <strong><%= format_time(experiment.paused_at) %></strong> paused. The control variant will be returned to all participants until it is resumed, restarted or a winner is selected.
       <% else %>
