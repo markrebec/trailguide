@@ -1,0 +1,32 @@
+<div class="row justify-content-center">
+  <div class="col-12 col-md-10 col-lg-8">
+    <div class="row align-items-center">
+      <div class="col-8 col-lg-10">
+        <h1 id="<%= @orphan %>" class="alert-warning" style="background-color: transparent; boder-color: transparent;">
+          <span class="fas fa-ghost"></span>
+          &nbsp;
+          <%= @orphan.to_s.humanize.titleize %>
+        </h1>
+      </div>
+
+      <div class="col-4 col-lg-2 text-right">
+      </div>
+    </div>
+
+    <div class="alert alert-warning">
+      <p>TrailGuide has detected <strong><%= @traces.count %></strong> orphaned calls to <code>trailguide.convert(:<%= @orphan %>)</code>.</p>
+      
+      <p><small>This usually means that the last experiment that belonged to the group was removed without realizing it, and references to the group were overlooked. <strong>Don't worry, your users won't notice a thing</strong>, and you can find all the logged references below. You can find <%= link_to "more info here.", "https://github.com/markrebec/trailguide#orphaned-groups", target: :blank %></small></p>
+    </div>
+
+    <ul style="list-style: none; margin-bottom: 15px;">
+      <% @traces.each do |trace| %>
+        <li><code><%= trace %></code></li>
+      <% end %>
+    </ul>
+
+    <div class="alert alert-info">
+      <p><small>These warnings will expire after 15 minutes of inactivity, and they will disappear automatically once you remove the references listed above. If you prefer to clear these warnings immediately after cleaning up, you can run <code>TrailGuide.catalog.adopted(:group_name)</code> from a console, rake task, or background job or <%= link_to 'click here to clear them immediately', trail_guide_admin.adopt_orphan_url(@orphan) %>.</small></p>
+    </div>
+  </div>
+</div>

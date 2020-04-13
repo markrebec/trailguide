@@ -4,7 +4,7 @@ module TrailGuide
   module Admin
     class ExperimentsController < ::TrailGuide::Admin::ApplicationController
       before_action except: [:index, :import] do
-        (redirect_to :back rescue redirect_to trail_guide_admin.experiments_path) and return unless experiment.present?
+        (redirect_to :back rescue redirect_to trail_guide_admin.experiments_path) unless experiment.present?
       end
 
       before_action :experiments, only: [:index]

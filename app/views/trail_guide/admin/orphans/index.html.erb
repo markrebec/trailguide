@@ -1,0 +1,33 @@
+<%= render partial: 'trail_guide/admin/orphans/alert' %>
+
+<div class="row justify-content-center">
+  <div class="col-12 col-md-10 col-lg-8">
+    <div class="experiments">
+      <% @orphans.each do |orphan,traces| %>
+        <button href="<%= trail_guide_admin.orphan_path(orphan) %>" class="experiment btn btn-outline-warning rounded-lg text-left">
+          <div class="row align-items-center">
+            <div class="col-12 col-md-8 col-lg-9 experiment-text">
+              <h4 id="<%= orphan %>">
+                <%= orphan.to_s.humanize.titleize %>
+              </h4>
+            </div>
+            <div class="col-12 col-md-4 col-lg-3 text-center text-md-right">
+              <div class="row align-items-center">
+                <div class="col-6 col-md-7 col-lg-8 experiment-text text-center">
+                </div>
+
+                <div class="col-6 col-md-5 col-lg-4">
+                  <h4>
+                    <span class="fas fa-ghost"></span>
+                    &times;
+                    <%= traces.count %>
+                  </h4>
+                </div>
+              </div>
+            </div>
+          </div>
+        </button>
+      <% end %>
+    </div>
+  </div>
+</div>

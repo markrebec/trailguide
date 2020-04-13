@@ -14,6 +14,15 @@
       <span class="fas fa-fill" data-toggle="tooltip" title="goals"></span> across
       <strong><%= number_with_delimiter TrailGuide.catalog.all.count %></strong>
       <span class="fas fa-flask" data-toggle="tooltip" title="experiments"></span>
+      <% unless TrailGuide.configuration.ignore_orphaned_groups? || TrailGuide.catalog.orphans.empty? %>
+        &nbsp;&nbsp;&nbsp;
+        <%= link_to trail_guide_admin.orphans_url, style: 'text-decoration: none', data: {toggle: 'tooltip'}, title: 'orphans' do %>
+          <span class="alert-warning" style="background-color: transparent; boder-color: transparent;">
+            <strong><%= number_with_delimiter TrailGuide.catalog.orphans.count %></strong>
+            <span class="fas fa-ghost"></span>
+          </span>
+        <% end %>
+      <% end %>
     </div>
     <div class="col-sm-3 text-right">
       <small class="text-muted"><%= TrailGuide.redis_client.id %><%= "/#{TrailGuide.redis.namespace}" if TrailGuide.redis.respond_to?(:namespace) %></small>

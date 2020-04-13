@@ -1,5 +1,10 @@
 TrailGuide::Admin::Engine.routes.draw do
-  resources :groups, only: [:index, :show]
+  resources :groups,  only: [:index, :show]
+  resources :orphans, only: [:index, :show] do
+    member do
+      match :adopt, via: [:put, :post, :get]
+    end
+  end
 
   resources :experiments, path: '/', only: [:index, :show] do
     member do
@@ -21,9 +26,9 @@ TrailGuide::Admin::Engine.routes.draw do
     end
 
     collection do
-      put  '/import', action: :import, as: :import
-      get  '/export', action: :index,  as: :export, format: [:json]
-      get  '/scope/:scope', action: :index, as: :scoped
+      put  '/import',       action: :import, as: :import
+      get  '/export',       action: :index,  as: :export, format: [:json]
+      get  '/scope/:scope', action: :index,  as: :scoped
     end
   end
 end

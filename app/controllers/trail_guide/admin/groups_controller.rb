@@ -2,7 +2,7 @@ module TrailGuide
   module Admin
     class GroupsController < ::TrailGuide::Admin::ApplicationController
       before_action except: [:index] do
-        (redirect_to :back rescue redirect_to trail_guide_admin.experiments_path) and return unless group.present?
+        (redirect_to :back rescue redirect_to trail_guide_admin.groups_path) unless group.present?
       end
 
       before_action :groups,      only: [:index]
