@@ -9,8 +9,8 @@ module TrailGuide
         @participant = participant
       end
 
-      def participating?
-        @participating ||= variant.present?
+      def participating?(include_control=true)
+        @participating ||= participant.participating?(experiment, include_control)
       end
 
       def participating!(variant)
@@ -26,7 +26,7 @@ module TrailGuide
         @converted[converted_key]
       end
 
-      def converted!(variant, checkpoint, reset: false)
+      def converted!(variant, checkpoint=nil, reset: false)
         @converted ||= {}
         @converted[checkpoint || :converted] ||= true
         participant.converted!(variant, checkpoint, reset: reset)
