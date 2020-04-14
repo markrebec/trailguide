@@ -6,6 +6,7 @@ module TrailGuide
         def initialize(&block)
           configure do |config|
             config.namespace = :participants
+            # TODO this can be simplified now that adapters have a contextual subject
             config.lookup = -> (context) {
               context.try(:trailguide_user).try(:id) ||
                 context.try(:current_user).try(:id)

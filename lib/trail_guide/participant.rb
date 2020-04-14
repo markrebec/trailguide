@@ -1,7 +1,7 @@
 module TrailGuide
   class Participant
     attr_reader :context
-    delegate :key?, :keys, :[], :[]=, :delete, :destroy!, :to_h, to: :adapter
+    delegate :key?, :keys, :[], :[]=, :delete, :destroy!, :to_h, :subject, to: :adapter
 
     def initialize(context, adapter: nil)
       @context = context

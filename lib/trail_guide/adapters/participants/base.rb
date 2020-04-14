@@ -28,6 +28,11 @@ module TrailGuide
             @config = config
           end
 
+          def subject
+            context.try(:trailguide_user) || context.try(:current_user)
+          end
+          alias_method :user, :subject
+
           def [](key)
             raise NotImplementedError, "You must override the `[]` method in your inheriting adapter class"
           end
