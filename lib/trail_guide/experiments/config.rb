@@ -13,7 +13,7 @@ module TrailGuide
         :on_start, :on_schedule, :on_stop, :on_pause, :on_resume, :on_winner,
         :on_reset, :on_delete, :on_choose, :on_use, :on_convert,
         :on_redis_failover, :allow_participation, :allow_conversion,
-        :rollout_winner
+        :track_participation, :rollout_winner
       ].freeze
 
       def default_config
@@ -295,6 +295,12 @@ module TrailGuide
         raise ArgumentError if meth.nil? && !block_given?
         self[:allow_conversion] ||= []
         self[:allow_conversion] << (meth || block)
+      end
+
+      def track_participation(meth=nil, &block)
+        raise ArgumentError if meth.nil? && !block_given?
+        self[:track_participation] ||= []
+        self[:track_participation] << (meth || block)
       end
 
       def rollout_winner(meth=nil, &block)

@@ -433,6 +433,7 @@ RSpec.describe TrailGuide::Experiments::Config do
         on_redis_failover: [],
         allow_participation: [],
         allow_conversion: [],
+        track_participation: [],
         rollout_winner: [],
       })
     end
@@ -492,6 +493,10 @@ RSpec.describe TrailGuide::Experiments::Config do
 
   describe '#allow_conversion' do
     it_behaves_like 'a callback config method', :allow_conversion
+  end
+
+  describe '#track_participation' do
+    it_behaves_like 'a callback config method', :track_participation
   end
 
   describe '#rollout_winner' do

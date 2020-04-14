@@ -128,7 +128,7 @@ module TrailGuide
 
       def run_callbacks(hook, *args)
         return unless callbacks[hook]
-        if [:allow_participation, :allow_conversion, :rollout_winner].include?(hook)
+        if [:allow_participation, :allow_conversion, :track_participation, :rollout_winner].include?(hook)
           callbacks[hook].reduce(args.slice!(0,1)[0]) do |result, callback|
             if callback.respond_to?(:call)
               callback.call(self, result, *args)

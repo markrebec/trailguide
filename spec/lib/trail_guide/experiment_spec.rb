@@ -2141,6 +2141,45 @@ RSpec.describe TrailGuide::Experiment do
       end
     end
 
+    context 'when configured not to track participation for the participant' do
+      trial { |cfg| cfg.track_participation = -> (exp, trk, ptc, mtd) { return false } }
+
+      it 'uses the algorithm to choose a variant' do
+        expect(subject).to receive(:algorithm_choose!).and_call_original
+        subject.choose_variant!
+      end
+
+      it 'does not increment variant participation' do
+        allow(subject).to receive(:algorithm_choose!).and_return(alternate)
+        expect(alternate).to_not receive(:increment_participation!)
+        subject.choose_variant!
+      end
+
+      it 'does not store participant assignment' do
+        allow(subject).to receive(:algorithm_choose!).and_return(alternate)
+        expect(participant).to_not receive(:participating!).with(alternate)
+        subject.choose_variant!
+      end
+
+      context 'when configured with sticky assignment' do
+        it 'does not store participant assignment' do
+          allow(subject).to receive(:algorithm_choose!).and_return(alternate)
+          expect(participant).to_not receive(:participating!)
+          subject.choose_variant!
+        end
+
+        context 'when the participant is already participating' do
+          before { participant.participating!(alternate) }
+
+          it 'does not refresh participant assignment' do
+            allow(subject).to receive(:algorithm_choose!).and_return(alternate)
+            expect(participant).to_not receive(:participating!)
+            subject.choose_variant!
+          end
+        end
+      end
+    end
+
     it 'uses the algorithm to choose a variant' do
       expect(subject).to receive(:algorithm_choose!).and_call_original
       subject.choose_variant!
@@ -2157,6 +2196,16 @@ RSpec.describe TrailGuide::Experiment do
         allow(subject).to receive(:algorithm_choose!).and_return(alternate)
         expect(participant).to receive(:participating!).with(alternate)
         subject.choose_variant!
+      end
+
+      context 'when the participant is already participating' do
+        before { participant.participating!(alternate) }
+
+        it 'refreshes participant assignment' do
+          allow(subject).to receive(:algorithm_choose!).and_return(alternate)
+          expect(participant).to receive(:participating!).with(alternate)
+          subject.choose_variant!
+        end
       end
     end
 
@@ -2619,6 +2668,34 @@ RSpec.describe TrailGuide::Experiment do
         it 'returns the result of callbacks' do
           expect(subject.allow_conversion?(variant)).to be_falsey
         end
+      end
+    end
+  end
+
+  describe '#track_participation?' do
+    context 'when no track_participation callbacks are defined' do
+      trial_subject
+
+      it 'returns true' do
+        expect(subject.track_participation?).to be_truthy
+      end
+
+      it 'does not run callbacks' do
+        expect(subject).to_not receive(:run_callbacks)
+        subject.track_participation?
+      end
+    end
+
+    context 'when track_participation callbacks are defined' do
+      trial_subject { |cfg| cfg.track_participation = -> (expmt, track, ptcpt, mtdt) { return false } }
+
+      it 'runs callbacks' do
+        expect(subject).to receive(:run_callbacks).with(:track_participation, true, subject.participant, nil)
+        subject.track_participation?
+      end
+
+      it 'returns the result of callbacks' do
+        expect(subject.track_participation?).to be_falsey
       end
     end
   end

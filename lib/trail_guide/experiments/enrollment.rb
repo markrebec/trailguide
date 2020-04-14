@@ -67,7 +67,7 @@ module TrailGuide
         # re-assign on enrollment
         if configuration.sticky_assignment? && participant.participating?
           variant = participant.variant
-          participant.participating!(variant)
+          participant.participating!(variant) if track_participation?(metadata)
           return variant
         end
 
@@ -75,8 +75,10 @@ module TrailGuide
         return control unless allow_participation?(metadata)
 
         variant = algorithm_choose!(metadata: metadata)
-        variant.increment_participation!
-        participant.participating!(variant)
+        if track_participation?(metadata)
+          variant.increment_participation!
+          participant.participating!(variant)
+        end
         run_callbacks(:on_choose, variant, participant, metadata)
         variant
       end
@@ -88,6 +90,11 @@ module TrailGuide
       def allow_participation?(metadata=nil)
         return true if callbacks[:allow_participation].empty?
         run_callbacks(:allow_participation, true, participant, metadata)
+      end
+
+      def track_participation?(metadata=nil)
+        return true if callbacks[:track_participation].empty?
+        run_callbacks(:track_participation, true, participant, metadata)
       end
     end
   end

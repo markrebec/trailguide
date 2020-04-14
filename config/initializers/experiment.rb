@@ -232,6 +232,17 @@ TrailGuide::Experiment.configure do |config|
   # config.allow_participation = -> (experiment, allowed, participant, metadata) { ... return true }
 
 
+  # callback that can short-circuit tracking participation based on your own logic,
+  # which gets checked as part of variant assignment - mostly useful with static
+  # algorithms used across a variety of contexts you do and do not want to track
+  #
+  # `track` will be the value returned by any previous callbacks in the chain
+  #
+  # should return true or false
+  #
+  # config.track_participation = -> (experiment, track, participant, metadata) { ... return true }
+
+
   # callback that can short-circuit conversion based on your own logic, which
   # gets called *after* all the core engine checks (i.e. that the user is
   # participating in the experiment, is within the bounds of the experiment
