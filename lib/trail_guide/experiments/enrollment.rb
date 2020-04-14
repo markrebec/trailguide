@@ -32,7 +32,7 @@ module TrailGuide
         if winner?
           variant = winning_variant
           if track_winner_conversions? && running?
-            variant.increment_participation! unless participant.variant == variant
+            variant.increment_participation! unless participant.variant == variant || !track_participation?(metadata)
             participant.exit! if participant.participating? && participant.variant != variant
             participant.participating!(variant)
           end
