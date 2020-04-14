@@ -10,11 +10,10 @@ module TrailGuide
       end
 
       def participating?(include_control=true)
-        @participating ||= participant.participating?(experiment, include_control)
+        participant.participating?(experiment, include_control)
       end
 
       def participating!(variant)
-        @participating = true
         @variant = variant
         participant.participating!(variant) if experiment.configuration.sticky_assignment?
       end
@@ -37,7 +36,6 @@ module TrailGuide
       end
 
       def exit!
-        @participating = nil
         @converted = nil
         @variant = nil
         participant.exit!(experiment)

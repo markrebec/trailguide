@@ -16,7 +16,7 @@ RSpec.describe TrailGuide::Experiments::Participant do
 
   describe '#participating?' do
     context 'when a variant is present' do
-      before { allow(subject).to receive(:variant).and_return(experiment.control) }
+      before { allow(subject.participant).to receive(:variant).and_return(experiment.control) }
 
       it 'returns true' do
         expect(subject.participating?).to be_truthy
@@ -34,10 +34,6 @@ RSpec.describe TrailGuide::Experiments::Participant do
 
   describe '#participating!' do
     variant(:control)
-
-    it 'sets @participating to true' do
-      expect { subject.participating!(variant) }.to change { subject.instance_variable_get(:@participating) }.to(true)
-    end
 
     it 'sets the @variant' do
       expect { subject.participating!(variant) }.to change { subject.instance_variable_get(:@variant) }.to(variant)
@@ -179,11 +175,6 @@ RSpec.describe TrailGuide::Experiments::Participant do
 
   describe '#exit!' do
     variant(:control)
-
-    it 'clears @participating' do
-      subject.instance_variable_set(:@participating, true)
-      expect { subject.exit! }.to change { subject.instance_variable_get(:@participating) }.from(true).to(nil)
-    end
 
     it 'clears @converted' do
       subject.instance_variable_set(:@converted, {})

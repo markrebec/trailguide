@@ -1944,7 +1944,7 @@ RSpec.describe TrailGuide::Experiment do
           end
 
           context 'and the participant is participating but their assigned variant is not the control' do
-            before { allow(subject.participant).to receive(:variant).and_return(alternate) }
+            before { allow(subject.participant.participant).to receive(:variant).and_return(alternate) }
 
             it 'exits the experiment for reassignment' do
               expect(participant).to receive(:exit!).with(subject)
