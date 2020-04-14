@@ -35,12 +35,11 @@ export const client = (axiosConfig) => {
     convert: (experiment, checkpoint=undefined, metadata={}, requestConfig=undefined) =>
       axiosClient.put(`/${experiment}`, { checkpoint, metadata }, mergeConfig(requestConfig)),
 
-    run: (experiment, metadata={}, callbacks={}, requestConfig=undefined) => {
+    run: (experiment, metadata={}, callbacks={}, requestConfig=undefined) =>
       axiosClient.post(`/${experiment}`, { metadata }, mergeConfig(requestConfig))
         .then(({ data, ...request }) => {
           if (callbacks[data.variant])
             callbacks[data.variant](data)
-        })
-    },
+        }),
   }
 }
