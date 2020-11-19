@@ -75,8 +75,8 @@ RSpec.describe TrailGuide::Adapters::Experiments::Redis do
   end
 
   describe '#persisted?' do
-    it 'uses exists to check of the storage key exists' do
-      expect(subject.redis).to receive(:exists).with(experiment.storage_key)
+    it 'uses exists? to check of the storage key exists' do
+      expect(subject.redis).to receive(:exists?).with(experiment.storage_key)
       subject.persisted?
     end
   end

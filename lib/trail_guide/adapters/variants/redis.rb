@@ -40,7 +40,7 @@ module TrailGuide
         end
 
         def persisted?
-          redis.exists(storage_key)
+          redis.exists?(storage_key)
         end
 
         def destroy
