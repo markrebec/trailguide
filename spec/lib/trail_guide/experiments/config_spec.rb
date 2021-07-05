@@ -7,7 +7,54 @@ RSpec.describe TrailGuide::Experiments::Config do
   subject { described_class.new(experiment, **config_hash) }
 
   describe '#initialize' do
-    pending
+    it 'requires an experiment' do
+      expect { described_class.new }.to raise_error(ArgumentError)
+    end
+
+    context 'when provided with options' do
+      let(:config_hash) { { name: :foobar, summary: 'abcdefg' } }
+
+      it 'merges options with defaults' do
+        expect(subject.to_h.keys).to eq(described_class::DEFAULT_KEYS + described_class::CALLBACK_KEYS)
+        expect(subject.name).to eq(:foobar)
+        expect(subject.summary).to eq('abcdefg')
+      end
+    end
+
+    context 'when inheriting from an ancestor' do
+      let(:ancestor) { described_class.new(experiment, name: 'ancestor', foo: 'foobar', bar: 'bazqux', on_start: -> { nil }) }
+      let(:config_hash) { { inherit: ancestor } }
+
+      it 'clears the inherit option' do
+        expect(subject.to_h.keys).to_not include(:inherit)
+      end
+
+      it 'slices valid options based on provided args and default keys' do
+        custom = described_class.new(experiment, :foo, :bar, **config_hash)
+        expect(custom.foo).to eq('foobar')
+        expect(custom.bar).to eq('bazqux')
+      end
+
+      it 'clears the ancestor name' do
+        expect(subject.name).to be_nil
+      end
+
+      it 'duplicates the ancestor goals' do
+        expect(subject.goals).to eq(ancestor.goals)
+      end
+
+      it 'duplicates the ancestor combined' do
+        expect(subject.combined).to eq(ancestor.combined)
+      end
+
+      it 'duplicates the ancestor variants' do
+        expect(subject.variants.to_a).to eq(ancestor.variants.to_a)
+      end
+
+      it 'merges the ancestor callbacks into the options' do
+        expect(subject.callbacks).to eq(ancestor.callbacks)
+      end
+    end
   end
 
   describe '#start_manually?' do
@@ -143,7 +190,41 @@ RSpec.describe TrailGuide::Experiments::Config do
   end
 
   describe '#variant' do
-    pending
+    context 'when the variant does not exist' do
+      before {
+        subject.configure {
+          variant :control
+          variant :alternate
+        }
+      }
+      variant(:control)
+      variant(:alternate)
+
+      it 'adds the variant to the experiment' do
+        subject.variant(:foobar)
+        expect(subject.variants.map(&:name)).to include(:foobar)
+      end
+
+      context 'when the control flag is true' do
+        it 'adds the variant as the control' do
+          subject.variant(:foobar, control: true)
+          expect(subject.variants.last.control?).to be_truthy
+        end
+
+        it 'removes the existing control variant' do
+          subject.variant(:foobar, control: true)
+          expect(subject.variants.map(&:control?).count { |c| c === true }).to eq(1)
+        end
+      end
+    end
+
+    context 'when no variants exist' do
+      it 'sets the first variant as the control' do
+        subject.variant(:foobar)
+        expect(subject.variants.last.control?).to be_truthy
+      end
+    end
+
   end
 
   describe '#control' do
