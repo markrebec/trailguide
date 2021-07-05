@@ -71,8 +71,7 @@ module TrailGuide
           return variant
         end
 
-        # TODO investigate whether non-thread-safe config vars (i.e. allow_multiple_experiments) are potentially causing issues with github CI
-        return control unless is_combined? || TrailGuide.configuration.allow_multiple_experiments == true || !participant.participating_in_active_experiments?(TrailGuide.configuration.allow_multiple_experiments == false || TrailGuide.configuration.allow_multiple_experiments.nil?)
+        return control unless is_combined? || TrailGuide.configuration.allow_multiple_experiments == true || !participant.participating_in_active_experiments?(TrailGuide.configuration.allow_multiple_experiments == false)
         return control unless allow_participation?(metadata)
 
         variant = algorithm_choose!(metadata: metadata)
