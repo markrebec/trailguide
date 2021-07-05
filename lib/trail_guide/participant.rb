@@ -52,6 +52,12 @@ module TrailGuide
 
     def participating?(experiment, include_control=true)
       var = variant(experiment)
+      if TrailGuide::SpecHelper.debug == true
+        puts "variant details (#{experiment.name}):"
+        puts "var: #{var.present?}"
+        puts "include control: #{include_control}"
+        puts "is control: #{var && var.control?}"
+      end
       return false if var.nil?
       return false if !include_control && var.control?
       return true
