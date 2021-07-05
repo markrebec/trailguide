@@ -52,12 +52,6 @@ module TrailGuide
 
     def participating?(experiment, include_control=true)
       var = variant(experiment)
-      # if TrailGuide::SpecHelper.debug == true
-      #   puts "variant details (#{experiment.configuration.name}):"
-      #   puts "  var: #{var.present?}"
-      #   puts "  include control: #{include_control}"
-      #   puts "  is control: #{var && var.control?}"
-      # end
       return false if var.nil?
       return false if !include_control && var.control?
       return true
@@ -175,16 +169,6 @@ module TrailGuide
       adapter.keys.any? do |key|
         experiment_name = key.to_s.split(":").first.to_sym
         experiment = TrailGuide.catalog.find(experiment_name)
-
-        # if TrailGuide::SpecHelper.debug == true
-        #   puts "experiment details:"
-        #   puts "  name: #{experiment_name} (#{experiment.configuration.name})"
-        #   puts "  present: #{experiment.present?}"
-        #   puts "  sticky: #{experiment.configuration.sticky_assignment?}"
-        #   puts "  combined: #{!experiment.combined?}"
-        #   puts "  running: #{experiment.running?}"
-        #   # puts "  participating: #{participating?(experiment, include_control)}"
-        # end
         experiment && experiment.configuration.sticky_assignment? && !experiment.combined? && experiment.running? && participating?(experiment, include_control)
       end
     end
