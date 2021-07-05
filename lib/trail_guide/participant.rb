@@ -170,10 +170,14 @@ module TrailGuide
         experiment_name = key.to_s.split(":").first.to_sym
         experiment = TrailGuide.catalog.find(experiment_name)
 
-        if TrailGuide::SpecHelper.debug
+        if TrailGuide::SpecHelper.debug == true
           puts "experiment details:"
-          puts experiment_name
-          puts experiment.present?
+          puts "name: #{experiment_name}"
+          puts "present: #{experiment.present?}"
+          puts "sticky: #{experiment.configuration.sticky_assignment?}"
+          puts "combined: #{!experiment.combined?}"
+          puts "running: #{experiment.running?}"
+          puts "participating: #{participating?(experiment, include_control)}"
         end
         experiment && experiment.configuration.sticky_assignment? && !experiment.combined? && experiment.running? && participating?(experiment, include_control)
       end
