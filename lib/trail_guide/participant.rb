@@ -164,6 +164,7 @@ module TrailGuide
     end
 
     def participating_in_active_experiments?(include_control=true)
+      puts "adapter keys empty: #{adapter.keys.empty?}" if TrailGuide::SpecHelper.debug
       return false if adapter.keys.empty?
 
       adapter.keys.any? do |key|
