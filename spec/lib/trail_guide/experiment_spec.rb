@@ -2063,7 +2063,7 @@ RSpec.describe TrailGuide::Experiment do
 
     context 'when the experiment is not combined' do
       context 'and trailguide is configured to not allow multiple experiments' do
-        before  { TrailGuide.configuration.allow_multiple_experiments = false }
+        before(:each)  { TrailGuide.configuration.allow_multiple_experiments = false }
 
         context 'and the participant is participating in other experiments' do
           before {
