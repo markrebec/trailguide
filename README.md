@@ -1,6 +1,6 @@
 # TrailGuide
 
-[![Build Status](https://travis-ci.org/markrebec/trailguide.svg?branch=master)](https://travis-ci.org/markrebec/trailguide)
+![Build Status](https://github.com/github/docs/actions/workflows/ruby.yml/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/markrebec/trailguide/badge.svg?branch=master)](https://coveralls.io/github/markrebec/trailguide?branch=master)
 
 TrailGuide is a framework to enable running A/B tests, user experiments and content experiments in rails applications. It is backed by redis making it extremely fast, and provides configuration options allowing for flexible, robust experiments and behavior.
