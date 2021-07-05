@@ -2063,7 +2063,14 @@ RSpec.describe TrailGuide::Experiment do
 
     context 'when the experiment is not combined' do
       context 'and trailguide is configured to not allow multiple experiments' do
-        before(:each)  { TrailGuide.configuration.allow_multiple_experiments = false }
+        before(:each)  {
+          TrailGuide.configuration.allow_multiple_experiments = false
+          TrailGuide::SpecHelper.debug = true
+        }
+        after  {
+          TrailGuide.configuration.allow_multiple_experiments = false
+          TrailGuide::SpecHelper.debug = false
+        }
 
         context 'and the participant is participating in other experiments' do
           before {
@@ -2072,17 +2079,13 @@ RSpec.describe TrailGuide::Experiment do
           }
 
           it 'returns control' do
-            TrailGuide::SpecHelper.debug = true
             expect(subject.choose_variant!).to be(control)
-            TrailGuide::SpecHelper.debug = false
           end
         end
 
         it 'includes control when checking participation' do
-          TrailGuide::SpecHelper.debug = true
           expect(participant).to receive(:participating_in_active_experiments?).with(true)
           subject.choose_variant!
-          TrailGuide::SpecHelper.debug = false
         end
       end
 
