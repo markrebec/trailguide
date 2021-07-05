@@ -164,12 +164,17 @@ module TrailGuide
     end
 
     def participating_in_active_experiments?(include_control=true)
-      puts "adapter keys empty: #{adapter.keys.empty?}" if TrailGuide::SpecHelper.debug
       return false if adapter.keys.empty?
 
       adapter.keys.any? do |key|
         experiment_name = key.to_s.split(":").first.to_sym
         experiment = TrailGuide.catalog.find(experiment_name)
+
+        if TrailGuide::SpecHelper.debug
+          puts "experiment details:"
+          puts experiment_name
+          puts experiment.present?
+        end
         experiment && experiment.configuration.sticky_assignment? && !experiment.combined? && experiment.running? && participating?(experiment, include_control)
       end
     end
