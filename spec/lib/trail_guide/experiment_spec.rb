@@ -2079,8 +2079,10 @@ RSpec.describe TrailGuide::Experiment do
         end
 
         it 'includes control when checking participation' do
+          TrailGuide::SpecHelper.debug = true
           expect(participant).to receive(:participating_in_active_experiments?).with(true)
           subject.choose_variant!
+          TrailGuide::SpecHelper.debug = false
         end
       end
 
