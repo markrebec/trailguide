@@ -2070,9 +2070,9 @@ RSpec.describe TrailGuide::Experiment do
           }
 
           it 'returns control' do
-            TrailGuide::DEBUG_SPECS = true
+            TrailGuide::SpecHelper.debug = true
             expect(subject.choose_variant!).to be(control)
-            TrailGuide::DEBUG_SPECS = false
+            TrailGuide::SpecHelper.debug = false
           end
         end
 

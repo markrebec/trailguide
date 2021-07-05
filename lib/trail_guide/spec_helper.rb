@@ -1,5 +1,6 @@
 module TrailGuide
   module SpecHelper
+    mattr_accessor :debug
 
     def use_trailguide(**experiments, &block)
       if block_given?

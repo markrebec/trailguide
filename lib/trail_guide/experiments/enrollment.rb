@@ -71,7 +71,7 @@ module TrailGuide
           return variant
         end
 
-        puts "is participating: #{participant.participating_in_active_experiments?(TrailGuide.configuration.allow_multiple_experiments == false)}" if TrailGuide::DEBUG_SPECS
+        puts "is participating: #{participant.participating_in_active_experiments?(TrailGuide.configuration.allow_multiple_experiments == false)}" if TrailGuide::SpecHelper.debug
         return control unless is_combined? || TrailGuide.configuration.allow_multiple_experiments == true || !participant.participating_in_active_experiments?(TrailGuide.configuration.allow_multiple_experiments == false)
         return control unless allow_participation?(metadata)
 
