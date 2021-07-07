@@ -1638,7 +1638,7 @@ RSpec.describe TrailGuide::Experiment do
   end
 
   describe '#algorithm' do
-    trial({algorithm: :random})
+    trial(**{algorithm: :random})
     subject { trial }
 
     it 'initializes an instance of the configured algorithm' do

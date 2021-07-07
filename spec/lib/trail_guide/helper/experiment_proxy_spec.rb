@@ -190,38 +190,78 @@ RSpec.describe TrailGuide::Helper::ExperimentProxy do
       end
 
       context 'and the variant method accepts a single argument' do
-        let(:context) {
-          Class.new {
-            include TrailGuide::Helper
+        context 'which is defined as a kwarg' do
+          let(:context) {
+            Class.new {
+              include TrailGuide::Helper
 
-            def control(metadata)
-              proxied(metadata)
-            end
+              def control(**metadata)
+                proxied(metadata)
+              end
 
-            def proxied(*args)
-            end
-          }.new
-        }
+              def proxied(*args)
+              end
+            }.new
+          }
 
-        it 'calls the variant method with the variant metadata' do
-          expect(context).to receive(:proxied).with(control.metadata)
-          subject.run!
+          it 'calls the variant method with the variant metadata' do
+            expect(context).to receive(:proxied).with(control.metadata)
+            subject.run!
+          end
+        end
+
+        context 'which is not defined as a kwarg' do
+          let(:context) {
+            Class.new {
+              include TrailGuide::Helper
+
+              def control(metadata)
+                proxied(metadata)
+              end
+
+              def proxied(*args)
+              end
+            }.new
+          }
+
+          it 'calls the variant method with the variant metadata' do
+            expect(context).to receive(:proxied).with(control.metadata)
+            subject.run!
+          end
         end
       end
 
       context 'and the variant method accepts multiple arguments' do
-        let(:context) {
-          Class.new {
-            include TrailGuide::Helper
+        context 'and the last argument is defined as a kwarg' do
+          let(:context) {
+            Class.new {
+              include TrailGuide::Helper
 
-            def control(variant, metadata)
-            end
-          }.new
-        }
+              def control(variant, **metadata)
+              end
+            }.new
+          }
 
-        it 'calls the variant method with the variant and the metadata' do
-          expect(context).to receive(:control).with(control, control.metadata)
-          subject.run!
+          it 'calls the variant method with the variant and the metadata' do
+            expect(context).to receive(:control).with(control, control.metadata)
+            subject.run!
+          end
+        end
+
+        context 'and the last argument is not defined as a kwarg' do
+          let(:context) {
+            Class.new {
+              include TrailGuide::Helper
+
+              def control(variant, metadata)
+              end
+            }.new
+          }
+
+          it 'calls the variant method with the variant and the metadata' do
+            expect(context).to receive(:control).with(control, control.metadata)
+            subject.run!
+          end
         end
       end
     end

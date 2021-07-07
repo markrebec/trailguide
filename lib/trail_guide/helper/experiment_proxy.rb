@@ -54,9 +54,17 @@ module TrailGuide
           if arguments.empty?
             context.send(varmeth)
           elsif arguments.length > 1 || arguments[0][0] == :rest
-            context.send(varmeth, variant, **variant.metadata)
+            if arguments.last[0] == :keyrest
+              context.send(varmeth, variant, **variant.metadata)
+            else
+              context.send(varmeth, variant, variant.metadata)
+            end
           elsif arguments.length == 1
-            context.send(varmeth, **variant.metadata)
+            if arguments[0][0] == :keyrest
+              context.send(varmeth, **variant.metadata)
+            else
+              context.send(varmeth, variant.metadata)
+            end
           end
         end
       end
