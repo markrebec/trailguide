@@ -1,7 +1,10 @@
 # TrailGuide
 
 ![Build Status](https://github.com/markrebec/trailguide/actions/workflows/ruby.yml/badge.svg)
+[![Maintainability](https://api.codeclimate.com/v1/badges/e0558f3ed44e34516ebe/maintainability)](https://codeclimate.com/github/markrebec/trailguide/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/e0558f3ed44e34516ebe/test_coverage)](https://codeclimate.com/github/markrebec/trailguide/test_coverage)
 [![Coverage Status](https://coveralls.io/repos/github/markrebec/trailguide/badge.svg?branch=master)](https://coveralls.io/github/markrebec/trailguide?branch=master)
+[![Gem Version](https://badge.fury.io/rb/trailguide.svg)](https://badge.fury.io/rb/trailguide)
 
 TrailGuide is a framework to enable running A/B tests, user experiments and content experiments in rails applications. It is backed by redis making it extremely fast, and provides configuration options allowing for flexible, robust experiments and behavior.
 
