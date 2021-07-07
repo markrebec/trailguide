@@ -16,7 +16,7 @@ Gem::Specification.new do |spec|
 
   spec.files = Dir["{app,config,lib}/**/*", "MIT-LICENSE", "README.md"]
 
-  spec.add_dependency "rails", "~> 5"
+  spec.add_dependency "rails", ">= 5"
   spec.add_dependency "canfig", ">= 0.1.1"
   spec.add_dependency "redis"
   spec.add_dependency "simple-random", ">= 0.9.3"

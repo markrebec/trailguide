@@ -11,9 +11,28 @@ gemspec
 # Git. Remember to move these dependencies to your gemspec before releasing
 # your gem to rubygems.org.
 
-# To use a debugger
+# debugging
 gem 'byebug', group: [:development, :test]
 gem 'awesome_print', group: [:development, :test]
+
+# coverage
 gem 'simplecov', group: [:development, :test], require: false
 gem 'simplecov-lcov', group: [:development, :test], require: false
+
+# development
 gem 'solargraph', group: [:development, :test], require: false
+
+# testing / dummy app
+
+rails_version = ENV['RAILS_VERSION'] || 'default'
+rails = case rails_version
+when 'master'
+  { github: 'rails/rails' }
+when 'default'
+  '~> 5'
+else
+  "~> #{rails_version}"
+end
+
+gem 'rails', rails
+gem 'sqlite3', group: [:development, :test]
