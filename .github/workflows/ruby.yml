@@ -36,25 +36,16 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      # Seems to be installed already :) leaving here just in case
-      # - name: Install GSL
-      #   run: sudo apt-get install -y libgsl-dev
-
-      - name: Set up Ruby
+      - name: Run tests
         # To automatically get bug fixes and new Ruby versions for ruby/setup-ruby,
         # change this to (see https://github.com/ruby/setup-ruby#versioning):
         uses: ruby/setup-ruby@v1
-        # uses: ruby/setup-ruby@473e4d8fe5dd94ee328fdfca9f8c9c7afc9dae5e
         env:
           RAILS_VERSION: ${{ matrix.rails-version }}
         with:
           ruby-version: ${{ matrix.ruby-version }}
-          bundler-cache: false # runs 'bundle install' and caches installed gems automatically
-
-      - name: Run tests
+          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
         run: bundle exec rspec
-        env:
-          RAILS_VERSION: ${{ matrix.rails-version }}
 
       - name: Coveralls
         uses: coverallsapp/github-action@master
