@@ -28,7 +28,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rubystats", ">= 0.3.0"
   spec.add_development_dependency "abanalyzer"
 
-  spec.add_development_dependency "sqlite3"
   spec.add_development_dependency "redis-namespace"
   spec.add_development_dependency "rspec-rails"
 end
