@@ -21,6 +21,7 @@ gem 'simplecov-lcov', groups: [:development, :test], require: false
 
 # development
 gem 'solargraph', groups: [:development, :test], require: false
+gem 'sqlite3', groups: [:development, :test]
 
 # testing / dummy app
 
@@ -35,4 +36,3 @@ else
 end
 
 gem 'rails', rails
-gem 'sqlite3', groups: [:development, :test]
