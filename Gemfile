@@ -12,15 +12,15 @@ gemspec
 # your gem to rubygems.org.
 
 # debugging
-gem 'byebug', group: [:development, :test]
-gem 'awesome_print', group: [:development, :test]
+gem 'byebug', groups: [:development, :test]
+gem 'awesome_print', groups: [:development, :test]
 
 # coverage
-gem 'simplecov', group: [:development, :test], require: false
-gem 'simplecov-lcov', group: [:development, :test], require: false
+gem 'simplecov', groups: [:development, :test], require: false
+gem 'simplecov-lcov', groups: [:development, :test], require: false
 
 # development
-gem 'solargraph', group: [:development, :test], require: false
+gem 'solargraph', groups: [:development, :test], require: false
 
 # testing / dummy app
 
@@ -35,4 +35,4 @@ else
 end
 
 gem 'rails', rails
-gem 'sqlite3', group: [:development, :test]
+gem 'sqlite3', groups: [:development, :test]
